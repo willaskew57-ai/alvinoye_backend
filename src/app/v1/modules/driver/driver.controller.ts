@@ -39,8 +39,22 @@ const getSingleDriver = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const updateDriver = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const driverId = id as string;
+  const result = await DriverServices.updateDriverInDB(driverId, req.body);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Driver and Vehicle info updated successfully',
+    data: result,
+  });
+});
+
 export const DriverController = {
   registerDriver,
   getAllDrivers,
   getSingleDriver,
+  updateDriver,
 };
