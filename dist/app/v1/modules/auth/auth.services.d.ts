@@ -1,0 +1,47 @@
+import type { JwtPayload } from 'jsonwebtoken';
+import type { IChangePassword, ILoginUser } from './auth.interface';
+import type { TUser } from '../user/user.interface';
+import type { Types } from 'mongoose';
+export declare const AuthServices: {
+    registerUser: (payload: TUser) => Promise<{
+        user: import("mongoose").Document<unknown, {}, TUser, {}, import("mongoose").DefaultSchemaOptions> & TUser & Required<{
+            _id: Types.ObjectId;
+        }> & {
+            __v: number;
+        } & {
+            id: string;
+        };
+        accessToken: string;
+        refreshToken: string;
+        otp: string;
+    }>;
+    loginServices: (payload: ILoginUser) => Promise<{
+        accessToken: string;
+        refreshToken: string;
+    }>;
+    verifyOtp: (payload: {
+        user_id: string;
+        otp: string;
+        purpose: "REGISTER" | "RESET_PASSWORD";
+    }) => Promise<null>;
+    resendOtp: (payload: {
+        email: string;
+        purpose: "REGISTER" | "RESET_PASSWORD";
+    }) => Promise<{
+        otp: string;
+    }>;
+    changePasswordIntoDB: (userData: JwtPayload, payload: IChangePassword) => Promise<null>;
+    refreshToken: (token: string) => Promise<{
+        accessToken: string;
+    }>;
+    forgetPassword: (email: string) => Promise<{
+        resetToken: string;
+        otp: string;
+        userId: Types.ObjectId | undefined;
+    }>;
+    resetPassword: (payload: {
+        id: string;
+        new_password: string;
+    }, token: string) => Promise<null>;
+};
+//# sourceMappingURL=auth.services.d.ts.map

@@ -1,4 +1,5 @@
 import { z } from 'zod/v3';
+import { USER_STATUS } from './user.interface';
 
 const createUserValidationSchema = z.object({
   body: z.object({
@@ -21,7 +22,17 @@ const updateUserValidationSchema = z.object({
   }),
 });
 
+const changeStatusValidationSchema = z.object({
+  body: z.object({
+    status: z.nativeEnum(USER_STATUS, {
+      required_error: 'Status is required',
+      invalid_type_error: 'Invalid status value',
+    }),
+  }),
+});
+
 export const UserValidation = {
   createUserValidationSchema,
   updateUserValidationSchema,
+  changeStatusValidationSchema,
 };

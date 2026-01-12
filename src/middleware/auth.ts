@@ -13,17 +13,17 @@ export const auth = (...requiredRoles: TUserRole[]) => {
   return catchAsync(async (req, res, next) => {
     const token = req.headers.authorization?.split(' ')[1];
 
-    console.log('Token', token);
 
     if (!token) {
-      console.log('No token provided');
-      throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized!!!');
+      throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized!');
     }
 
-    console.log('secret', configs.jwt_access_token);
 
     //  verify jwt token :
     let decoded;
+
+    console.log('Verifying token:', token);
+
     try {
       decoded = jwt.verify(
         token,
@@ -35,8 +35,6 @@ export const auth = (...requiredRoles: TUserRole[]) => {
 
     // destructure decoded object:
     const { userId, role, iat } = decoded;
-
-    console.log('Decoded Token:', decoded);
 
     // check isUserExists:
     const user = await User.isUserExistsById(userId);
@@ -74,7 +72,6 @@ export const auth = (...requiredRoles: TUserRole[]) => {
 
     if (requiredRoles && !requiredRoles.includes(role)) {
       // check user is authorized for this  route by role?:
-
       throw new AppError(httpStatus.UNAUTHORIZED, 'You are not Authorized !!!');
     }
 

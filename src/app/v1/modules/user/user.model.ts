@@ -2,7 +2,12 @@ import { Schema, model, Types } from 'mongoose';
 import bcrypt from 'bcrypt';
 
 // ** import local files
-import type { IUserModel, TUser } from './user.interface';
+import {
+  USER_ROLE,
+  USER_STATUS,
+  type IUserModel,
+  type TUser,
+} from './user.interface';
 import configs from '../../../../config';
 
 const UserSchema = new Schema<TUser, IUserModel>(
@@ -22,10 +27,19 @@ const UserSchema = new Schema<TUser, IUserModel>(
     role: {
       type: String,
       enum: {
-        values: ['SUPER_ADMIN', 'ADMIN', 'CUSTOMER', 'DRIVER'],
+        values: Object.values(USER_ROLE),
         message: `{VALUE} is not a valid role`,
       },
       required: [true, 'Role is required'],
+    },
+    status: {
+      type: String,
+      enum: {
+        values: Object.values(USER_STATUS),
+        message: `{VALUE} is not a valid status`,
+      },
+      default: USER_STATUS.PENDING,
+      required: [true, 'Status is required'],
     },
     phone_number: {
       type: String,
@@ -40,7 +54,6 @@ const UserSchema = new Schema<TUser, IUserModel>(
       type: Boolean,
       default: false,
     },
-
     password: {
       type: String,
       trim: true,
@@ -51,33 +64,14 @@ const UserSchema = new Schema<TUser, IUserModel>(
       type: Date,
     },
 
-    // Account Workflow & Approval
-    request_date: {
-      type: Date,
-    },
-    accepted_date: {
-      type: Date,
-    },
-    rejected_date: {
-      type: Date,
-    },
-
-    // Moderation & Soft Deletion
-    is_verified: {
-      type: Boolean,
-      default: false,
-    },
-    is_blocked: {
-      type: Boolean,
-      default: false,
-    },
+    // Moderation & Deletion
     blocked_by: {
       type: Schema.Types.ObjectId,
-      ref: 'User', // Reference to the admin who blocked
+      ref: 'User',
     },
-    is_deleted: {
-      type: Boolean,
-      default: false,
+    removed_by: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
     },
     deleted_date: {
       type: Date,
@@ -102,12 +96,18 @@ UserSchema.statics.isUserExistsById = async function (id: string) {
 UserSchema.statics.isUserExistsByEmail = async function (email: string) {
   return await this.findOne({ email }).select('+password');
 };
-UserSchema.statics.isUserDeleted = async function (user: TUser) {
-  return user?.is_deleted || false;
-};
 
+UserSchema.statics.isUserActive = async function (user: TUser) {
+  return user?.status === 'ACTIVE' || false;
+};
+UserSchema.statics.isUserDeleted = async function (user: TUser) {
+  return user?.status === 'REMOVED' || false;
+};
 UserSchema.statics.isUserBlocked = async function (user: TUser) {
-  return user?.is_blocked || false;
+  return user?.status === 'BLOCKED' || false;
+};
+UserSchema.statics.isUserDeleted = async function (user: TUser) {
+  return user?.status === 'DELETED' || false;
 };
 
 UserSchema.statics.isJWTIssuedBeforePasswordChanged = (

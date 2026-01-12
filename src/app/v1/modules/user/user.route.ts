@@ -3,16 +3,23 @@ import { UserControllers } from './user.controller';
 import { UserValidation } from './user.zod-validation';
 import validateRequest from '../../../../middleware/validate-request';
 import { auth } from '../../../../middleware/auth';
-import { USER_ROLE } from './user.constants';
+import { USER_ROLE } from './user.interface';
 
 const router = express.Router();
 
 // Only SUPER_ADMIN can create a user directly via this admin route
 router.post(
-  '/create',
+  '/create-admin',
   auth(USER_ROLE.SUPER_ADMIN),
   validateRequest(UserValidation.createUserValidationSchema),
   UserControllers.createUser
+);
+
+router.patch(
+  '/change-status/:id',
+  auth(USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN), // Only these roles allowed
+  validateRequest(UserValidation.changeStatusValidationSchema), // Zod validation
+  UserControllers.changeStatus
 );
 
 // Admins and Super Admins can view user lists (with optional ?role= filter)

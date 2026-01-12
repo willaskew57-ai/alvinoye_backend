@@ -13,6 +13,29 @@ const createUser = catchAsync(async (req, res) => {
   });
 });
 
+const changeStatus = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const userId = id as string;
+  const { status } = req.body;
+
+  const performerId = req.user.userId;
+  const performerRole = req.user.role;
+
+  const result = await UserServices.changeUserStatusInDB(
+    userId,
+    { status },
+    performerId,
+    performerRole
+  );
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'User status updated successfully',
+    data: result,
+  });
+});
+
 const getAllUser = catchAsync(async (req, res) => {
   const result = await UserServices.getAllUsersFromDB(req.query);
   sendResponse(res, {
@@ -58,6 +81,7 @@ const deleteUser = catchAsync(async (req, res) => {
 
 export const UserControllers = {
   createUser,
+  changeStatus,
   getAllUser,
   getSingleUser,
   updateUser,

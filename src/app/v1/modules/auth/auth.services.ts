@@ -6,15 +6,12 @@ import { createToken, verifyToken } from './auth.utils';
 import type { IChangePassword, ILoginUser } from './auth.interface';
 import User from '../user/user.model';
 import type { TUser } from '../user/user.interface';
-import { is } from 'zod/locales';
 import { OtpServices } from './otp/otp.services';
 import type { Types } from 'mongoose';
 
 // ** ------- Register User Service -------
-
 const registerUser = async (payload: TUser) => {
-  // 1. Check if user already exists
-  const isUserExists = await User.findOne({ email: payload.email });
+  const isUserExists = await User.isUserExistsByEmail(payload.email);
   if (isUserExists) {
     throw new AppError(
       httpStatus.CONFLICT,
@@ -24,18 +21,15 @@ const registerUser = async (payload: TUser) => {
 
   const isProfileCompleted = payload.role !== 'CUSTOMER';
 
-  // 3. Prepare user data
   const userData = {
     ...payload,
     is_profile_completed: isProfileCompleted,
-    is_verified: false, // New users are unverified by default
-    status: 'Pending', // As per your requirement
+    is_verified: false,
     request_date: new Date(),
   };
 
   console.log('Registering User:', userData);
 
-  // 4. Create the User
   const newUser = await User.create(userData);
 
   if (!newUser) {
@@ -84,8 +78,6 @@ const loginServices = async (payload: ILoginUser) => {
       'User does not exist with these credentials!'
     );
   }
-
-  // Check if user is deleted (Handles is_removed and is_deleted)
   if (await User.isUserDeleted(user)) {
     throw new AppError(httpStatus.FORBIDDEN, 'This account has been deleted!');
   }
@@ -107,6 +99,8 @@ const loginServices = async (payload: ILoginUser) => {
   if (!isPasswordMatched) {
     throw new AppError(httpStatus.FORBIDDEN, 'Invalid credentials!');
   }
+
+  console.log('User logged in:', user);
 
   // JWT Payload including the role
   const jwtPayload = {
@@ -297,7 +291,7 @@ const forgetPassword = async (email: string) => {
     role: user.role,
   };
 
-  console.log('JWT reset expireIn' , configs.jwt_reset_expiresIn);
+  console.log('JWT reset expireIn', configs.jwt_reset_expiresIn);
 
   const resetToken = createToken(
     jwtPayload,

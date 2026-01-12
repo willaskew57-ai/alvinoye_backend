@@ -1,17 +1,103 @@
 import httpStatus from 'http-status';
 import AppError from '../../../../errors/app-error';
 import { User } from './user.model';
-import type { TUser } from './user.interface';
+import {
+  USER_ROLE,
+  USER_STATUS,
+  type TUser,
+  type TUserStatus,
+} from './user.interface';
+import { Types } from 'mongoose';
 
 const createUserIntoDB = async (payload: TUser) => {
-  const result = await User.create(payload);
+  const isUserExists = await User.isUserExistsByEmail(payload.email);
+
+  if (isUserExists) {
+    throw new AppError(
+      httpStatus.CONFLICT,
+      'User with this email already exists!'
+    );
+  }
+
+  const userData = {
+    ...payload,
+    is_profile_completed: true,
+    is_verified: true,
+  };
+  const result = await User.create(userData);
+  return result;
+};
+
+// ** ------------- User Status update Service -------------
+
+const changeUserStatusInDB = async (
+  targetId: string,
+  payload: { status: TUserStatus },
+  performerId: string,
+  performerRole: string // From req.user.role
+) => {
+  const targetUser = await User.findById(targetId);
+  if (!targetUser) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User not found!');
+  }
+
+  if (performerRole === USER_ROLE.ADMIN) {
+    const allowedRolesToManage = [USER_ROLE.CUSTOMER, USER_ROLE.DRIVER];
+
+    if (!allowedRolesToManage.includes(targetUser.role as any)) {
+      throw new AppError(
+        httpStatus.FORBIDDEN,
+        'Admins can only manage status for Customers and Drivers'
+      );
+    }
+  }
+
+  if (
+    targetUser.status === USER_STATUS.ACTIVE &&
+    payload.status === USER_STATUS.PENDING
+  ) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      'Cannot change status back to PENDING once a user is ACTIVE'
+    );
+  }
+
+  const updateData: Partial<TUser> = {
+    status: payload.status,
+  };
+
+  const adminObjectId = new Types.ObjectId(performerId);
+
+  switch (payload.status) {
+    case USER_STATUS.BLOCKED:
+      updateData.blocked_by = adminObjectId;
+      break;
+
+    case USER_STATUS.REMOVED:
+    case USER_STATUS.DELETED:
+      updateData.removed_by = adminObjectId;
+      updateData.deleted_date = new Date();
+      break;
+
+    case USER_STATUS.ACTIVE:
+      updateData.blocked_by = null;
+      updateData.removed_by = null;
+      updateData.deleted_date = null;
+      break;
+  }
+
+  const result = await User.findByIdAndUpdate(
+    targetId,
+    { $set: updateData },
+    { new: true, runValidators: true }
+  );
+
   return result;
 };
 
 const getAllUsersFromDB = async (query: Record<string, unknown>) => {
-  const filter: any = { is_deleted: false };
+  const filter: any = {};
 
-  // Filter by role if provided in query params (e.g., ?role=DRIVER)
   if (query?.role) {
     filter.role = query.role;
   }
@@ -21,7 +107,8 @@ const getAllUsersFromDB = async (query: Record<string, unknown>) => {
 };
 
 const getSingleUserFromDB = async (id: string) => {
-  const result = await User.findOne({ _id: id, is_deleted: false });
+  const result = await User.findOne({ _id: id });
+
   if (!result) throw new AppError(httpStatus.NOT_FOUND, 'User not found!');
 
   return result;
@@ -48,6 +135,7 @@ const deleteUserFromDB = async (id: string) => {
 
 export const UserServices = {
   createUserIntoDB,
+  changeUserStatusInDB,
   getAllUsersFromDB,
   getSingleUserFromDB,
   updateUserInDB,
