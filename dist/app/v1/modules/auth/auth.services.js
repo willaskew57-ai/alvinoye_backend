@@ -10,10 +10,12 @@ const registerUser = async (payload) => {
     if (isUserExists) {
         throw new AppError(httpStatus.CONFLICT, 'User with this email already exists!');
     }
-    const isProfileCompleted = payload.role !== 'CUSTOMER';
+    const isProfileCompleted = payload.role !== 'DRIVER';
+    const status = payload.role === 'DRIVER' ? 'PENDING' : 'ACTIVE';
     const userData = {
         ...payload,
         is_profile_completed: isProfileCompleted,
+        status,
         is_verified: false,
         request_date: new Date(),
     };
@@ -24,7 +26,7 @@ const registerUser = async (payload) => {
     }
     const otp = await OtpServices.generateAndSaveOtp(newUser._id, 'REGISTER');
     const jwtPayload = {
-        userId: newUser._id.toString(),
+        user_id: newUser._id.toString(),
         role: newUser.role,
     };
     const accessToken = createToken(jwtPayload, configs.jwt_access_token, configs.jwt_access_expiresIn);
@@ -58,7 +60,7 @@ const loginServices = async (payload) => {
     console.log('User logged in:', user);
     // JWT Payload including the role
     const jwtPayload = {
-        userId: user._id.toString(),
+        user_id: user._id.toString(),
         role: user.role, // Added role
     };
     const accessToken = createToken(jwtPayload, configs.jwt_access_token, configs.jwt_access_expiresIn);
@@ -73,7 +75,7 @@ const loginServices = async (payload) => {
  */
 const changePasswordIntoDB = async (userData, payload) => {
     const { old_password, new_password } = payload;
-    const user = await User.findById(userData.userId).select('+password');
+    const user = await User.findById(userData.user_id).select('+password');
     if (!user ||
         (await User.isUserDeleted(user)) ||
         (await User.isUserBlocked(user))) {
@@ -121,8 +123,8 @@ const resendOtp = async (payload) => {
  */
 const refreshToken = async (token) => {
     const decoded = verifyToken(token, configs.jwt_refresh_token);
-    const { userId, iat } = decoded;
-    const user = await User.findById(userId);
+    const { user_id, iat } = decoded;
+    const user = await User.findById(user_id);
     if (!user ||
         (await User.isUserDeleted(user)) ||
         (await User.isUserBlocked(user))) {
@@ -134,7 +136,7 @@ const refreshToken = async (token) => {
         throw new AppError(httpStatus.UNAUTHORIZED, 'Password recently changed. Please login again.');
     }
     const jwtPayload = {
-        userId: user._id.toString(),
+        user_id: user._id.toString(),
         role: user.role,
     };
     const accessToken = createToken(jwtPayload, configs.jwt_access_token, configs.jwt_access_expiresIn);
@@ -153,12 +155,12 @@ const forgetPassword = async (email) => {
         (await User.isUserBlocked(user))) {
         throw new AppError(httpStatus.NOT_FOUND, 'No active account found with this email!');
     }
-    const userId = user._id;
+    const user_id = user._id;
     // 2. Generate and Store OTP for RESET_PASSWORD purpose
     const otp = await OtpServices.generateAndSaveOtp(user._id, 'RESET_PASSWORD');
     // 3. Generate a Reset Token (used for the final reset step)
     const jwtPayload = {
-        userId: userId.toString(),
+        user_id: user_id.toString(),
         role: user.role,
     };
     console.log('JWT reset expireIn', configs.jwt_reset_expiresIn);
@@ -167,7 +169,7 @@ const forgetPassword = async (email) => {
     return {
         resetToken,
         otp,
-        userId: user._id,
+        user_id: user._id,
     };
 };
 /**
@@ -177,7 +179,7 @@ const resetPassword = async (payload, token) => {
     // 1. Verify the Reset Token
     const decoded = verifyToken(token, configs.jwt_reset_token);
     // 2. Security Check: Ensure token matches the user being updated
-    if (payload.id !== decoded.userId) {
+    if (payload.id !== decoded.user_id) {
         throw new AppError(httpStatus.FORBIDDEN, 'Invalid reset request!');
     }
     // 3. Check User Status

@@ -37,7 +37,7 @@ export declare const AuthServices: {
     forgetPassword: (email: string) => Promise<{
         resetToken: string;
         otp: string;
-        userId: Types.ObjectId | undefined;
+        user_id: Types.ObjectId | undefined;
     }>;
     resetPassword: (payload: {
         id: string;

@@ -14,7 +14,6 @@ UserControllers.changeStatus);
 router.get('/get', auth(USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN, USER_ROLE.CUSTOMER, USER_ROLE.DRIVER), UserControllers.getAllUser);
 router.get('/get-single/:id', auth(USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN, USER_ROLE.CUSTOMER, USER_ROLE.DRIVER), UserControllers.getSingleUser);
 router.patch('/update/:id', auth(USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN, USER_ROLE.CUSTOMER, USER_ROLE.DRIVER), validateRequest(UserValidation.updateUserValidationSchema), UserControllers.updateUser);
-router.delete('/delete/:id', auth(USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.CUSTOMER, USER_ROLE.DRIVER), // Only Super Admin can delete users
-UserControllers.deleteUser);
+router.delete('/delete/:id', auth(USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.CUSTOMER, USER_ROLE.DRIVER), UserControllers.deleteUser);
 export const UserRoutes = router;
 //# sourceMappingURL=user.route.js.map

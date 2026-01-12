@@ -64,7 +64,7 @@ router.delete(
     USER_ROLE.SUPER_ADMIN,
     USER_ROLE.CUSTOMER,
     USER_ROLE.DRIVER
-  ), // Only Super Admin can delete users
+  ), 
   UserControllers.deleteUser
 );
 

@@ -8,6 +8,7 @@ import {
   type TUserStatus,
 } from './user.interface';
 import { Types } from 'mongoose';
+import QueryBuilder from '../../../../builders/QueryBuilder';
 
 const createUserIntoDB = async (payload: TUser) => {
   const isUserExists = await User.isUserExistsByEmail(payload.email);
@@ -96,14 +97,27 @@ const changeUserStatusInDB = async (
 };
 
 const getAllUsersFromDB = async (query: Record<string, unknown>) => {
-  const filter: any = {};
+  // 1. Define the fields you want to enable for searching (full_name)
+  const userSearchableFields = ['full_name', 'email', 'phone_number'];
 
-  if (query?.role) {
-    filter.role = query.role;
-  }
+  // 2. Initialize the QueryBuilder with the User model and the query object
+  const userQuery = new QueryBuilder(User.find(), query)
+    .search(userSearchableFields)
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
 
-  const result = await User.find(filter);
-  return result;
+  // 3. Execute the query to get the data
+  const data = await userQuery.modelQuery;
+
+  // 4. Get the pagination metadata
+  const meta = await userQuery.countTotal();
+
+  return {
+    meta,
+    data,
+  };
 };
 
 const getSingleUserFromDB = async (id: string) => {

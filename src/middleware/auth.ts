@@ -34,10 +34,10 @@ export const auth = (...requiredRoles: TUserRole[]) => {
     }
 
     // destructure decoded object:
-    const { userId, role, iat } = decoded;
+    const { user_id, role, iat } = decoded;
 
     // check isUserExists:
-    const user = await User.isUserExistsById(userId);
+    const user = await User.isUserExistsById(user_id);
 
     if (!user) {
       throw new AppError(httpStatus.NOT_FOUND, 'Your Account Is Not Exists!!!');

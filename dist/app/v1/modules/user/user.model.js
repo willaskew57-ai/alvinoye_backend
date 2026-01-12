@@ -75,6 +75,24 @@ const UserSchema = new Schema({
     toJSON: {
         virtuals: true,
     },
+    toObject: {
+        virtuals: true,
+    },
+});
+// --- Virtual Populates ---
+// Link to DriverInfo
+UserSchema.virtual('driver_info', {
+    ref: 'DriverInfo', // Matches the model name in Driver model
+    localField: '_id',
+    foreignField: 'user_id',
+    justOne: true,
+});
+// Link to Vehicle
+UserSchema.virtual('vehicle', {
+    ref: 'Vehicle', // Matches the model name in Vehicle model
+    localField: '_id',
+    foreignField: 'user_id',
+    justOne: true,
 });
 // Static Methods
 UserSchema.statics.isUserExistsById = async function (id) {

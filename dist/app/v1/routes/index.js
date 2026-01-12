@@ -4,6 +4,7 @@ import express, { Router } from 'express';
 import { UserRoutes } from '../modules/user/user.route';
 import { SettingsRoutes } from '../modules/settings/settings.route';
 import { AuthRoutes } from '../modules/auth/auth.route';
+import { DriverRoutes } from '../modules/driver/driver.route';
 const router = express.Router();
 const modulesRoute = [
     {
@@ -13,6 +14,10 @@ const modulesRoute = [
     {
         path: '/user',
         route: UserRoutes,
+    },
+    {
+        path: '/driver',
+        route: DriverRoutes,
     },
     {
         path: '/settings',

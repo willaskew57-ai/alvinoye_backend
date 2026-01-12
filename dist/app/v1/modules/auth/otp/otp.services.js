@@ -6,15 +6,15 @@ import AppError from '../../../../../errors/app-error';
 /**
  * Creates and stores an OTP for a user
  */
-const generateAndSaveOtp = async (userId, purpose) => {
+const generateAndSaveOtp = async (user_id, purpose) => {
     const rawOtp = generateOtp();
     const otpHash = hashOtp(rawOtp);
     // Set expiry to 5 minutes from now
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
     // Remove any existing unused OTPs for this user/purpose before creating new one
-    await Otp.deleteMany({ user: userId, purpose, is_used: false });
+    await Otp.deleteMany({ user: user_id, purpose, is_used: false });
     await Otp.create({
-        user: userId,
+        user: user_id,
         otp_hash: otpHash,
         purpose,
         expires_at: expiresAt,
@@ -25,10 +25,10 @@ const generateAndSaveOtp = async (userId, purpose) => {
 /**
  * Verifies the OTP provided by the user
  */
-const verifyOtpFromDB = async (userId, inputOtp, purpose) => {
+const verifyOtpFromDB = async (user_id, inputOtp, purpose) => {
     const inputHash = hashOtp(inputOtp);
     const otpRecord = await Otp.findOne({
-        user: userId,
+        user: user_id,
         purpose,
         is_used: false,
         expires_at: { $gt: new Date() },
