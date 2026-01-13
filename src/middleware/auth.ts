@@ -1,6 +1,6 @@
 // ** imports packages
 import httpStatus from 'http-status';
-import jwt, { type JwtPayload } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken'; // removed JwtPayload import as we'll use your custom one
 
 // ** import local files
 import AppError from '../errors/app-error';
@@ -8,32 +8,30 @@ import catchAsync from '../utils/catchAsync';
 import User from '../app/v1/modules/user/user.model';
 import configs from '../config';
 import type { TUserRole } from '../app/v1/modules/user/user.interface';
+import type { TUserPayload } from '../interfaces';
 
 export const auth = (...requiredRoles: TUserRole[]) => {
   return catchAsync(async (req, res, next) => {
     const token = req.headers.authorization?.split(' ')[1];
 
-
     if (!token) {
       throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized!');
     }
 
-
-    //  verify jwt token :
-    let decoded;
-
-    console.log('Verifying token:', token);
+    //  Declare decoded as your custom TUserPayload type
+    let decoded: TUserPayload;
 
     try {
+      // Cast directly to TUserPayload here
       decoded = jwt.verify(
         token,
         configs.jwt_access_token as string
-      ) as JwtPayload;
+      ) as TUserPayload;
     } catch (err) {
-      throw new AppError(httpStatus.UNAUTHORIZED, 'Your are not authorized!!');
+      throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized!!');
     }
 
-    // destructure decoded object:
+    //  Now destructuring works without extra casting
     const { user_id, role, iat } = decoded;
 
     // check isUserExists:
@@ -44,7 +42,6 @@ export const auth = (...requiredRoles: TUserRole[]) => {
     }
 
     // check is user deleted:
-
     if (await User.isUserDeleted(user)) {
       throw new AppError(httpStatus.NOT_FOUND, 'You are Deleted!!!');
     }
@@ -68,15 +65,13 @@ export const auth = (...requiredRoles: TUserRole[]) => {
       );
     }
 
-    console.log('Required Roles:', requiredRoles);
-
-    if (requiredRoles && !requiredRoles.includes(role)) {
-      // check user is authorized for this  route by role?:
+    //  Checking role compatibility works because 'role' is now TUserRole
+    if (requiredRoles.length > 0 && !requiredRoles.includes(role)) {
       throw new AppError(httpStatus.UNAUTHORIZED, 'You are not Authorized !!!');
     }
 
-    // set the decoded  object as user in request object:
-    req.user = decoded; // define a type index.d.ts in interface folder to assign this req.user type globally.
+    //  This assignment now works perfectly because types match exactly
+    req.user = decoded; 
 
     next();
   });

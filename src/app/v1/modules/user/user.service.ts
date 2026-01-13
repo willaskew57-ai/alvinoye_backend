@@ -128,6 +128,35 @@ const getSingleUserFromDB = async (id: string) => {
   return result;
 };
 
+const getMeFromDB = async (id: string) => {
+  const result = await User.findById(id);
+  if (!result) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User not found!');
+  }
+  return result;
+};
+
+const updateMeIntoDB = async (id: string, payload: Partial<TUser>) => {
+  // Prevent users from updating sensitive fields via the "update-me" route
+  const forbiddenFields: (keyof TUser)[] = ['role', 'status', 'email', 'is_profile_completed'];
+
+  forbiddenFields.forEach((field) => {
+    if (field in payload) {
+      delete (payload as any)[field];
+    }
+  });
+
+  const result = await User.findByIdAndUpdate(id, payload, {
+    new: true,
+    runValidators: true,
+  });
+
+  if (!result) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User not found!');
+  }
+  return result;
+};
+
 const updateUserInDB = async (id: string, payload: Partial<TUser>) => {
   const result = await User.findByIdAndUpdate(id, payload, {
     new: true,
@@ -151,7 +180,10 @@ export const UserServices = {
   createUserIntoDB,
   changeUserStatusInDB,
   getAllUsersFromDB,
+  getMeFromDB,
+  updateMeIntoDB,
   getSingleUserFromDB,
   updateUserInDB,
+
   deleteUserFromDB,
 };

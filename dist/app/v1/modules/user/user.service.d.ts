@@ -32,6 +32,20 @@ export declare const UserServices: {
             id: string;
         })[];
     }>;
+    getMeFromDB: (id: string) => Promise<import("mongoose").Document<unknown, {}, TUser, {}, import("mongoose").DefaultSchemaOptions> & TUser & Required<{
+        _id: Types.ObjectId;
+    }> & {
+        __v: number;
+    } & {
+        id: string;
+    }>;
+    updateMeIntoDB: (id: string, payload: Partial<TUser>) => Promise<import("mongoose").Document<unknown, {}, TUser, {}, import("mongoose").DefaultSchemaOptions> & TUser & Required<{
+        _id: Types.ObjectId;
+    }> & {
+        __v: number;
+    } & {
+        id: string;
+    }>;
     getSingleUserFromDB: (id: string) => Promise<import("mongoose").Document<unknown, {}, TUser, {}, import("mongoose").DefaultSchemaOptions> & TUser & Required<{
         _id: Types.ObjectId;
     }> & {

@@ -210,52 +210,8 @@ const getSingleDriverFromDB = async (id: string) => {
   return result;
 };
 
-const updateDriverInDB = async (id: string, payload: any) => {
-  const { driverInfo, vehicle } = payload;
-  const session = await mongoose.startSession();
-
-  try {
-    session.startTransaction();
-
-    let updatedDriver = null;
-    let updatedVehicle = null;
-
-    // 1. Update Driver Info
-    if (driverInfo) {
-      updatedDriver = await Driver.findByIdAndUpdate(
-        id,
-        { $set: driverInfo },
-        { new: true, runValidators: true, session }
-      );
-    }
-
-    // 2. Update Vehicle Info (Assuming driver has a vehicle link or shared user_id)
-    if (vehicle) {
-      // Find the driver first to get the user_id or vehicle_id reference
-      const driver = await Driver.findById(id);
-      if (driver && driver.user_id) {
-        updatedVehicle = await Vehicle.findOneAndUpdate(
-          { user_id: driver.user_id },
-          { $set: vehicle },
-          { new: true, runValidators: true, session }
-        );
-      }
-    }
-
-    await session.commitTransaction();
-    session.endSession();
-
-    return { updatedDriver, updatedVehicle };
-  } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
-    throw error;
-  }
-};
-
 export const DriverServices = {
   addDriverInfoIntoDB,
   getAllDriversFromDB,
   getSingleDriverFromDB,
-  updateDriverInDB,
 };

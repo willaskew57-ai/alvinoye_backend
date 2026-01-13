@@ -47,36 +47,26 @@ export declare const UserValidation: {
             full_name: z.ZodOptional<z.ZodString>;
             phone_number: z.ZodOptional<z.ZodString>;
             profile_picture: z.ZodOptional<z.ZodString>;
-            is_blocked: z.ZodOptional<z.ZodBoolean>;
-            is_verified: z.ZodOptional<z.ZodBoolean>;
         }, "strip", z.ZodTypeAny, {
             full_name?: string | undefined;
             phone_number?: string | undefined;
             profile_picture?: string | undefined;
-            is_blocked?: boolean | undefined;
-            is_verified?: boolean | undefined;
         }, {
             full_name?: string | undefined;
             phone_number?: string | undefined;
             profile_picture?: string | undefined;
-            is_blocked?: boolean | undefined;
-            is_verified?: boolean | undefined;
         }>;
     }, "strip", z.ZodTypeAny, {
         body: {
             full_name?: string | undefined;
             phone_number?: string | undefined;
             profile_picture?: string | undefined;
-            is_blocked?: boolean | undefined;
-            is_verified?: boolean | undefined;
         };
     }, {
         body: {
             full_name?: string | undefined;
             phone_number?: string | undefined;
             profile_picture?: string | undefined;
-            is_blocked?: boolean | undefined;
-            is_verified?: boolean | undefined;
         };
     }>;
     changeStatusValidationSchema: z.ZodObject<{

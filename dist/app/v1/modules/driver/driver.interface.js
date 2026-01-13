@@ -1,2 +1,2 @@
-import { Types } from 'mongoose';
+export {};
 //# sourceMappingURL=driver.interface.js.map

@@ -17,12 +17,11 @@ router.post(
 
 router.patch(
   '/change-status/:id',
-  auth(USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN), // Only these roles allowed
-  validateRequest(UserValidation.changeStatusValidationSchema), // Zod validation
+  auth(USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN),
+  validateRequest(UserValidation.changeStatusValidationSchema),
   UserControllers.changeStatus
 );
 
-// Admins and Super Admins can view user lists (with optional ?role= filter)
 router.get(
   '/get',
   auth(
@@ -32,6 +31,31 @@ router.get(
     USER_ROLE.DRIVER
   ),
   UserControllers.getAllUser
+);
+
+// --- Profile Routes ---
+
+router.get(
+  '/get-me',
+  auth(
+    USER_ROLE.SUPER_ADMIN,
+    USER_ROLE.ADMIN,
+    USER_ROLE.CUSTOMER,
+    USER_ROLE.DRIVER
+  ),
+  UserControllers.getMe
+);
+
+router.patch(
+  '/update-me',
+  auth(
+    USER_ROLE.SUPER_ADMIN,
+    USER_ROLE.ADMIN,
+    USER_ROLE.CUSTOMER,
+    USER_ROLE.DRIVER
+  ),
+  validateRequest(UserValidation.updateUserValidationSchema), // Reuse or create a specific Zod schema
+  UserControllers.updateMe
 );
 
 router.get(
@@ -64,7 +88,7 @@ router.delete(
     USER_ROLE.SUPER_ADMIN,
     USER_ROLE.CUSTOMER,
     USER_ROLE.DRIVER
-  ), 
+  ),
   UserControllers.deleteUser
 );
 

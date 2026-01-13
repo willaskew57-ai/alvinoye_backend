@@ -1,6 +1,6 @@
 // ** imports packages
 import httpStatus from 'http-status';
-import jwt, {} from 'jsonwebtoken';
+import jwt from 'jsonwebtoken'; // removed JwtPayload import as we'll use your custom one
 // ** import local files
 import AppError from '../errors/app-error';
 import catchAsync from '../utils/catchAsync';
@@ -12,16 +12,16 @@ export const auth = (...requiredRoles) => {
         if (!token) {
             throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized!');
         }
-        //  verify jwt token :
+        //  Declare decoded as your custom TUserPayload type
         let decoded;
-        console.log('Verifying token:', token);
         try {
+            // Cast directly to TUserPayload here
             decoded = jwt.verify(token, configs.jwt_access_token);
         }
         catch (err) {
-            throw new AppError(httpStatus.UNAUTHORIZED, 'Your are not authorized!!');
+            throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized!!');
         }
-        // destructure decoded object:
+        //  Now destructuring works without extra casting
         const { user_id, role, iat } = decoded;
         // check isUserExists:
         const user = await User.isUserExistsById(user_id);
@@ -41,13 +41,12 @@ export const auth = (...requiredRoles) => {
             User.isJWTIssuedBeforePasswordChanged(user.password_changed_at, iat)) {
             throw new AppError(httpStatus.UNAUTHORIZED, 'Password was changed. Please login again.');
         }
-        console.log('Required Roles:', requiredRoles);
-        if (requiredRoles && !requiredRoles.includes(role)) {
-            // check user is authorized for this  route by role?:
+        //  Checking role compatibility works because 'role' is now TUserRole
+        if (requiredRoles.length > 0 && !requiredRoles.includes(role)) {
             throw new AppError(httpStatus.UNAUTHORIZED, 'You are not Authorized !!!');
         }
-        // set the decoded  object as user in request object:
-        req.user = decoded; // define a type index.d.ts in interface folder to assign this req.user type globally.
+        //  This assignment now works perfectly because types match exactly
+        req.user = decoded;
         next();
     });
 };

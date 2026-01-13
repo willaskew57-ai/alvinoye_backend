@@ -15,8 +15,6 @@ const updateUserValidationSchema = z.object({
         full_name: z.string().optional(),
         phone_number: z.string().optional(),
         profile_picture: z.string().optional(),
-        is_blocked: z.boolean().optional(),
-        is_verified: z.boolean().optional(),
     }),
 });
 const changeStatusValidationSchema = z.object({

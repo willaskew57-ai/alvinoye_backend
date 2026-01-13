@@ -27,10 +27,4 @@ router.get(
 
 router.get('/get/:id', DriverController.getSingleDriver);
 
-router.patch(
-  '/update/:id',
-  validateRequest(DriverValidation.updateDriverWithVehicleValidationSchema),
-  DriverController.updateDriver
-);
-
 export const DriverRoutes = router;

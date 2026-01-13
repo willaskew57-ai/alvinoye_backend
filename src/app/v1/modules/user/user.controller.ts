@@ -36,6 +36,33 @@ const changeStatus = catchAsync(async (req, res) => {
   });
 });
 
+const getMe = catchAsync(async (req, res) => {
+  const { user_id } = req.user;
+
+  console.log({ user: req.user });
+
+  const result = await UserServices.getMeFromDB(user_id);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'User profile retrieved successfully',
+    data: result,
+  });
+});
+
+const updateMe = catchAsync(async (req, res) => {
+  const { user_id  } = req.user; // Extracted from token
+  const result = await UserServices.updateMeIntoDB(user_id, req.body);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Profile updated successfully',
+    data: result,
+  });
+});
+
 const getAllUser = catchAsync(async (req, res) => {
   const result = await UserServices.getAllUsersFromDB(req.query);
   sendResponse(res, {
@@ -82,6 +109,8 @@ const deleteUser = catchAsync(async (req, res) => {
 export const UserControllers = {
   createUser,
   changeStatus,
+  getMe,
+  updateMe,
   getAllUser,
   getSingleUser,
   updateUser,

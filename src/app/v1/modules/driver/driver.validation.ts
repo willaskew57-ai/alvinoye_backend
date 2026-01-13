@@ -37,49 +37,7 @@ const createDriverWithVehicleValidationSchema = z.object({
   }),
 });
 
-// ** ---- update validations ---- **
-
-const updateUserInfoValidationSchema = z.object({
-  name: z.string().optional(),
-  email: z.string().email().optional(),
-  contact: z.string().optional(),
-  profile_image: z.string().optional(),
-});
-
-// Helper to make location fields optional
-const updateLocationSchema = z.object({
-  address: z.string().optional(),
-  latitude: z.number().optional(),
-  longitude: z.number().optional(),
-});
-
-const updateDriverInfoValidationSchema = z.object({
-  from: updateLocationSchema.optional(),
-  to: updateLocationSchema.optional(),
-  stops: z.array(updateLocationSchema).optional(),
-  driver_license_number: z.string().optional(),
-  license_image: z.string().optional(),
-  daily_commute_time: z.string().optional(),
-  available_for_delivery: z.string().optional(),
-  max_parcel_weight: z.string().optional(),
-  pickup_time: z.string().optional(),
-  notes: z.string().optional(),
-});
-
-const updateDriverWithVehicleValidationSchema = z.object({
-  body: z.object({
-    userInfo: updateUserInfoValidationSchema.optional(),
-    driverInfo: updateDriverInfoValidationSchema.optional(),
-    vehicle: VehicleValidation.createVehicleValidationSchema.shape.body
-      .omit({ user_id: true })
-      .partial()
-      .optional(),
-  }),
-});
-
-
 export const DriverValidation = {
   driverInfoValidationSchema,
   createDriverWithVehicleValidationSchema,
-  updateDriverWithVehicleValidationSchema
 };
