@@ -1,11 +1,26 @@
 import { Schema, model } from 'mongoose';
-import type { TParcel, TParcelPriceRequest } from './parcel.interface';
+import {
+  PARCEL_STATUS,
+  PRICE_REQUEST_STATUS,
+  PRICE_STATUS,
+  PROPOSED_BY,
+  type TParcel,
+  type TParcelPriceRequest,
+} from './parcel.interface';
 
 // --- Parcel Schema ---
 const parcelSchema = new Schema<TParcel>(
   {
-    parcel_id: { type: String, required: true, unique: true },
-    user_id: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    parcel_id: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    user_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
     parcel_name: { type: String, required: true },
     size: { type: String, required: true },
     vehicle_type: { type: String, required: true },
@@ -20,34 +35,67 @@ const parcelSchema = new Schema<TParcel>(
     sender_remarks: { type: String },
     status: {
       type: String,
-      enum: ['Waiting', 'Pending', 'Ongoing', 'Completed', 'Rejected'],
-      default: 'Waiting',
+      enum: Object.values(PARCEL_STATUS),
+      default: PARCEL_STATUS.WAITING,
     },
     final_price: { type: Number, default: null },
     price_status: {
       type: String,
-      enum: ['NotSet', 'Proposed', 'Countered', 'Accepted', 'Rejected'],
-      default: 'NotSet',
+      enum: Object.values(PRICE_STATUS),
+      default: PRICE_STATUS.NOT_SET,
     },
-    accepted_by: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+    accepted_by: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
+    },
     accepted_at: { type: Date, default: null },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
 );
+
+/**
+ * Virtual Populate: Links all price requests to this Parcel
+ */
+parcelSchema.virtual('price_requests', {
+  ref: 'ParcelPriceRequest',
+  localField: '_id',
+  foreignField: 'parcel_id',
+});
 
 export const Parcel = model<TParcel>('Parcel', parcelSchema);
 
 // --- Price Request Schema ---
 const priceRequestSchema = new Schema<TParcelPriceRequest>(
   {
-    parcel_id: { type: Schema.Types.ObjectId, ref: 'Parcel', required: true },
-    proposed_by: { type: String, enum: ['Admin', 'Customer'], required: true },
+    parcel_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'Parcel',
+      required: true,
+    },
+    proposed_by: {
+      type: String,
+      enum: Object.values(PROPOSED_BY),
+      required: true,
+    },
     proposed_price: { type: Number, required: true },
+     rejection_reason: { type: String, default: null },
     message: { type: String },
-    status: { type: String, enum: ['Pending', 'Accepted', 'Rejected'], default: 'Pending' },
+    status: {
+      type: String,
+      enum: Object.values(PRICE_REQUEST_STATUS),
+      default: PRICE_REQUEST_STATUS.PENDING,
+    },
     decided_at: { type: Date },
   },
   { timestamps: true }
 );
 
-export const ParcelPriceRequest = model<TParcelPriceRequest>('ParcelPriceRequest', priceRequestSchema);
+export const ParcelPriceRequest = model<TParcelPriceRequest>(
+  'ParcelPriceRequest',
+  priceRequestSchema
+);

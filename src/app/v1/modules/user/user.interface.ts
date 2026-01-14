@@ -1,5 +1,3 @@
-/* eslint-disable no-unused-vars */
-import e from 'express';
 import { Model, Types } from 'mongoose';
 
 // Enums as Constants
@@ -32,6 +30,7 @@ export interface TUser extends Document {
   role: TUserRole;
   status: TUserStatus;
   is_profile_completed: boolean;
+  is_verified: boolean;
 
   // Auth Logic
   password_changed_at?: Date;
@@ -54,6 +53,7 @@ export interface IUserModel extends Model<TUser> {
   isUserActive(user: TUser): Promise<boolean>;
   isUserBlocked(user: TUser): Promise<boolean>;
   isUserDeleted(user: TUser): Promise<boolean>;
+  isUserVerified(user: TUser): Promise<boolean>;
 
   // Auth & Security
   compareUserPassword(

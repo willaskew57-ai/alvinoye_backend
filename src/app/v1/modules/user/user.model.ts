@@ -54,6 +54,10 @@ const UserSchema = new Schema<TUser, IUserModel>(
       type: Boolean,
       default: false,
     },
+    is_verified: {
+      type: Boolean,
+      default: false,
+    },
     password: {
       type: String,
       trim: true,
@@ -127,8 +131,8 @@ UserSchema.statics.isUserDeleted = async function (user: TUser) {
 UserSchema.statics.isUserBlocked = async function (user: TUser) {
   return user?.status === 'BLOCKED' || false;
 };
-UserSchema.statics.isUserDeleted = async function (user: TUser) {
-  return user?.status === 'DELETED' || false;
+UserSchema.statics.isUserVerified = async function (user: TUser) {
+  return user?.is_verified || false;
 };
 
 UserSchema.statics.isJWTIssuedBeforePasswordChanged = (

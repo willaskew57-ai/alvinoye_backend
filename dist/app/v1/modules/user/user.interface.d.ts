@@ -24,6 +24,7 @@ export interface TUser extends Document {
     role: TUserRole;
     status: TUserStatus;
     is_profile_completed: boolean;
+    is_verified: boolean;
     password_changed_at?: Date;
     removed_by?: Types.ObjectId | null;
     blocked_by?: Types.ObjectId | null;
@@ -37,6 +38,7 @@ export interface IUserModel extends Model<TUser> {
     isUserActive(user: TUser): Promise<boolean>;
     isUserBlocked(user: TUser): Promise<boolean>;
     isUserDeleted(user: TUser): Promise<boolean>;
+    isUserVerified(user: TUser): Promise<boolean>;
     compareUserPassword(plainTextPassword: string, hashedPassword: string): Promise<boolean>;
     isJWTIssuedBeforePasswordChanged(passwordChangedTimeStamps: Date | undefined, jwtIssuedTimeStamps: number): boolean;
 }

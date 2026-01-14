@@ -6,7 +6,7 @@ import { auth } from '../../../../middleware/auth';
 import { USER_ROLE } from './user.interface';
 const router = express.Router();
 // Only SUPER_ADMIN can create a user directly via this admin route
-router.post('/create-admin', auth(USER_ROLE.SUPER_ADMIN), validateRequest(UserValidation.createUserValidationSchema), UserControllers.createUser);
+router.post('/create-admin', auth(USER_ROLE.SUPER_ADMIN), validateRequest(UserValidation.createAdminValidationSchema), UserControllers.createAdmin);
 router.patch('/change-status/:id', auth(USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN), validateRequest(UserValidation.changeStatusValidationSchema), UserControllers.changeStatus);
 router.get('/get', auth(USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN, USER_ROLE.CUSTOMER, USER_ROLE.DRIVER), UserControllers.getAllUser);
 // --- Profile Routes ---

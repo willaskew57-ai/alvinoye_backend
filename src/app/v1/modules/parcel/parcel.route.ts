@@ -7,29 +7,37 @@ import { ParcelValidations } from './parcel.validation';
 
 const router = express.Router();
 
-// --- Booking & Discovery ---
-
 router.post(
-  '/create-parcel',
+  '/create',
   auth(USER_ROLE.CUSTOMER, USER_ROLE.SUPER_ADMIN),
   validateRequest(ParcelValidations.createParcelValidationSchema),
   ParcelControllers.createParcel
 );
 
 router.get(
-  '/',
-  auth(USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN, USER_ROLE.DRIVER, USER_ROLE.CUSTOMER),
+  '/get',
+  auth(
+    USER_ROLE.SUPER_ADMIN,
+    USER_ROLE.ADMIN,
+    USER_ROLE.DRIVER,
+    USER_ROLE.CUSTOMER
+  ),
   ParcelControllers.getAllParcels
 );
 
 router.get(
-  '/:id',
-  auth(USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN, USER_ROLE.DRIVER, USER_ROLE.CUSTOMER),
+  '/get/:id',
+  auth(
+    USER_ROLE.SUPER_ADMIN,
+    USER_ROLE.ADMIN,
+    USER_ROLE.DRIVER,
+    USER_ROLE.CUSTOMER
+  ),
   ParcelControllers.getSingleParcel
 );
 
 router.patch(
-  '/:id',
+  '/update/:id',
   auth(USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN, USER_ROLE.CUSTOMER),
   validateRequest(ParcelValidations.updateParcelValidationSchema),
   ParcelControllers.updateParcel

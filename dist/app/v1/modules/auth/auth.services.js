@@ -54,9 +54,16 @@ const loginServices = async (payload) => {
     if (await User.isUserDeleted(user)) {
         throw new AppError(httpStatus.FORBIDDEN, 'This account has been deleted!');
     }
-    // Check if user is blocked
     if (await User.isUserBlocked(user)) {
         throw new AppError(httpStatus.FORBIDDEN, 'This account is currently blocked!');
+    }
+    const isVerified = await User.isUserVerified(user);
+    if (!isVerified) {
+        throw new AppError(httpStatus.UNAUTHORIZED, 'Your email is not verified. Please verify your OTP first.');
+    }
+    const isActive = await User.isUserActive(user);
+    if (!isActive) {
+        throw new AppError(httpStatus.FORBIDDEN, 'Your account is not active. Please contact support or wait for approval.');
     }
     // Compare Password
     const isPasswordMatched = await User.compareUserPassword(payload.password, user.password);
@@ -109,9 +116,7 @@ const changePasswordIntoDB = async (userData, payload) => {
  */
 const verifyOtp = async (payload) => {
     const { user_id, otp, purpose } = payload;
-    // 1. Verify OTP using OtpServices
     await OtpServices.verifyOtpFromDB(user_id, otp, purpose);
-    // 2. If purpose is REGISTER, set user as verified
     if (purpose === 'REGISTER') {
         await User.findByIdAndUpdate(user_id, { is_verified: true });
     }

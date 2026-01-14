@@ -1,7 +1,7 @@
 import { type TUser, type TUserStatus } from './user.interface';
 import { Types } from 'mongoose';
 export declare const UserServices: {
-    createUserIntoDB: (payload: TUser) => Promise<import("mongoose").Document<unknown, {}, TUser, {}, import("mongoose").DefaultSchemaOptions> & TUser & Required<{
+    createAdminIntoDB: (payload: TUser) => Promise<import("mongoose").Document<unknown, {}, TUser, {}, import("mongoose").DefaultSchemaOptions> & TUser & Required<{
         _id: Types.ObjectId;
     }> & {
         __v: number;

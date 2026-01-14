@@ -14,7 +14,6 @@ const createParcel = catchAsync(async (req, res) => {
     });
 });
 const getAllParcels = catchAsync(async (req, res) => {
-    // Pass req.user to service to filter results for Customers
     const result = await ParcelServices.getAllParcelsFromDB(req.query, req.user);
     sendResponse(res, {
         statusCode: httpStatus.OK,
@@ -56,9 +55,9 @@ const proposePrice = catchAsync(async (req, res) => {
 });
 const respondToPrice = catchAsync(async (req, res) => {
     const { id } = req.params; // This is the ID from parcel_price_requests table
-    const { status } = req.body;
-    const { user_id } = req.user;
-    const result = await ParcelServices.respondToPriceProposalInDB(id, status, user_id);
+    const { status, rejection_reason } = req.body;
+    const user = req.user;
+    const result = await ParcelServices.respondToPriceProposalInDB(id, status, user, rejection_reason);
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,

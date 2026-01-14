@@ -11,8 +11,8 @@ const router = express.Router();
 router.post(
   '/create-admin',
   auth(USER_ROLE.SUPER_ADMIN),
-  validateRequest(UserValidation.createUserValidationSchema),
-  UserControllers.createUser
+  validateRequest(UserValidation.createAdminValidationSchema),
+  UserControllers.createAdmin
 );
 
 router.patch(

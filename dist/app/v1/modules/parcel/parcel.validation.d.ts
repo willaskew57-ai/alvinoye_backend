@@ -17,12 +17,12 @@ export declare const ParcelValidations: {
         }, "strip", z.ZodTypeAny, {
             date: string;
             size: string;
+            time: string;
             priority: string;
             parcel_name: string;
             vehicle_type: string;
             weight: number;
             handover_location: string;
-            time: string;
             parcel_images: string[];
             receiver_name: string;
             receiver_phone: string;
@@ -30,12 +30,12 @@ export declare const ParcelValidations: {
         }, {
             date: string;
             size: string;
+            time: string;
             priority: string;
             parcel_name: string;
             vehicle_type: string;
             weight: number;
             handover_location: string;
-            time: string;
             receiver_name: string;
             receiver_phone: string;
             parcel_images?: string[] | undefined;
@@ -45,12 +45,12 @@ export declare const ParcelValidations: {
         body: {
             date: string;
             size: string;
+            time: string;
             priority: string;
             parcel_name: string;
             vehicle_type: string;
             weight: number;
             handover_location: string;
-            time: string;
             parcel_images: string[];
             receiver_name: string;
             receiver_phone: string;
@@ -60,12 +60,12 @@ export declare const ParcelValidations: {
         body: {
             date: string;
             size: string;
+            time: string;
             priority: string;
             parcel_name: string;
             vehicle_type: string;
             weight: number;
             handover_location: string;
-            time: string;
             receiver_name: string;
             receiver_phone: string;
             parcel_images?: string[] | undefined;
@@ -86,31 +86,28 @@ export declare const ParcelValidations: {
             receiver_name: z.ZodOptional<z.ZodString>;
             receiver_phone: z.ZodOptional<z.ZodString>;
             sender_remarks: z.ZodOptional<z.ZodString>;
-            status: z.ZodOptional<z.ZodEnum<["Waiting", "Pending", "Ongoing", "Completed", "Rejected"]>>;
         }, "strip", z.ZodTypeAny, {
-            status?: "Waiting" | "Pending" | "Ongoing" | "Completed" | "Rejected" | undefined;
             date?: string | undefined;
             size?: string | undefined;
+            time?: string | undefined;
             priority?: string | undefined;
             parcel_name?: string | undefined;
             vehicle_type?: string | undefined;
             weight?: number | undefined;
             handover_location?: string | undefined;
-            time?: string | undefined;
             parcel_images?: string[] | undefined;
             receiver_name?: string | undefined;
             receiver_phone?: string | undefined;
             sender_remarks?: string | undefined;
         }, {
-            status?: "Waiting" | "Pending" | "Ongoing" | "Completed" | "Rejected" | undefined;
             date?: string | undefined;
             size?: string | undefined;
+            time?: string | undefined;
             priority?: string | undefined;
             parcel_name?: string | undefined;
             vehicle_type?: string | undefined;
             weight?: number | undefined;
             handover_location?: string | undefined;
-            time?: string | undefined;
             parcel_images?: string[] | undefined;
             receiver_name?: string | undefined;
             receiver_phone?: string | undefined;
@@ -118,15 +115,14 @@ export declare const ParcelValidations: {
         }>;
     }, "strip", z.ZodTypeAny, {
         body: {
-            status?: "Waiting" | "Pending" | "Ongoing" | "Completed" | "Rejected" | undefined;
             date?: string | undefined;
             size?: string | undefined;
+            time?: string | undefined;
             priority?: string | undefined;
             parcel_name?: string | undefined;
             vehicle_type?: string | undefined;
             weight?: number | undefined;
             handover_location?: string | undefined;
-            time?: string | undefined;
             parcel_images?: string[] | undefined;
             receiver_name?: string | undefined;
             receiver_phone?: string | undefined;
@@ -134,15 +130,14 @@ export declare const ParcelValidations: {
         };
     }, {
         body: {
-            status?: "Waiting" | "Pending" | "Ongoing" | "Completed" | "Rejected" | undefined;
             date?: string | undefined;
             size?: string | undefined;
+            time?: string | undefined;
             priority?: string | undefined;
             parcel_name?: string | undefined;
             vehicle_type?: string | undefined;
             weight?: number | undefined;
             handover_location?: string | undefined;
-            time?: string | undefined;
             parcel_images?: string[] | undefined;
             receiver_name?: string | undefined;
             receiver_phone?: string | undefined;
@@ -178,19 +173,24 @@ export declare const ParcelValidations: {
     }>;
     respondPriceRequestValidationSchema: z.ZodObject<{
         body: z.ZodObject<{
-            status: z.ZodEnum<["Accepted", "Rejected"]>;
+            status: z.ZodEnum<["ACCEPTED", "REJECTED"]>;
+            rejection_reason: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
-            status: "Rejected" | "Accepted";
+            status: "REJECTED" | "ACCEPTED";
+            rejection_reason?: string | undefined;
         }, {
-            status: "Rejected" | "Accepted";
+            status: "REJECTED" | "ACCEPTED";
+            rejection_reason?: string | undefined;
         }>;
     }, "strip", z.ZodTypeAny, {
         body: {
-            status: "Rejected" | "Accepted";
+            status: "REJECTED" | "ACCEPTED";
+            rejection_reason?: string | undefined;
         };
     }, {
         body: {
-            status: "Rejected" | "Accepted";
+            status: "REJECTED" | "ACCEPTED";
+            rejection_reason?: string | undefined;
         };
     }>;
     adminUpdateParcelValidationSchema: z.ZodObject<{

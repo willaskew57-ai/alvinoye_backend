@@ -1,5 +1,3 @@
-/* eslint-disable no-unused-vars */
-import e from 'express';
 import { Model, Types } from 'mongoose';
 // Enums as Constants
 export const USER_ROLE = {

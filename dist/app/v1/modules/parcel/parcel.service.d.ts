@@ -1,10 +1,21 @@
 import mongoose from 'mongoose';
-import type { TParcel, TParcelPriceRequest } from './parcel.interface';
+import { type TParcel, type TParcelPriceRequest, type TPriceRequestStatus } from './parcel.interface';
 import type { TUserPayload } from '../../../../interfaces';
+export declare const respondToPriceProposalInDB: (requestId: string, status: TPriceRequestStatus, user: {
+    user_id: string;
+    role: string;
+}, // Pass full user object
+rejection_reason?: string) => Promise<mongoose.Document<unknown, {}, TParcelPriceRequest, {}, mongoose.DefaultSchemaOptions> & TParcelPriceRequest & Required<{
+    _id: mongoose.Types.ObjectId;
+}> & {
+    __v: number;
+} & {
+    id: string;
+}>;
 export declare const ParcelServices: {
-    createParcelIntoDB: (userId: string, payload: TParcel) => Promise<mongoose.Document<unknown, {}, TParcel, {}, mongoose.DefaultSchemaOptions> & TParcel & {
+    createParcelIntoDB: (userId: string, payload: TParcel) => Promise<mongoose.Document<unknown, {}, TParcel, {}, mongoose.DefaultSchemaOptions> & TParcel & Required<{
         _id: mongoose.Types.ObjectId;
-    } & {
+    }> & {
         __v: number;
     } & {
         id: string;
@@ -16,45 +27,48 @@ export declare const ParcelServices: {
             limit: number;
             totalPages: number;
         };
-        data: (mongoose.Document<unknown, {}, TParcel, {}, mongoose.DefaultSchemaOptions> & TParcel & {
+        data: (mongoose.Document<unknown, {}, TParcel, {}, mongoose.DefaultSchemaOptions> & TParcel & Required<{
             _id: mongoose.Types.ObjectId;
-        } & {
+        }> & {
             __v: number;
         } & {
             id: string;
         })[];
     }>;
-    getSingleParcelFromDB: (id: string) => Promise<mongoose.Document<unknown, {}, TParcel, {}, mongoose.DefaultSchemaOptions> & TParcel & {
+    getSingleParcelFromDB: (id: string) => Promise<mongoose.Document<unknown, {}, TParcel, {}, mongoose.DefaultSchemaOptions> & TParcel & Required<{
         _id: mongoose.Types.ObjectId;
-    } & {
+    }> & {
         __v: number;
     } & {
         id: string;
     }>;
-    updateParcelInDB: (id: string, payload: Partial<TParcel>) => Promise<mongoose.Document<unknown, {}, TParcel, {}, mongoose.DefaultSchemaOptions> & TParcel & {
+    updateParcelInDB: (id: string, payload: Partial<TParcel>) => Promise<mongoose.Document<unknown, {}, TParcel, {}, mongoose.DefaultSchemaOptions> & TParcel & Required<{
         _id: mongoose.Types.ObjectId;
-    } & {
+    }> & {
         __v: number;
     } & {
         id: string;
     }>;
-    proposePriceInDB: (userId: string, role: string, payload: TParcelPriceRequest) => Promise<(mongoose.Document<unknown, {}, TParcelPriceRequest, {}, mongoose.DefaultSchemaOptions> & TParcelPriceRequest & {
+    proposePriceInDB: (userId: string, role: string, payload: TParcelPriceRequest) => Promise<(mongoose.Document<unknown, {}, TParcelPriceRequest, {}, mongoose.DefaultSchemaOptions> & TParcelPriceRequest & Required<{
         _id: mongoose.Types.ObjectId;
-    } & {
+    }> & {
         __v: number;
     } & {
         id: string;
     }) | undefined>;
-    respondToPriceProposalInDB: (requestId: string, status: "Accepted" | "Rejected", userId: string) => Promise<mongoose.Document<unknown, {}, TParcelPriceRequest, {}, mongoose.DefaultSchemaOptions> & TParcelPriceRequest & {
+    respondToPriceProposalInDB: (requestId: string, status: TPriceRequestStatus, user: {
+        user_id: string;
+        role: string;
+    }, rejection_reason?: string) => Promise<mongoose.Document<unknown, {}, TParcelPriceRequest, {}, mongoose.DefaultSchemaOptions> & TParcelPriceRequest & Required<{
         _id: mongoose.Types.ObjectId;
-    } & {
+    }> & {
         __v: number;
     } & {
         id: string;
     }>;
-    getPriceHistoryFromDB: (parcelId: string) => Promise<(mongoose.Document<unknown, {}, TParcelPriceRequest, {}, mongoose.DefaultSchemaOptions> & TParcelPriceRequest & {
+    getPriceHistoryFromDB: (parcelId: string) => Promise<(mongoose.Document<unknown, {}, TParcelPriceRequest, {}, mongoose.DefaultSchemaOptions> & TParcelPriceRequest & Required<{
         _id: mongoose.Types.ObjectId;
-    } & {
+    }> & {
         __v: number;
     } & {
         id: string;

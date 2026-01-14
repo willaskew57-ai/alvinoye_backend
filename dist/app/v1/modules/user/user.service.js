@@ -4,13 +4,15 @@ import { User } from './user.model';
 import { USER_ROLE, USER_STATUS, } from './user.interface';
 import { Types } from 'mongoose';
 import QueryBuilder from '../../../../builders/QueryBuilder';
-const createUserIntoDB = async (payload) => {
+const createAdminIntoDB = async (payload) => {
     const isUserExists = await User.isUserExistsByEmail(payload.email);
     if (isUserExists) {
         throw new AppError(httpStatus.CONFLICT, 'User with this email already exists!');
     }
     const userData = {
         ...payload,
+        role: "ADMIN",
+        status: "ACTIVE",
         is_profile_completed: true,
         is_verified: true,
     };
@@ -90,7 +92,12 @@ const getMeFromDB = async (id) => {
 };
 const updateMeIntoDB = async (id, payload) => {
     // Prevent users from updating sensitive fields via the "update-me" route
-    const forbiddenFields = ['role', 'status', 'email', 'is_profile_completed'];
+    const forbiddenFields = [
+        'role',
+        'status',
+        'email',
+        'is_profile_completed',
+    ];
     forbiddenFields.forEach((field) => {
         if (field in payload) {
             delete payload[field];
@@ -121,7 +128,7 @@ const deleteUserFromDB = async (id) => {
     return result;
 };
 export const UserServices = {
-    createUserIntoDB,
+    createAdminIntoDB,
     changeUserStatusInDB,
     getAllUsersFromDB,
     getMeFromDB,

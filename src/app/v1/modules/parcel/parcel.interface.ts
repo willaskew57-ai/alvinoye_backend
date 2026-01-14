@@ -1,11 +1,41 @@
-import { Types } from 'mongoose';
+import { Types, Document } from 'mongoose';
 
-export type TParcelStatus = 'Waiting' | 'Pending' | 'Ongoing' | 'Completed' | 'Rejected';
-export type TPriceStatus = 'NotSet' | 'Proposed' | 'Countered' | 'Accepted' | 'Rejected';
-export type TProposedBy = 'Admin' | 'Customer';
+// Enums as Constants
+export const PARCEL_STATUS = {
+  WAITING: 'WAITING',
+  PENDING: 'PENDING',
+  ONGOING: 'ONGOING',
+  COMPLETED: 'COMPLETED',
+  REJECTED: 'REJECTED',
+} as const;
 
-export type TParcel = {
-  parcel_id: string; // Human readable ID (e.g., PC-1002)
+export const PRICE_STATUS = {
+  NOT_SET: 'NOT_SET',
+  PROPOSED: 'PROPOSED',
+  COUNTERED: 'COUNTERED',
+  ACCEPTED: 'ACCEPTED',
+  REJECTED: 'REJECTED',
+} as const;
+
+export const PROPOSED_BY = {
+  ADMIN: 'ADMIN',
+  CUSTOMER: 'CUSTOMER',
+} as const;
+
+export const PRICE_REQUEST_STATUS = {
+  PENDING: 'PENDING',
+  ACCEPTED: 'ACCEPTED',
+  REJECTED: 'REJECTED',
+} as const;
+
+// Derived Types
+export type TParcelStatus = keyof typeof PARCEL_STATUS;
+export type TPriceStatus = keyof typeof PRICE_STATUS;
+export type TProposedBy = keyof typeof PROPOSED_BY;
+export type TPriceRequestStatus = keyof typeof PRICE_REQUEST_STATUS;
+
+export interface TParcel extends Document {
+  parcel_id: string;
   user_id: Types.ObjectId;
   parcel_name: string;
   size: string;
@@ -20,17 +50,18 @@ export type TParcel = {
   receiver_phone: string;
   sender_remarks?: string;
   status: TParcelStatus;
-  final_price?: number; 
+  final_price?: number | null;
   price_status: TPriceStatus;
-  accepted_by?: Types.ObjectId;
-  accepted_at?: Date;
-};
+  accepted_by?: Types.ObjectId | null;
+  accepted_at?: Date | null;
+}
 
-export type TParcelPriceRequest = {
+export interface TParcelPriceRequest extends Document {
   parcel_id: Types.ObjectId;
   proposed_by: TProposedBy;
   proposed_price: number;
   message?: string;
-  status: 'Pending' | 'Accepted' | 'Rejected';
+  rejection_reason?: string | null;
+  status: TPriceRequestStatus;
   decided_at?: Date;
-};
+}

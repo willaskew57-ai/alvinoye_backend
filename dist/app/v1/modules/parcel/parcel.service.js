@@ -4,34 +4,22 @@ import QueryBuilder from '../../../../builders/QueryBuilder';
 import AppError from '../../../../errors/app-error';
 import { USER_ROLE } from '../user/user.interface';
 import { Parcel, ParcelPriceRequest } from './parcel.model';
-/**
- * Generate a unique human-readable Parcel ID (e.g., PC-1715432)
- */
-const generateParcelId = () => {
-    const datePart = Date.now().toString().slice(-6);
-    const randomPart = Math.floor(100 + Math.random() * 900);
-    return `PC-${datePart}${randomPart}`;
-};
-// --- Standard CRUD Services ---
+import { PARCEL_STATUS, PRICE_REQUEST_STATUS, PRICE_STATUS, } from './parcel.interface';
+import { generateParcelId } from './parcel.utils';
+// ** ----- create parcel -----
 const createParcelIntoDB = async (userId, payload) => {
     const parcelData = {
         ...payload,
         user_id: userId,
         parcel_id: generateParcelId(),
-        status: 'Waiting',
-        price_status: 'NotSet',
+        status: 'WAITING',
+        price_status: 'NOT_SET',
     };
     const result = await Parcel.create(parcelData);
     return result;
 };
 const getAllParcelsFromDB = async (query, user) => {
-    const parcelSearchableFields = [
-        'parcel_id',
-        'parcel_name',
-        'receiver_name',
-        'receiver_phone',
-        'handover_location',
-    ];
+    const parcelSearchableFields = ['parcel_id', 'parcel_name'];
     const queryObj = { ...query };
     // If the user is a Customer, they can only see their own parcels
     if (user.role === USER_ROLE.CUSTOMER) {
@@ -48,7 +36,7 @@ const getAllParcelsFromDB = async (query, user) => {
     return { meta, data };
 };
 const getSingleParcelFromDB = async (id) => {
-    const result = await Parcel.findById(id).populate('user_id accepted_by');
+    const result = await Parcel.findById(id).populate('user_id accepted_by price_requests');
     if (!result) {
         throw new AppError(httpStatus.NOT_FOUND, 'Parcel not found!');
     }
@@ -78,18 +66,16 @@ const proposePriceInDB = async (userId, role, payload) => {
         }
         // Determine who is proposing
         const proposedBy = role === USER_ROLE.ADMIN || role === USER_ROLE.SUPER_ADMIN
-            ? 'Admin'
-            : 'Customer';
-        // 1. Create the price request log
+            ? 'ADMIN'
+            : 'CUSTOMER';
         const priceRequest = await ParcelPriceRequest.create([
             {
                 ...payload,
                 proposed_by: proposedBy,
-                status: 'Pending',
+                status: 'PENDING',
             },
         ], { session });
-        // 2. Update the main Parcel table status
-        const priceStatus = proposedBy === 'Admin' ? 'Proposed' : 'Countered';
+        const priceStatus = proposedBy === 'ADMIN' ? 'PROPOSED' : 'COUNTED';
         await Parcel.findByIdAndUpdate(payload.parcel_id, { price_status: priceStatus }, { session });
         await session.commitTransaction();
         session.endSession();
@@ -101,43 +87,66 @@ const proposePriceInDB = async (userId, role, payload) => {
         throw new AppError(httpStatus.BAD_REQUEST, err.message);
     }
 };
-const respondToPriceProposalInDB = async (requestId, status, userId) => {
+// Updated Service
+export const respondToPriceProposalInDB = async (requestId, status, user, // Pass full user object
+rejection_reason) => {
     const session = await mongoose.startSession();
     try {
         session.startTransaction();
-        // 1. Find the specific price request
         const priceRequest = await ParcelPriceRequest.findById(requestId).session(session);
         if (!priceRequest) {
             throw new AppError(httpStatus.NOT_FOUND, 'Price request record not found!');
         }
-        if (priceRequest.status !== 'Pending') {
-            throw new AppError(httpStatus.BAD_REQUEST, 'This proposal is already decided!');
+        if (priceRequest.status !== PRICE_REQUEST_STATUS.PENDING) {
+            throw new AppError(httpStatus.BAD_REQUEST, 'This proposal has already been decided!');
         }
-        // 2. Update the request status
+        /**
+         * BUSINESS RULE: A user cannot respond to their own proposal.
+         * If Admin proposed, only Customer can respond.
+         * If Customer proposed, only Admin can respond.
+         */
+        if (priceRequest.proposed_by === user.role) {
+            throw new AppError(httpStatus.FORBIDDEN, `As an ${user.role}, you cannot accept or reject your own price proposal.`);
+        }
+        /**
+         * BUSINESS RULE: Rejection reason is mandatory for REJECTED status.
+         */
+        if (status === PRICE_REQUEST_STATUS.REJECTED && !rejection_reason) {
+            throw new AppError(httpStatus.BAD_REQUEST, 'Please provide a reason for rejecting this price proposal.');
+        }
+        // 2. Update the Price Request status
         priceRequest.status = status;
         priceRequest.decided_at = new Date();
+        if (status === PRICE_REQUEST_STATUS.REJECTED) {
+            priceRequest.message = `REJECTION REASON: ${rejection_reason}`;
+        }
         await priceRequest.save({ session });
-        // 3. Update the Parcel table based on the decision
-        if (status === 'Accepted') {
-            await Parcel.findByIdAndUpdate(priceRequest.parcel_id, {
+        // 3. Update the Parcel table
+        if (status === PRICE_REQUEST_STATUS.ACCEPTED) {
+            const updatedParcel = await Parcel.findByIdAndUpdate(priceRequest.parcel_id, {
                 final_price: priceRequest.proposed_price,
-                price_status: 'Accepted',
-                status: 'Pending', // Once price is fixed, it moves to Pending for fulfillment
-                accepted_by: userId,
+                price_status: PRICE_STATUS.ACCEPTED,
+                status: PARCEL_STATUS.PENDING,
+                accepted_by: user.user_id,
                 accepted_at: new Date(),
-            }, { session });
+            }, { session, new: true });
+            if (!updatedParcel) {
+                throw new AppError(httpStatus.NOT_FOUND, 'Associated parcel not found!');
+            }
         }
         else {
-            await Parcel.findByIdAndUpdate(priceRequest.parcel_id, { price_status: 'Rejected' }, { session });
+            // If REJECTED
+            await Parcel.findByIdAndUpdate(priceRequest.parcel_id, { price_status: PRICE_STATUS.REJECTED }, { session });
         }
         await session.commitTransaction();
-        session.endSession();
         return priceRequest;
     }
     catch (err) {
         await session.abortTransaction();
-        session.endSession();
-        throw new AppError(httpStatus.BAD_REQUEST, err.message);
+        throw err instanceof AppError ? err : new AppError(httpStatus.INTERNAL_SERVER_ERROR, err.message);
+    }
+    finally {
+        await session.endSession();
     }
 };
 const getPriceHistoryFromDB = async (parcelId) => {

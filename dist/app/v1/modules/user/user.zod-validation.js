@@ -5,9 +5,13 @@ const createUserValidationSchema = z.object({
         full_name: z.string({ required_error: 'Full name is required' }),
         email: z.string().email('Invalid email address'),
         password: z.string().min(6),
-        role: z.enum(['SUPER_ADMIN', 'ADMIN', 'CUSTOMER', 'DRIVER']),
-        phone_number: z.string().optional(),
-        profile_picture: z.string().optional(),
+    }),
+});
+const createAdminValidationSchema = z.object({
+    body: z.object({
+        full_name: z.string({ required_error: 'Full name is required' }),
+        email: z.string().email('Invalid email address'),
+        password: z.string().min(6),
     }),
 });
 const updateUserValidationSchema = z.object({
@@ -27,6 +31,7 @@ const changeStatusValidationSchema = z.object({
 });
 export const UserValidation = {
     createUserValidationSchema,
+    createAdminValidationSchema,
     updateUserValidationSchema,
     changeStatusValidationSchema,
 };

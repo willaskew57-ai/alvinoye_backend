@@ -5,41 +5,53 @@ export declare const UserValidation: {
             full_name: z.ZodString;
             email: z.ZodString;
             password: z.ZodString;
-            role: z.ZodEnum<["SUPER_ADMIN", "ADMIN", "CUSTOMER", "DRIVER"]>;
-            phone_number: z.ZodOptional<z.ZodString>;
-            profile_picture: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
             full_name: string;
             email: string;
             password: string;
-            role: "SUPER_ADMIN" | "ADMIN" | "CUSTOMER" | "DRIVER";
-            phone_number?: string | undefined;
-            profile_picture?: string | undefined;
         }, {
             full_name: string;
             email: string;
             password: string;
-            role: "SUPER_ADMIN" | "ADMIN" | "CUSTOMER" | "DRIVER";
-            phone_number?: string | undefined;
-            profile_picture?: string | undefined;
         }>;
     }, "strip", z.ZodTypeAny, {
         body: {
             full_name: string;
             email: string;
             password: string;
-            role: "SUPER_ADMIN" | "ADMIN" | "CUSTOMER" | "DRIVER";
-            phone_number?: string | undefined;
-            profile_picture?: string | undefined;
         };
     }, {
         body: {
             full_name: string;
             email: string;
             password: string;
-            role: "SUPER_ADMIN" | "ADMIN" | "CUSTOMER" | "DRIVER";
-            phone_number?: string | undefined;
-            profile_picture?: string | undefined;
+        };
+    }>;
+    createAdminValidationSchema: z.ZodObject<{
+        body: z.ZodObject<{
+            full_name: z.ZodString;
+            email: z.ZodString;
+            password: z.ZodString;
+        }, "strip", z.ZodTypeAny, {
+            full_name: string;
+            email: string;
+            password: string;
+        }, {
+            full_name: string;
+            email: string;
+            password: string;
+        }>;
+    }, "strip", z.ZodTypeAny, {
+        body: {
+            full_name: string;
+            email: string;
+            password: string;
+        };
+    }, {
+        body: {
+            full_name: string;
+            email: string;
+            password: string;
         };
     }>;
     updateUserValidationSchema: z.ZodObject<{

@@ -2,8 +2,8 @@ import httpStatus from 'http-status';
 import catchAsync from '../../../../utils/catch-async';
 import sendResponse from '../../../../utils/send-response';
 import { UserServices } from './user.service';
-const createUser = catchAsync(async (req, res) => {
-    const result = await UserServices.createUserIntoDB(req.body);
+const createAdmin = catchAsync(async (req, res) => {
+    const result = await UserServices.createAdminIntoDB(req.body);
     sendResponse(res, {
         statusCode: httpStatus.CREATED,
         success: true,
@@ -86,7 +86,7 @@ const deleteUser = catchAsync(async (req, res) => {
     });
 });
 export const UserControllers = {
-    createUser,
+    createAdmin,
     changeStatus,
     getMe,
     updateMe,

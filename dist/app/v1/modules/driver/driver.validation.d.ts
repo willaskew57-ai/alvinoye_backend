@@ -49,12 +49,12 @@ export declare const DriverValidation: {
         pickup_time: z.ZodString;
         notes: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
-        from: {
+        to: {
             address: string;
             latitude: number;
             longitude: number;
         };
-        to: {
+        from: {
             address: string;
             latitude: number;
             longitude: number;
@@ -73,12 +73,12 @@ export declare const DriverValidation: {
         }[] | undefined;
         notes?: string | undefined;
     }, {
-        from: {
+        to: {
             address: string;
             latitude: number;
             longitude: number;
         };
-        to: {
+        from: {
             address: string;
             latitude: number;
             longitude: number;
@@ -148,12 +148,12 @@ export declare const DriverValidation: {
                 pickup_time: z.ZodString;
                 notes: z.ZodOptional<z.ZodString>;
             }, "strip", z.ZodTypeAny, {
-                from: {
+                to: {
                     address: string;
                     latitude: number;
                     longitude: number;
                 };
-                to: {
+                from: {
                     address: string;
                     latitude: number;
                     longitude: number;
@@ -172,12 +172,12 @@ export declare const DriverValidation: {
                 }[] | undefined;
                 notes?: string | undefined;
             }, {
-                from: {
+                to: {
                     address: string;
                     latitude: number;
                     longitude: number;
                 };
-                to: {
+                from: {
                     address: string;
                     latitude: number;
                     longitude: number;
@@ -221,12 +221,12 @@ export declare const DriverValidation: {
                 vehicle_images: [string, ...string[]];
             };
             driverInfo: {
-                from: {
+                to: {
                     address: string;
                     latitude: number;
                     longitude: number;
                 };
-                to: {
+                from: {
                     address: string;
                     latitude: number;
                     longitude: number;
@@ -253,12 +253,12 @@ export declare const DriverValidation: {
                 vehicle_images: [string, ...string[]];
             };
             driverInfo: {
-                from: {
+                to: {
                     address: string;
                     latitude: number;
                     longitude: number;
                 };
-                to: {
+                from: {
                     address: string;
                     latitude: number;
                     longitude: number;
@@ -287,12 +287,12 @@ export declare const DriverValidation: {
                 vehicle_images: [string, ...string[]];
             };
             driverInfo: {
-                from: {
+                to: {
                     address: string;
                     latitude: number;
                     longitude: number;
                 };
-                to: {
+                from: {
                     address: string;
                     latitude: number;
                     longitude: number;
@@ -321,12 +321,12 @@ export declare const DriverValidation: {
                 vehicle_images: [string, ...string[]];
             };
             driverInfo: {
-                from: {
+                to: {
                     address: string;
                     latitude: number;
                     longitude: number;
                 };
-                to: {
+                from: {
                     address: string;
                     latitude: number;
                     longitude: number;

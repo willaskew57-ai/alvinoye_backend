@@ -10,7 +10,7 @@ import {
 import { Types } from 'mongoose';
 import QueryBuilder from '../../../../builders/QueryBuilder';
 
-const createUserIntoDB = async (payload: TUser) => {
+const createAdminIntoDB = async (payload: TUser) => {
   const isUserExists = await User.isUserExistsByEmail(payload.email);
 
   if (isUserExists) {
@@ -22,6 +22,8 @@ const createUserIntoDB = async (payload: TUser) => {
 
   const userData = {
     ...payload,
+    role: "ADMIN",
+    status: "ACTIVE",
     is_profile_completed: true,
     is_verified: true,
   };
@@ -138,7 +140,12 @@ const getMeFromDB = async (id: string) => {
 
 const updateMeIntoDB = async (id: string, payload: Partial<TUser>) => {
   // Prevent users from updating sensitive fields via the "update-me" route
-  const forbiddenFields: (keyof TUser)[] = ['role', 'status', 'email', 'is_profile_completed'];
+  const forbiddenFields: (keyof TUser)[] = [
+    'role',
+    'status',
+    'email',
+    'is_profile_completed',
+  ];
 
   forbiddenFields.forEach((field) => {
     if (field in payload) {
@@ -177,7 +184,7 @@ const deleteUserFromDB = async (id: string) => {
 };
 
 export const UserServices = {
-  createUserIntoDB,
+  createAdminIntoDB,
   changeUserStatusInDB,
   getAllUsersFromDB,
   getMeFromDB,

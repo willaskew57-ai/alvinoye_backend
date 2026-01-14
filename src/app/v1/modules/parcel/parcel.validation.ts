@@ -39,7 +39,6 @@ const updateParcelValidationSchema = z.object({
     receiver_name: z.string().optional(),
     receiver_phone: z.string().optional(),
     sender_remarks: z.string().optional(),
-    status: ParcelStatus.optional(),
   }),
 });
 
@@ -59,9 +58,10 @@ const createPriceRequestValidationSchema = z.object({
  */
 const respondPriceRequestValidationSchema = z.object({
   body: z.object({
-    status: z.enum(['Accepted', 'Rejected'], {
-      required_error: 'Status must be either Accepted or Rejected',
+    status: z.enum(['ACCEPTED', 'REJECTED'], {
+      required_error: 'Status must be either ACCEPTED or REJECTED',
     }),
+    rejection_reason: z.string().max(500).optional(),
   }),
 });
 

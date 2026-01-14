@@ -46,6 +46,10 @@ const UserSchema = new Schema({
         type: Boolean,
         default: false,
     },
+    is_verified: {
+        type: Boolean,
+        default: false,
+    },
     password: {
         type: String,
         trim: true,
@@ -110,8 +114,8 @@ UserSchema.statics.isUserDeleted = async function (user) {
 UserSchema.statics.isUserBlocked = async function (user) {
     return user?.status === 'BLOCKED' || false;
 };
-UserSchema.statics.isUserDeleted = async function (user) {
-    return user?.status === 'DELETED' || false;
+UserSchema.statics.isUserVerified = async function (user) {
+    return user?.is_verified || false;
 };
 UserSchema.statics.isJWTIssuedBeforePasswordChanged = (passwordChangedTimeStamps, jwtIssuedTimeStamps) => {
     if (!passwordChangedTimeStamps)
