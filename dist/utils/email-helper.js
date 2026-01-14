@@ -1,0 +1,59 @@
+import httpStatus from 'http-status';
+import AppError from '../errors/app-error';
+import { sendEmail } from './send-email';
+import { otpResendTemp, resetPassEmailTemp, registerEmailTemp } from '../mail';
+// ** --- Helper Functions ---
+/**
+ * Sends a resend-OTP email
+ */
+const sendOtpResendEmail = async (email, data) => {
+    try {
+        await sendEmail({
+            email,
+            subject: 'New Activation Code',
+            html: otpResendTemp(data),
+        });
+    }
+    catch (error) {
+        console.error('Email Error:', error);
+        throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to send OTP resend email');
+    }
+};
+/**
+ * Sends a welcome/activation email after sign up
+ */
+const sendRegisterEmail = async (email, data) => {
+    try {
+        await sendEmail({
+            email,
+            subject: 'Welcome to Parcel - Activate Your Account',
+            html: registerEmailTemp(data),
+        });
+    }
+    catch (error) {
+        console.error('Email Error:', error);
+        throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to send sign-up email');
+    }
+};
+/**
+ * Sends a password reset verification code email
+ */
+const sendResetPasswordEmail = async (email, data) => {
+    try {
+        await sendEmail({
+            email,
+            subject: 'Password Reset Request',
+            html: resetPassEmailTemp(data),
+        });
+    }
+    catch (error) {
+        console.error('Email Error:', error);
+        throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to send password reset email');
+    }
+};
+export const EmailHelpers = {
+    sendOtpResendEmail,
+    sendRegisterEmail,
+    sendResetPasswordEmail,
+};
+//# sourceMappingURL=email-helper.js.map

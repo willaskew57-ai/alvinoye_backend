@@ -1,6 +1,6 @@
 import httpStatus from 'http-status';
-import catchAsync from '../../../../utils/catchAsync';
-import sendResponse from '../../../../utils/sendResponse';
+import catchAsync from '../../../../utils/catch-async';
+import sendResponse from '../../../../utils/send-response';
 import { UserServices } from './user.service';
 
 const createUser = catchAsync(async (req, res) => {
@@ -52,7 +52,7 @@ const getMe = catchAsync(async (req, res) => {
 });
 
 const updateMe = catchAsync(async (req, res) => {
-  const { user_id  } = req.user; // Extracted from token
+  const { user_id } = req.user; // Extracted from token
   const result = await UserServices.updateMeIntoDB(user_id, req.body);
 
   sendResponse(res, {

@@ -13,11 +13,17 @@ export declare const AuthServices: {
         };
         accessToken: string;
         refreshToken: string;
-        otp: string;
     }>;
     loginServices: (payload: ILoginUser) => Promise<{
         accessToken: string;
         refreshToken: string;
+        user: {
+            _id: Types.ObjectId | undefined;
+            full_name: string;
+            email: string;
+            role: "SUPER_ADMIN" | "ADMIN" | "CUSTOMER" | "DRIVER";
+            status: "PENDING" | "ACTIVE" | "BLOCKED" | "REMOVED" | "DELETED";
+        };
     }>;
     verifyOtp: (payload: {
         user_id: string;
@@ -27,9 +33,7 @@ export declare const AuthServices: {
     resendOtp: (payload: {
         email: string;
         purpose: "REGISTER" | "RESET_PASSWORD";
-    }) => Promise<{
-        otp: string;
-    }>;
+    }) => Promise<null>;
     changePasswordIntoDB: (userData: JwtPayload, payload: IChangePassword) => Promise<null>;
     refreshToken: (token: string) => Promise<{
         accessToken: string;

@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken'; // removed JwtPayload import as we'll use your c
 
 // ** import local files
 import AppError from '../errors/app-error';
-import catchAsync from '../utils/catchAsync';
+import catchAsync from '../utils/catch-async';
 import User from '../app/v1/modules/user/user.model';
 import configs from '../config';
 import type { TUserRole } from '../app/v1/modules/user/user.interface';
@@ -71,8 +71,9 @@ export const auth = (...requiredRoles: TUserRole[]) => {
     }
 
     //  This assignment now works perfectly because types match exactly
-    req.user = decoded; 
+    req.user = decoded;
 
     next();
   });
 };
+

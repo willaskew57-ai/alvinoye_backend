@@ -1,6 +1,6 @@
 import httpStatus from 'http-status';
-import catchAsync from '../../../../utils/catchAsync';
-import sendResponse from '../../../../utils/sendResponse';
+import catchAsync from '../../../../utils/catch-async';
+import sendResponse from '../../../../utils/send-response';
 import { DriverServices } from './driver.service';
 const registerDriver = catchAsync(async (req, res) => {
     const user_id = req.user.user_id;

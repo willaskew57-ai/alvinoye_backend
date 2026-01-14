@@ -19,6 +19,7 @@ router
     validateRequest(AuthValidations.loginValidationSchema),
     AuthControllers.login
   );
+router.route('/logout').post(AuthControllers.logout);
 
 router
   .route('/verify-otp')

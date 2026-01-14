@@ -8,6 +8,7 @@ import User from '../user/user.model';
 import type { TUser } from '../user/user.interface';
 import { OtpServices } from './otp/otp.services';
 import type { Types } from 'mongoose';
+import { EmailHelpers } from '../../../../utils/email-helper';
 
 // ** ------- Register User Service -------
 const registerUser = async (payload: TUser) => {
@@ -30,8 +31,6 @@ const registerUser = async (payload: TUser) => {
     request_date: new Date(),
   };
 
-  console.log('Registering User:', userData);
-
   const newUser = await User.create(userData);
 
   if (!newUser) {
@@ -42,6 +41,13 @@ const registerUser = async (payload: TUser) => {
     newUser._id as Types.ObjectId,
     'REGISTER'
   );
+
+  // Send registration email
+  await EmailHelpers.sendRegisterEmail(newUser.email, {
+    user: newUser.full_name || 'User',
+    activationCode: otp,
+    activationCodeExpire: configs.otp_expiry_minutes || 5,
+  });
 
   const jwtPayload = {
     user_id: newUser._id.toString(),
@@ -64,7 +70,7 @@ const registerUser = async (payload: TUser) => {
     user: newUser,
     accessToken,
     refreshToken,
-    otp,
+    // otp,
   };
 };
 
@@ -102,7 +108,13 @@ const loginServices = async (payload: ILoginUser) => {
     throw new AppError(httpStatus.FORBIDDEN, 'Invalid credentials!');
   }
 
-  console.log('User logged in:', user);
+  const userData = {
+    _id: user._id,
+    full_name: user.full_name,
+    email: user.email,
+    role: user.role,
+    status: user.status,
+  };
 
   // JWT Payload including the role
   const jwtPayload = {
@@ -125,6 +137,7 @@ const loginServices = async (payload: ILoginUser) => {
   return {
     accessToken,
     refreshToken,
+    user: userData,
   };
 };
 
@@ -209,7 +222,14 @@ const resendOtp = async (payload: {
     purpose
   );
 
-  return { otp };
+  // Send resend OTP email
+  await EmailHelpers.sendOtpResendEmail(email, {
+    user: user.full_name || 'User',
+    code: otp,
+    expiresIn: configs.otp_expiry_minutes || 5,
+  });
+
+  return null;
 };
 
 /**
@@ -281,27 +301,28 @@ const forgetPassword = async (email: string) => {
 
   const user_id = user._id!;
 
-  // 2. Generate and Store OTP for RESET_PASSWORD purpose
   const otp = await OtpServices.generateAndSaveOtp(
-    user._id as Types.ObjectId,
+    user_id as Types.ObjectId,
     'RESET_PASSWORD'
   );
 
-  // 3. Generate a Reset Token (used for the final reset step)
+  // Send reset password email
+  await EmailHelpers.sendResetPasswordEmail(email, {
+    name: user.full_name || 'User',
+    verificationCode: otp,
+    verificationCodeExpire: configs.otp_expiry_minutes || 5,
+  });
+
   const jwtPayload = {
     user_id: user_id.toString(),
     role: user.role,
   };
-
-  console.log('JWT reset expireIn', configs.jwt_reset_expiresIn);
 
   const resetToken = createToken(
     jwtPayload,
     configs.jwt_reset_token as string,
     configs.jwt_reset_expiresIn as number
   );
-
-  console.log('Generated Reset Token:', resetToken);
 
   return {
     resetToken,
@@ -317,18 +338,15 @@ const resetPassword = async (
   payload: { id: string; new_password: string },
   token: string
 ) => {
-  // 1. Verify the Reset Token
   const decoded = verifyToken(
     token,
     configs.jwt_reset_token as string
   ) as JwtPayload;
 
-  // 2. Security Check: Ensure token matches the user being updated
   if (payload.id !== decoded.user_id) {
     throw new AppError(httpStatus.FORBIDDEN, 'Invalid reset request!');
   }
 
-  // 3. Check User Status
   const user = await User.findById(payload.id);
 
   if (

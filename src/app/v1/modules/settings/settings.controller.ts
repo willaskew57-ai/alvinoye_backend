@@ -1,9 +1,9 @@
 // settings.controller.ts
 import type { RequestHandler } from 'express';
 import httpStatus from 'http-status';
-import catchAsync from '../../../../utils/catchAsync';
+import catchAsync from '../../../../utils/catch-async';
 import { SettingsServices } from './settings.services';
-import sendResponse from '../../../../utils/sendResponse';
+import sendResponse from '../../../../utils/send-response';
 import AppError from '../../../../errors/app-error';
 
 const CreatePrivacyPolicy: RequestHandler = catchAsync(async (req, res) => {

@@ -3,8 +3,7 @@
 import type { AnyZodObject } from 'zod/v3';
 
 // ** import local files
-import catchAsync from '../utils/catchAsync';
-
+import catchAsync from '../utils/catch-async';
 
 const validateRequest = (schema: AnyZodObject) => {
   return catchAsync(async (req, res, next) => {

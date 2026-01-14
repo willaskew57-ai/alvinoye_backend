@@ -3,7 +3,7 @@ import httpStatus from 'http-status';
 import jwt from 'jsonwebtoken'; // removed JwtPayload import as we'll use your custom one
 // ** import local files
 import AppError from '../errors/app-error';
-import catchAsync from '../utils/catchAsync';
+import catchAsync from '../utils/catch-async';
 import User from '../app/v1/modules/user/user.model';
 import configs from '../config';
 export const auth = (...requiredRoles) => {

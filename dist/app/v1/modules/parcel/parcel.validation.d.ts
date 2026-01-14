@@ -17,12 +17,12 @@ export declare const ParcelValidations: {
         }, "strip", z.ZodTypeAny, {
             date: string;
             size: string;
-            time: string;
-            vehicle_type: string;
+            priority: string;
             parcel_name: string;
+            vehicle_type: string;
             weight: number;
             handover_location: string;
-            priority: string;
+            time: string;
             parcel_images: string[];
             receiver_name: string;
             receiver_phone: string;
@@ -30,12 +30,12 @@ export declare const ParcelValidations: {
         }, {
             date: string;
             size: string;
-            time: string;
-            vehicle_type: string;
+            priority: string;
             parcel_name: string;
+            vehicle_type: string;
             weight: number;
             handover_location: string;
-            priority: string;
+            time: string;
             receiver_name: string;
             receiver_phone: string;
             parcel_images?: string[] | undefined;
@@ -45,12 +45,12 @@ export declare const ParcelValidations: {
         body: {
             date: string;
             size: string;
-            time: string;
-            vehicle_type: string;
+            priority: string;
             parcel_name: string;
+            vehicle_type: string;
             weight: number;
             handover_location: string;
-            priority: string;
+            time: string;
             parcel_images: string[];
             receiver_name: string;
             receiver_phone: string;
@@ -60,12 +60,12 @@ export declare const ParcelValidations: {
         body: {
             date: string;
             size: string;
-            time: string;
-            vehicle_type: string;
+            priority: string;
             parcel_name: string;
+            vehicle_type: string;
             weight: number;
             handover_location: string;
-            priority: string;
+            time: string;
             receiver_name: string;
             receiver_phone: string;
             parcel_images?: string[] | undefined;
@@ -91,12 +91,12 @@ export declare const ParcelValidations: {
             status?: "Waiting" | "Pending" | "Ongoing" | "Completed" | "Rejected" | undefined;
             date?: string | undefined;
             size?: string | undefined;
-            time?: string | undefined;
-            vehicle_type?: string | undefined;
+            priority?: string | undefined;
             parcel_name?: string | undefined;
+            vehicle_type?: string | undefined;
             weight?: number | undefined;
             handover_location?: string | undefined;
-            priority?: string | undefined;
+            time?: string | undefined;
             parcel_images?: string[] | undefined;
             receiver_name?: string | undefined;
             receiver_phone?: string | undefined;
@@ -105,12 +105,12 @@ export declare const ParcelValidations: {
             status?: "Waiting" | "Pending" | "Ongoing" | "Completed" | "Rejected" | undefined;
             date?: string | undefined;
             size?: string | undefined;
-            time?: string | undefined;
-            vehicle_type?: string | undefined;
+            priority?: string | undefined;
             parcel_name?: string | undefined;
+            vehicle_type?: string | undefined;
             weight?: number | undefined;
             handover_location?: string | undefined;
-            priority?: string | undefined;
+            time?: string | undefined;
             parcel_images?: string[] | undefined;
             receiver_name?: string | undefined;
             receiver_phone?: string | undefined;
@@ -121,12 +121,12 @@ export declare const ParcelValidations: {
             status?: "Waiting" | "Pending" | "Ongoing" | "Completed" | "Rejected" | undefined;
             date?: string | undefined;
             size?: string | undefined;
-            time?: string | undefined;
-            vehicle_type?: string | undefined;
+            priority?: string | undefined;
             parcel_name?: string | undefined;
+            vehicle_type?: string | undefined;
             weight?: number | undefined;
             handover_location?: string | undefined;
-            priority?: string | undefined;
+            time?: string | undefined;
             parcel_images?: string[] | undefined;
             receiver_name?: string | undefined;
             receiver_phone?: string | undefined;
@@ -137,12 +137,12 @@ export declare const ParcelValidations: {
             status?: "Waiting" | "Pending" | "Ongoing" | "Completed" | "Rejected" | undefined;
             date?: string | undefined;
             size?: string | undefined;
-            time?: string | undefined;
-            vehicle_type?: string | undefined;
+            priority?: string | undefined;
             parcel_name?: string | undefined;
+            vehicle_type?: string | undefined;
             weight?: number | undefined;
             handover_location?: string | undefined;
-            priority?: string | undefined;
+            time?: string | undefined;
             parcel_images?: string[] | undefined;
             receiver_name?: string | undefined;
             receiver_phone?: string | undefined;

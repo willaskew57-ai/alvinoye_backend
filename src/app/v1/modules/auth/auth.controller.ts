@@ -1,13 +1,13 @@
 import httpStatus from 'http-status';
-import catchAsync from '../../../../utils/catchAsync';
+import catchAsync from '../../../../utils/catch-async';
 import configs from '../../../../config';
-import sendResponse from '../../../../utils/sendResponse';
+import sendResponse from '../../../../utils/send-response';
 import { AuthServices } from './auth.services';
 
 // ** Register user controller:
 const register = catchAsync(async (req, res) => {
   const result = await AuthServices.registerUser(req.body);
-  const { accessToken, refreshToken, user, otp } = result;
+  const { accessToken, refreshToken, user } = result;
 
   // set refresh token to cookie (Same as login flow)
   res.cookie('refresh_token', refreshToken, {
@@ -24,7 +24,6 @@ const register = catchAsync(async (req, res) => {
     data: {
       user,
       accessToken,
-      otp,
     },
   });
 });
@@ -32,14 +31,14 @@ const register = catchAsync(async (req, res) => {
 // login user:
 const login = catchAsync(async (req, res) => {
   const result = await AuthServices.loginServices(req.body);
-  const { accessToken, refreshToken } = result;
+  const { accessToken, refreshToken, user } = result;
 
   // set refresh token to cookie:
   res.cookie('refresh_token', refreshToken, {
     secure: configs.node_env === 'production',
     httpOnly: true,
     sameSite: 'none',
-    maxAge: 365 * 24 * 60 * 60 * 1000, // convert 365 days to milliseconds:
+    maxAge: 7 * 24 * 60 * 60 * 1000, // ✅ 7 days
   });
 
   sendResponse(res, {
@@ -48,7 +47,25 @@ const login = catchAsync(async (req, res) => {
     message: 'LoggedIn Successfully!!!',
     data: {
       accessToken,
+      refreshToken,
+      user,
     },
+  });
+});
+
+const logout = catchAsync(async (req, res) => {
+  res.cookie('refresh_token', '', {
+    httpOnly: true,
+    secure: configs.node_env === 'production',
+    sameSite: 'none',
+    expires: new Date(0),
+  });
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Logged out successfully!',
+    data: null,
   });
 });
 
@@ -122,7 +139,7 @@ const resetPassword = catchAsync(async (req, res) => {
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
-    success: false,
+    success: true,
     message: 'Password Reset Successfully!!!',
     data: result,
   });
@@ -131,6 +148,7 @@ const resetPassword = catchAsync(async (req, res) => {
 export const AuthControllers = {
   register,
   login,
+  logout,
   verifyOtp,
   resendOtp,
   changePassword,
