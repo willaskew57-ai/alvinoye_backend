@@ -3,8 +3,6 @@ import catchAsync from '../../../../utils/catch-async';
 import sendResponse from '../../../../utils/send-response';
 import { ParcelServices } from './parcel.service';
 
-// --- Core Parcel CRUD ---
-
 const createParcel = catchAsync(async (req, res) => {
   // Extract user_id from token (TUserPayload)
   const result = await ParcelServices.createParcelIntoDB(
@@ -27,6 +25,18 @@ const getAllParcels = catchAsync(async (req, res) => {
     statusCode: httpStatus.OK,
     success: true,
     message: 'Parcels retrieved successfully',
+    data: result,
+  });
+});
+
+const getMyParcels = catchAsync(async (req, res) => {
+  const { user_id, role } = req.user; 
+  const result = await ParcelServices.getMyParcelsFromDB(req.query, user_id, role);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'My parcels retrieved successfully',
     data: result,
   });
 });
@@ -58,7 +68,10 @@ const updateParcel = catchAsync(async (req, res) => {
 // --- Price Negotiation ---
 
 const proposePrice = catchAsync(async (req, res) => {
-  const { user_id, role } = req.user;
+  const { user_id, role } = (req as any).user;
+
+  console.log('user', role);
+
   const result = await ParcelServices.proposePriceInDB(user_id, role, req.body);
 
   sendResponse(res, {
@@ -69,16 +82,17 @@ const proposePrice = catchAsync(async (req, res) => {
   });
 });
 
-const respondToPrice = catchAsync(async (req, res) => {
-  const { id } = req.params; // This is the ID from parcel_price_requests table
-  const { status, rejection_reason } = req.body;
-  const user = req.user;
+const acceptPrice = catchAsync(async (req, res) => {
+  const { id } = req.params; // Request ID
+  const { status } = req.body;
+  const user = (req as any).user;
 
-  const result = await ParcelServices.respondToPriceProposalInDB(
+  console.log('user', user);
+
+  const result = await ParcelServices.acceptPriceProposalInDB(
     id as string,
     status,
-    user,
-    rejection_reason
+    user
   );
 
   sendResponse(res, {
@@ -89,14 +103,38 @@ const respondToPrice = catchAsync(async (req, res) => {
   });
 });
 
-const getPriceHistory = catchAsync(async (req, res) => {
-  const { id } = req.params; // parcel_id
-  const result = await ParcelServices.getPriceHistoryFromDB(id as string);
+/**
+ * Controller: Handles the "Reject reason" + "Suggested price" popup from Customer
+ */
+const rejectAndCounter = catchAsync(async (req, res) => {
+  const { id } = req.params; // Request ID of the Admin offer
+  const result = await ParcelServices.rejectAndCounterPriceInDB(
+    id as string,
+    req.body
+  );
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'Price history retrieved successfully',
+    message: 'Price rejected and counter-offer submitted successfully',
+    data: result,
+  });
+});
+
+/**
+ * Controller: Admin rejects customer price and sends final "Take it or leave it" price
+ */
+const adminFinalOffer = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const result = await ParcelServices.adminRejectAndFinalOfferInDB(
+    id as string,
+    req.body
+  );
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Customer counter rejected and final offer sent',
     data: result,
   });
 });
@@ -104,9 +142,11 @@ const getPriceHistory = catchAsync(async (req, res) => {
 export const ParcelControllers = {
   createParcel,
   getAllParcels,
+  getMyParcels,
   getSingleParcel,
   updateParcel,
   proposePrice,
-  respondToPrice,
-  getPriceHistory,
+  acceptPrice,
+  rejectAndCounter,
+  adminFinalOffer,
 };

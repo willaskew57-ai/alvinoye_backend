@@ -10,11 +10,12 @@ export const PARCEL_STATUS = {
 } as const;
 
 export const PRICE_STATUS = {
-  NOT_SET: 'NOT_SET',
-  PROPOSED: 'PROPOSED',
-  COUNTERED: 'COUNTERED',
-  ACCEPTED: 'ACCEPTED',
-  REJECTED: 'REJECTED',
+  NOT_SET: 'NOT_SET',           // Initial creation
+  PROPOSED: 'PROPOSED',         // Admin's first price
+  COUNTERED: 'COUNTERED',       // User's counter offer
+  FINAL_OFFER: 'FINAL_OFFER',   // Admin's second and last price offer
+  ACCEPTED: 'ACCEPTED',         // Negotiation successful
+  REJECTED: 'REJECTED',         // Negotiation failed
 } as const;
 
 export const PROPOSED_BY = {
@@ -29,10 +30,10 @@ export const PRICE_REQUEST_STATUS = {
 } as const;
 
 // Derived Types
-export type TParcelStatus = keyof typeof PARCEL_STATUS;
-export type TPriceStatus = keyof typeof PRICE_STATUS;
-export type TProposedBy = keyof typeof PROPOSED_BY;
-export type TPriceRequestStatus = keyof typeof PRICE_REQUEST_STATUS;
+export type TParcelStatus = (typeof PARCEL_STATUS)[keyof typeof PARCEL_STATUS];
+export type TPriceStatus = (typeof PRICE_STATUS)[keyof typeof PRICE_STATUS];
+export type TProposedBy = (typeof PROPOSED_BY)[keyof typeof PROPOSED_BY];
+export type TPriceRequestStatus = (typeof PRICE_REQUEST_STATUS)[keyof typeof PRICE_REQUEST_STATUS];
 
 export interface TParcel extends Document {
   parcel_id: string;
@@ -50,6 +51,7 @@ export interface TParcel extends Document {
   receiver_phone: string;
   sender_remarks?: string;
   status: TParcelStatus;
+  // Price Negotiation
   final_price?: number | null;
   price_status: TPriceStatus;
   accepted_by?: Types.ObjectId | null;
@@ -60,8 +62,9 @@ export interface TParcelPriceRequest extends Document {
   parcel_id: Types.ObjectId;
   proposed_by: TProposedBy;
   proposed_price: number;
-  message?: string;
+  message?: string;             // Message or reason for counter/rejection
   rejection_reason?: string | null;
+  is_final_offer: boolean;      // To identify the "Final Price" from Admin
   status: TPriceRequestStatus;
   decided_at?: Date;
 }

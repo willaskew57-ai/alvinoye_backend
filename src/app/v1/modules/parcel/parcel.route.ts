@@ -15,7 +15,7 @@ router.post(
 );
 
 router.get(
-  '/get',
+  '/get-all',
   auth(
     USER_ROLE.SUPER_ADMIN,
     USER_ROLE.ADMIN,
@@ -23,6 +23,12 @@ router.get(
     USER_ROLE.CUSTOMER
   ),
   ParcelControllers.getAllParcels
+);
+
+router.get(
+  '/get-my-parcels',
+  auth(USER_ROLE.CUSTOMER, USER_ROLE.DRIVER),
+  ParcelControllers.getMyParcels
 );
 
 router.get(
@@ -43,29 +49,38 @@ router.patch(
   ParcelControllers.updateParcel
 );
 
-// --- Price Negotiation Routes ---
+// ** ------- Negotiation Flow -------
 
-// Admin or Customer proposes a price
+// Admin sets first price
 router.post(
   '/propose-price',
-  auth(USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN, USER_ROLE.CUSTOMER),
+  auth(USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN),
   validateRequest(ParcelValidations.createPriceRequestValidationSchema),
   ParcelControllers.proposePrice
 );
 
-// Accept or Reject a specific proposal (id = price_request_id)
+// Customer Reject & Counter
 router.patch(
-  '/respond-price/:id',
-  auth(USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN, USER_ROLE.CUSTOMER),
-  validateRequest(ParcelValidations.respondPriceRequestValidationSchema),
-  ParcelControllers.respondToPrice
+  '/reject-and-counter/:id',
+  auth(USER_ROLE.CUSTOMER),
+  validateRequest(ParcelValidations.customerRejectAndCounterValidationSchema),
+  ParcelControllers.rejectAndCounter
 );
 
-// Get the full negotiation log for a specific parcel (id = parcel_id)
-router.get(
-  '/price-history/:id',
-  auth(USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN, USER_ROLE.CUSTOMER),
-  ParcelControllers.getPriceHistory
+// Admin Reject & Final Price
+router.patch(
+  '/final-offer/:id',
+  auth(USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN),
+  validateRequest(ParcelValidations.adminRejectAndFinalOfferValidationSchema),
+  ParcelControllers.adminFinalOffer
+);
+
+// Simple Accept or Reject (Final choice)
+router.patch(
+  '/accept-price/:id',
+  auth(USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.CUSTOMER),
+  validateRequest(ParcelValidations.acceptPriceRequestValidationSchema),
+  ParcelControllers.acceptPrice
 );
 
 export const ParcelRoutes = router;
