@@ -16,6 +16,7 @@ import {
 } from './parcel.interface';
 import type { TUserPayload } from '../../../../interfaces';
 import { generateParcelId } from './parcel.utils';
+import { getIO } from '../../../../socket';
 
 // ** ----- create parcel -----
 const createParcelIntoDB = async (userId: string, payload: TParcel) => {
@@ -28,6 +29,10 @@ const createParcelIntoDB = async (userId: string, payload: TParcel) => {
   };
 
   const result = await Parcel.create(parcelData);
+
+  const io = getIO();
+  io.emit('new-parcel', result);
+
   return result;
 };
 
