@@ -6,6 +6,8 @@ import colors from 'colors';
 import app from './app';
 import configs from './config';
 import { connectDB } from './db';
+import { initSocket } from './socket';
+
 
 let server: Server;
 
@@ -18,6 +20,9 @@ async function main() {
         colors.green(`The Server is running on ${configs.port}`).bold
       );
     });
+
+     // 🔥 initialize socket after server starts
+    initSocket(server);
   } catch (err) {
     console.log(err);
   }

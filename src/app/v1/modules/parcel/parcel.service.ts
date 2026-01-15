@@ -268,8 +268,6 @@ const acceptPriceProposalInDB = async (
         final_price: priceRequest.proposed_price,
         price_status: PRICE_STATUS.ACCEPTED,
         status: PARCEL_STATUS.PENDING,
-        accepted_by: user.user_id, // The ID of the person who accepted the price
-        accepted_at: new Date(),
       },
       { session, new: true }
     );
