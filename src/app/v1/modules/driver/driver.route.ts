@@ -27,4 +27,23 @@ router.get(
 
 router.get('/get/:id', DriverController.getSingleDriver);
 
+router.post(
+  '/accept-parcel/:id',
+  auth(USER_ROLE.DRIVER),
+  DriverController.acceptParcel
+);
+
+router.post(
+  '/parcel/verify-otp',
+  auth(USER_ROLE.DRIVER),
+  validateRequest(DriverValidation.verifyParcelOtpValidationSchema),
+  DriverController.verifyParcelOtp
+);
+
+router.patch(
+  '/parcel/:id/complete',
+  auth(USER_ROLE.DRIVER),
+  DriverController.completeParcel
+);
+
 export const DriverRoutes = router;

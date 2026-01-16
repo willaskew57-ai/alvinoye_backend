@@ -50,6 +50,7 @@ const parcelSchema = new Schema<TParcel>(
       default: null,
     },
     accepted_at: { type: Date, default: null },
+    completed_at: { type: Date, default: null },
   },
   {
     timestamps: true,

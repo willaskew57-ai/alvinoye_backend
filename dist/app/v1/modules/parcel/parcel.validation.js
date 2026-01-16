@@ -1,19 +1,23 @@
 import { z } from 'zod/v3';
-// --- Reusable Enums ---
-const ParcelStatus = z.enum(['Waiting', 'Pending', 'Ongoing', 'Completed', 'Rejected']);
-const PriceStatus = z.enum(['NotSet', 'Proposed', 'Countered', 'Accepted', 'Rejected']);
-const ProposedBy = z.enum(['Admin', 'Customer']);
-const PriceRequestStatus = z.enum(['Pending', 'Accepted', 'Rejected']);
+import { PARCEL_STATUS, PRICE_REQUEST_STATUS, PRICE_STATUS, } from './parcel.interface';
+// --- Reusable Enum Validations based on your Interface ---
+const ParcelStatusEnum = z.nativeEnum(PARCEL_STATUS);
+const PriceStatusEnum = z.nativeEnum(PRICE_STATUS);
 // --- Schemas ---
 const createParcelValidationSchema = z.object({
     body: z.object({
-        parcel_name: z.string({ required_error: 'Parcel name is required' }).min(3).max(100),
+        parcel_name: z
+            .string({ required_error: 'Parcel name is required' })
+            .min(3)
+            .max(100),
         size: z.string({ required_error: 'Size is required' }),
         vehicle_type: z.string({ required_error: 'Vehicle type is required' }),
         weight: z.number({ required_error: 'Weight is required' }).positive(),
-        handover_location: z.string({ required_error: 'Handover location is required' }),
+        handover_location: z.string({
+            required_error: 'Handover location is required',
+        }),
         priority: z.string({ required_error: 'Priority is required' }),
-        date: z.string({ required_error: 'Date is required' }), // Validates as string, format 'YYYY-MM-DD'
+        date: z.string({ required_error: 'Date is required' }),
         time: z.string({ required_error: 'Time is required' }),
         parcel_images: z.array(z.string().url()).optional().default([]),
         receiver_name: z.string({ required_error: 'Receiver name is required' }),
@@ -37,42 +41,56 @@ const updateParcelValidationSchema = z.object({
         sender_remarks: z.string().optional(),
     }),
 });
-/**
- * Validation for when an Admin or Customer proposes a price
- */
 const createPriceRequestValidationSchema = z.object({
     body: z.object({
         parcel_id: z.string({ required_error: 'Parcel ID (ObjectId) is required' }),
-        proposed_price: z.number({ required_error: 'Proposed price is required' }).positive(),
-        message: z.string().max(500, 'Message cannot exceed 500 characters').optional(),
+        proposed_price: z
+            .number({ required_error: 'Proposed price is required' })
+            .positive(),
+        message: z.string().max(500).optional(),
     }),
 });
-/**
- * Validation for accepting or rejecting a price proposal
- */
-const respondPriceRequestValidationSchema = z.object({
+const customerRejectAndCounterValidationSchema = z.object({
     body: z.object({
-        status: z.enum(['ACCEPTED', 'REJECTED'], {
-            required_error: 'Status must be either ACCEPTED or REJECTED',
+        parcel_id: z.string({ required_error: 'Parcel ID is required' }),
+        rejection_reason: z.string({
+            required_error: 'Rejection reason is required',
         }),
-        rejection_reason: z.string().max(500).optional(),
+        suggested_price: z
+            .number({ required_error: 'Suggested price is required' })
+            .positive(),
     }),
 });
-/**
- * Validation for Admin to manually override status or final price
- */
+const adminRejectAndFinalOfferValidationSchema = z.object({
+    body: z.object({
+        parcel_id: z.string({ required_error: 'Parcel ID is required' }),
+        final_price: z
+            .number({ required_error: 'Final price is required' })
+            .positive(),
+        message: z.string().optional(),
+    }),
+});
+const acceptPriceRequestValidationSchema = z.object({
+    body: z.object({
+        status: z.enum([PRICE_REQUEST_STATUS.ACCEPTED], {
+            required_error: 'Status must be either ACCEPTED',
+        }),
+    }),
+});
 const adminUpdateParcelValidationSchema = z.object({
     body: z.object({
-        status: ParcelStatus.optional(),
+        status: ParcelStatusEnum.optional(),
         final_price: z.number().positive().optional(),
-        price_status: PriceStatus.optional(),
+        price_status: PriceStatusEnum.optional(),
     }),
 });
 export const ParcelValidations = {
     createParcelValidationSchema,
     updateParcelValidationSchema,
     createPriceRequestValidationSchema,
-    respondPriceRequestValidationSchema,
+    customerRejectAndCounterValidationSchema,
+    adminRejectAndFinalOfferValidationSchema,
+    acceptPriceRequestValidationSchema,
     adminUpdateParcelValidationSchema,
 };
 //# sourceMappingURL=parcel.validation.js.map

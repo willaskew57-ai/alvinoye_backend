@@ -347,5 +347,27 @@ export declare const DriverValidation: {
             };
         };
     }>;
+    verifyParcelOtpValidationSchema: z.ZodObject<{
+        body: z.ZodObject<{
+            parcel_id: z.ZodString;
+            otp: z.ZodString;
+        }, "strip", z.ZodTypeAny, {
+            otp: string;
+            parcel_id: string;
+        }, {
+            otp: string;
+            parcel_id: string;
+        }>;
+    }, "strip", z.ZodTypeAny, {
+        body: {
+            otp: string;
+            parcel_id: string;
+        };
+    }, {
+        body: {
+            otp: string;
+            parcel_id: string;
+        };
+    }>;
 };
 //# sourceMappingURL=driver.validation.d.ts.map

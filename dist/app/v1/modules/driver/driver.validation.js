@@ -33,8 +33,17 @@ const createDriverWithVehicleValidationSchema = z.object({
         }),
     }),
 });
+const verifyParcelOtpValidationSchema = z.object({
+    body: z.object({
+        parcel_id: z.string({ required_error: 'Parcel ID is required' }),
+        otp: z
+            .string({ required_error: 'OTP is required' })
+            .length(6, 'OTP must be exactly 6 digits'),
+    }),
+});
 export const DriverValidation = {
     driverInfoValidationSchema,
     createDriverWithVehicleValidationSchema,
+    verifyParcelOtpValidationSchema
 };
 //# sourceMappingURL=driver.validation.js.map

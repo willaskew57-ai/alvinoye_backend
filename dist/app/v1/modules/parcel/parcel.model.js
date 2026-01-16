@@ -41,13 +41,14 @@ const parcelSchema = new Schema({
         default: null,
     },
     accepted_at: { type: Date, default: null },
+    completed_at: { type: Date, default: null },
 }, {
     timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
 });
 /**
- * Virtual Populate: Links all price requests to this Parcel
+ * Virtual Populate: Links all price history to this Parcel
  */
 parcelSchema.virtual('price_requests', {
     ref: 'ParcelPriceRequest',
@@ -70,6 +71,10 @@ const priceRequestSchema = new Schema({
     proposed_price: { type: Number, required: true },
     rejection_reason: { type: String, default: null },
     message: { type: String },
+    is_final_offer: {
+        type: Boolean,
+        default: false, // Set to true when Admin rejects counter and gives last price
+    },
     status: {
         type: String,
         enum: Object.values(PRICE_REQUEST_STATUS),

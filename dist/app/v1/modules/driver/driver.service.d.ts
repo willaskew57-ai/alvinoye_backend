@@ -1,5 +1,5 @@
 import type { TDriver } from './driver.interface';
-import mongoose from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 import type { TVehicle } from '../vehicle/vehicle.interface';
 export declare const DriverServices: {
     addDriverInfoIntoDB: (payload: {
@@ -7,14 +7,14 @@ export declare const DriverServices: {
         vehicle: TVehicle;
     }, userIdFromToken: string) => Promise<{
         driver: (mongoose.Document<unknown, {}, TDriver, {}, mongoose.DefaultSchemaOptions> & TDriver & {
-            _id: mongoose.Types.ObjectId;
+            _id: Types.ObjectId;
         } & {
             __v: number;
         } & {
             id: string;
         }) | undefined;
         vehicle: (mongoose.Document<unknown, {}, TVehicle, {}, mongoose.DefaultSchemaOptions> & TVehicle & {
-            _id: mongoose.Types.ObjectId;
+            _id: Types.ObjectId;
         } & {
             __v: number;
         } & {
@@ -29,7 +29,7 @@ export declare const DriverServices: {
             totalPages: number;
         };
         data: (mongoose.Document<unknown, {}, import("../user/user.interface").TUser, {}, mongoose.DefaultSchemaOptions> & import("../user/user.interface").TUser & Required<{
-            _id: mongoose.Types.ObjectId;
+            _id: Types.ObjectId;
         }> & {
             __v: number;
         } & {
@@ -37,11 +37,28 @@ export declare const DriverServices: {
         })[];
     }>;
     getSingleDriverFromDB: (id: string) => Promise<mongoose.Document<unknown, {}, import("../user/user.interface").TUser, {}, mongoose.DefaultSchemaOptions> & import("../user/user.interface").TUser & Required<{
-        _id: mongoose.Types.ObjectId;
+        _id: Types.ObjectId;
     }> & {
         __v: number;
     } & {
         id: string;
+    }>;
+    acceptParcelFromDB: (parcelId: string, driverIdFromToken: string) => Promise<{
+        message: string;
+        parcel_id: Types.ObjectId;
+        status: "ONGOING";
+    }>;
+    verifyParcelOtpFromDB: (payload: {
+        parcel_id: string;
+        otp: string;
+    }) => Promise<{
+        message: string;
+        parcel_id: Types.ObjectId;
+    }>;
+    completeParcelFromDB: (parcel_id: string, driver_id: string) => Promise<{
+        message: string;
+        parcel_id: Types.ObjectId;
+        status: "COMPLETED";
     }>;
 };
 //# sourceMappingURL=driver.service.d.ts.map

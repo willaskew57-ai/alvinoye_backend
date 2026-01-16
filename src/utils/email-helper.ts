@@ -2,6 +2,7 @@ import httpStatus from 'http-status';
 import AppError from '../errors/app-error';
 import { sendEmail } from './send-email';
 import { otpResendTemp, resetPassEmailTemp, registerEmailTemp } from '../mail';
+import { parcelOtpEmailTemp } from '../mail/parcel-otp-temp';
 
 // --- Interfaces for the Helpers ---
 interface IOTPData {
@@ -22,6 +23,12 @@ interface IResetPassData {
   name: string;
   verificationCode: string;
   verificationCodeExpire: string | number;
+}
+
+interface IParcelOtpEmailData {
+  email: string;
+  name: string;
+  verificationCode: string;
 }
 
 // ** --- Helper Functions ---
@@ -92,8 +99,28 @@ const sendResetPasswordEmail = async (
   }
 };
 
+const sendParcelOtpEmail = async (data: IParcelOtpEmailData): Promise<void> => {
+  try {
+    await sendEmail({
+      email: data.email,
+      subject: 'Parcel Pickup Verification Code',
+      html: parcelOtpEmailTemp({
+        name: data.name,
+        verificationCode: data.verificationCode,
+      }),
+    });
+  } catch (error) {
+    console.error('Parcel OTP Email Error:', error);
+    throw new AppError(
+      httpStatus.INTERNAL_SERVER_ERROR,
+      'Failed to send parcel OTP email'
+    );
+  }
+};
+
 export const EmailHelpers = {
   sendOtpResendEmail,
   sendRegisterEmail,
   sendResetPasswordEmail,
+  sendParcelOtpEmail
 };

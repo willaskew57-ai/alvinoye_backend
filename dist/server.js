@@ -5,6 +5,7 @@ import colors from 'colors';
 import app from './app';
 import configs from './config';
 import { connectDB } from './db';
+import { initSocket } from './socket';
 let server;
 async function main() {
     try {
@@ -13,6 +14,8 @@ async function main() {
         server = app.listen(configs.port, () => {
             console.log(colors.green(`The Server is running on ${configs.port}`).bold);
         });
+        // 🔥 initialize socket after server starts
+        initSocket(server);
     }
     catch (err) {
         console.log(err);

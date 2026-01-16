@@ -3,7 +3,7 @@ import configs from '../../../../config';
 import AppError from '../../../../errors/app-error';
 import { createToken, verifyToken } from './auth.utils';
 import User from '../user/user.model';
-import { OtpServices } from './otp/otp.services';
+import { OtpServices } from '../otp/otp.services';
 import { EmailHelpers } from '../../../../utils/email-helper';
 // ** ------- Register User Service -------
 const registerUser = async (payload) => {
@@ -24,7 +24,10 @@ const registerUser = async (payload) => {
     if (!newUser) {
         throw new AppError(httpStatus.BAD_REQUEST, 'Failed to register user');
     }
-    const otp = await OtpServices.generateAndSaveOtp(newUser._id, 'REGISTER');
+    const otp = await OtpServices.generateAndSaveOtp({
+        user_id: newUser._id,
+        purpose: 'REGISTER',
+    });
     // Send registration email
     await EmailHelpers.sendRegisterEmail(newUser.email, {
         user: newUser.full_name || 'User',
@@ -116,7 +119,11 @@ const changePasswordIntoDB = async (userData, payload) => {
  */
 const verifyOtp = async (payload) => {
     const { user_id, otp, purpose } = payload;
-    await OtpServices.verifyOtpFromDB(user_id, otp, purpose);
+    await OtpServices.verifyOtpFromDB({
+        user_id: user_id,
+        inputOtp: otp,
+        purpose,
+    });
     if (purpose === 'REGISTER') {
         await User.findByIdAndUpdate(user_id, { is_verified: true });
     }
@@ -127,13 +134,14 @@ const verifyOtp = async (payload) => {
  */
 const resendOtp = async (payload) => {
     const { email, purpose } = payload;
-    // 1. Find User
     const user = await User.findOne({ email });
     if (!user) {
         throw new AppError(httpStatus.NOT_FOUND, 'User not found with this email!');
     }
-    // 2. Generate and Save new OTP
-    const otp = await OtpServices.generateAndSaveOtp(user._id, purpose);
+    const otp = await OtpServices.generateAndSaveOtp({
+        user_id: user._id,
+        purpose,
+    });
     // Send resend OTP email
     await EmailHelpers.sendOtpResendEmail(email, {
         user: user.full_name || 'User',
@@ -180,7 +188,10 @@ const forgetPassword = async (email) => {
         throw new AppError(httpStatus.NOT_FOUND, 'No active account found with this email!');
     }
     const user_id = user._id;
-    const otp = await OtpServices.generateAndSaveOtp(user_id, 'RESET_PASSWORD');
+    const otp = await OtpServices.generateAndSaveOtp({
+        user_id: user_id,
+        purpose: 'RESET_PASSWORD',
+    });
     // Send reset password email
     await EmailHelpers.sendResetPasswordEmail(email, {
         name: user.full_name || 'User',

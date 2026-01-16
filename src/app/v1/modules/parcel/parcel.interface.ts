@@ -56,6 +56,7 @@ export interface TParcel extends Document {
   price_status: TPriceStatus;
   accepted_by?: Types.ObjectId | null;
   accepted_at?: Date | null;
+  completed_at?: Date | null;
 }
 
 export interface TParcelPriceRequest extends Document {

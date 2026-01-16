@@ -2,9 +2,14 @@ import httpStatus from 'http-status';
 import AppError from '../../../../errors/app-error';
 import { Driver } from './driver.model';
 import QueryBuilder from '../../../../builders/QueryBuilder';
-import mongoose from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 import { Vehicle } from '../vehicle/vehicle.model';
 import User from '../user/user.model';
+import { Parcel } from '../parcel/parcel.model';
+import { PARCEL_STATUS } from '../parcel/parcel.interface';
+import { OtpServices } from '../otp/otp.services';
+import Otp from '../otp/otp.model';
+import { EmailHelpers } from '../../../../utils/email-helper';
 const addDriverInfoIntoDB = async (payload, userIdFromToken // Add this parameter
 ) => {
     const { driverInfo, vehicle } = payload;
@@ -151,9 +156,113 @@ const getSingleDriverFromDB = async (id) => {
     }
     return result;
 };
+const acceptParcelFromDB = async (parcelId, driverIdFromToken) => {
+    const session = await mongoose.startSession();
+    try {
+        session.startTransaction();
+        const parcel = await Parcel.findById(parcelId).session(session);
+        if (!parcel) {
+            throw new AppError(httpStatus.NOT_FOUND, 'Parcel not found');
+        }
+        if (parcel.status !== PARCEL_STATUS.PENDING) {
+            throw new AppError(httpStatus.BAD_REQUEST, 'Parcel is not available for acceptance');
+        }
+        parcel.status = PARCEL_STATUS.ONGOING;
+        parcel.accepted_by = new Types.ObjectId(driverIdFromToken);
+        parcel.accepted_at = new Date();
+        await parcel.save({ session });
+        const parcelOwner = await User.findById(parcel.user_id).session(session);
+        if (!parcelOwner) {
+            throw new AppError(httpStatus.NOT_FOUND, 'Parcel owner not found');
+        }
+        const otp = await OtpServices.generateAndSaveOtp({
+            parcel_id: parcel._id,
+            purpose: 'PARCEL',
+        });
+        await EmailHelpers.sendParcelOtpEmail({
+            email: parcelOwner.email,
+            name: parcelOwner.full_name,
+            verificationCode: otp,
+        });
+        await session.commitTransaction();
+        await session.endSession();
+        return {
+            message: 'Parcel accepted successfully',
+            parcel_id: parcel._id,
+            status: parcel.status,
+        };
+    }
+    catch (error) {
+        await session.abortTransaction();
+        await session.endSession();
+        throw new AppError(httpStatus.BAD_REQUEST, error.message || 'Failed to accept parcel');
+    }
+};
+const verifyParcelOtpFromDB = async (payload) => {
+    const { parcel_id, otp } = payload;
+    const parcel = await Parcel.findById(parcel_id);
+    if (!parcel) {
+        throw new AppError(httpStatus.NOT_FOUND, 'Parcel not found');
+    }
+    if (parcel.status !== PARCEL_STATUS.ONGOING) {
+        throw new AppError(httpStatus.BAD_REQUEST, 'Parcel is not in ONGOING state');
+    }
+    // Verify OTP (no expiry for parcel)
+    await OtpServices.verifyOtpFromDB({
+        parcel_id: parcel._id.toString(),
+        inputOtp: otp,
+        purpose: 'PARCEL',
+    });
+    return {
+        message: 'Parcel OTP verified successfully',
+        parcel_id: parcel._id,
+    };
+};
+const completeParcelFromDB = async (parcel_id, driver_id) => {
+    const session = await mongoose.startSession();
+    try {
+        session.startTransaction();
+        const parcel = await Parcel.findById(parcel_id).session(session);
+        if (!parcel) {
+            throw new AppError(httpStatus.NOT_FOUND, 'Parcel not found');
+        }
+        if (parcel.status !== PARCEL_STATUS.ONGOING) {
+            throw new AppError(httpStatus.BAD_REQUEST, 'Only ongoing parcels can be completed');
+        }
+        if (parcel.accepted_by?.toString() !== driver_id) {
+            throw new AppError(httpStatus.FORBIDDEN, 'You are not authorized to complete this parcel');
+        }
+        const otpUsed = await Otp.findOne({
+            parcel: parcel._id,
+            purpose: 'PARCEL',
+            is_used: true,
+        }).session(session);
+        if (!otpUsed) {
+            throw new AppError(httpStatus.BAD_REQUEST, 'Parcel OTP not verified yet');
+        }
+        parcel.status = PARCEL_STATUS.COMPLETED;
+        parcel.completed_at = new Date();
+        await parcel.save({ session });
+        await session.commitTransaction();
+        await session.endSession();
+        return {
+            message: 'Parcel completed successfully',
+            parcel_id: parcel._id,
+            status: parcel.status,
+        };
+    }
+    catch (error) {
+        await session.abortTransaction();
+        await session.endSession();
+        throw new AppError(httpStatus.BAD_REQUEST, error.message || 'Failed to complete parcel');
+    }
+};
 export const DriverServices = {
     addDriverInfoIntoDB,
     getAllDriversFromDB,
     getSingleDriverFromDB,
+    acceptParcelFromDB,
+    verifyParcelOtpFromDB,
+    completeParcelFromDB,
 };
 //# sourceMappingURL=driver.service.js.map

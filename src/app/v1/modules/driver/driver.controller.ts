@@ -39,8 +39,63 @@ const getSingleDriver = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+// ** ------------- parcel related api ------------- ** //
+const acceptParcel = catchAsync(async (req, res) => {
+  const driverId = req.user.user_id;
+  const result = await DriverServices.acceptParcelFromDB(
+    req.params.id as string,
+    driverId
+  );
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Parcel accepted successfully',
+    data: result,
+  });
+});
+
+const verifyParcelOtp = catchAsync(async (req, res) => {
+  const { parcel_id, otp } = req.body;
+
+  const result = await DriverServices.verifyParcelOtpFromDB({
+    parcel_id,
+    otp,
+  });
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Parcel OTP verified successfully',
+    data: result,
+  });
+});
+
+/**
+ * Complete Parcel (after OTP verification)
+ */
+const completeParcel = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const driver_id = req.user.user_id;
+
+  const result = await DriverServices.completeParcelFromDB(
+    id as string,
+    driver_id
+  );
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Parcel completed successfully',
+    data: result,
+  });
+});
+
 export const DriverController = {
   registerDriver,
   getAllDrivers,
   getSingleDriver,
+  acceptParcel,
+  verifyParcelOtp,
+  completeParcel,
 };

@@ -171,53 +171,115 @@ export declare const ParcelValidations: {
             message?: string | undefined;
         };
     }>;
-    respondPriceRequestValidationSchema: z.ZodObject<{
+    customerRejectAndCounterValidationSchema: z.ZodObject<{
         body: z.ZodObject<{
-            status: z.ZodEnum<["ACCEPTED", "REJECTED"]>;
-            rejection_reason: z.ZodOptional<z.ZodString>;
+            parcel_id: z.ZodString;
+            rejection_reason: z.ZodString;
+            suggested_price: z.ZodNumber;
         }, "strip", z.ZodTypeAny, {
-            status: "REJECTED" | "ACCEPTED";
-            rejection_reason?: string | undefined;
+            parcel_id: string;
+            rejection_reason: string;
+            suggested_price: number;
         }, {
-            status: "REJECTED" | "ACCEPTED";
-            rejection_reason?: string | undefined;
+            parcel_id: string;
+            rejection_reason: string;
+            suggested_price: number;
         }>;
     }, "strip", z.ZodTypeAny, {
         body: {
-            status: "REJECTED" | "ACCEPTED";
-            rejection_reason?: string | undefined;
+            parcel_id: string;
+            rejection_reason: string;
+            suggested_price: number;
         };
     }, {
         body: {
-            status: "REJECTED" | "ACCEPTED";
-            rejection_reason?: string | undefined;
+            parcel_id: string;
+            rejection_reason: string;
+            suggested_price: number;
+        };
+    }>;
+    adminRejectAndFinalOfferValidationSchema: z.ZodObject<{
+        body: z.ZodObject<{
+            parcel_id: z.ZodString;
+            final_price: z.ZodNumber;
+            message: z.ZodOptional<z.ZodString>;
+        }, "strip", z.ZodTypeAny, {
+            parcel_id: string;
+            final_price: number;
+            message?: string | undefined;
+        }, {
+            parcel_id: string;
+            final_price: number;
+            message?: string | undefined;
+        }>;
+    }, "strip", z.ZodTypeAny, {
+        body: {
+            parcel_id: string;
+            final_price: number;
+            message?: string | undefined;
+        };
+    }, {
+        body: {
+            parcel_id: string;
+            final_price: number;
+            message?: string | undefined;
+        };
+    }>;
+    acceptPriceRequestValidationSchema: z.ZodObject<{
+        body: z.ZodObject<{
+            status: z.ZodEnum<["ACCEPTED"]>;
+        }, "strip", z.ZodTypeAny, {
+            status: "ACCEPTED";
+        }, {
+            status: "ACCEPTED";
+        }>;
+    }, "strip", z.ZodTypeAny, {
+        body: {
+            status: "ACCEPTED";
+        };
+    }, {
+        body: {
+            status: "ACCEPTED";
         };
     }>;
     adminUpdateParcelValidationSchema: z.ZodObject<{
         body: z.ZodObject<{
-            status: z.ZodOptional<z.ZodEnum<["Waiting", "Pending", "Ongoing", "Completed", "Rejected"]>>;
+            status: z.ZodOptional<z.ZodNativeEnum<{
+                readonly WAITING: "WAITING";
+                readonly PENDING: "PENDING";
+                readonly ONGOING: "ONGOING";
+                readonly COMPLETED: "COMPLETED";
+                readonly REJECTED: "REJECTED";
+            }>>;
             final_price: z.ZodOptional<z.ZodNumber>;
-            price_status: z.ZodOptional<z.ZodEnum<["NotSet", "Proposed", "Countered", "Accepted", "Rejected"]>>;
+            price_status: z.ZodOptional<z.ZodNativeEnum<{
+                readonly NOT_SET: "NOT_SET";
+                readonly PROPOSED: "PROPOSED";
+                readonly COUNTERED: "COUNTERED";
+                readonly FINAL_OFFER: "FINAL_OFFER";
+                readonly ACCEPTED: "ACCEPTED";
+                readonly REJECTED: "REJECTED";
+            }>>;
         }, "strip", z.ZodTypeAny, {
-            status?: "Waiting" | "Pending" | "Ongoing" | "Completed" | "Rejected" | undefined;
+            status?: "PENDING" | "WAITING" | "ONGOING" | "COMPLETED" | "REJECTED" | undefined;
             final_price?: number | undefined;
-            price_status?: "Rejected" | "NotSet" | "Proposed" | "Countered" | "Accepted" | undefined;
+            price_status?: "REJECTED" | "NOT_SET" | "PROPOSED" | "COUNTERED" | "FINAL_OFFER" | "ACCEPTED" | undefined;
         }, {
-            status?: "Waiting" | "Pending" | "Ongoing" | "Completed" | "Rejected" | undefined;
+            status?: "PENDING" | "WAITING" | "ONGOING" | "COMPLETED" | "REJECTED" | undefined;
             final_price?: number | undefined;
-            price_status?: "Rejected" | "NotSet" | "Proposed" | "Countered" | "Accepted" | undefined;
+            price_status?: "REJECTED" | "NOT_SET" | "PROPOSED" | "COUNTERED" | "FINAL_OFFER" | "ACCEPTED" | undefined;
         }>;
     }, "strip", z.ZodTypeAny, {
         body: {
-            status?: "Waiting" | "Pending" | "Ongoing" | "Completed" | "Rejected" | undefined;
+            status?: "PENDING" | "WAITING" | "ONGOING" | "COMPLETED" | "REJECTED" | undefined;
             final_price?: number | undefined;
-            price_status?: "Rejected" | "NotSet" | "Proposed" | "Countered" | "Accepted" | undefined;
+            price_status?: "REJECTED" | "NOT_SET" | "PROPOSED" | "COUNTERED" | "FINAL_OFFER" | "ACCEPTED" | undefined;
         };
     }, {
         body: {
-            status?: "Waiting" | "Pending" | "Ongoing" | "Completed" | "Rejected" | undefined;
+            status?: "PENDING" | "WAITING" | "ONGOING" | "COMPLETED" | "REJECTED" | undefined;
             final_price?: number | undefined;
-            price_status?: "Rejected" | "NotSet" | "Proposed" | "Countered" | "Accepted" | undefined;
+            price_status?: "REJECTED" | "NOT_SET" | "PROPOSED" | "COUNTERED" | "FINAL_OFFER" | "ACCEPTED" | undefined;
         };
     }>;
 };
