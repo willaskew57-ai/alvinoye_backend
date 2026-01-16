@@ -17,8 +17,6 @@ const createParcelIntoDB = async (userId, payload) => {
         price_status: 'NOT_SET',
     };
     const result = await Parcel.create(parcelData);
-    const io = getIO();
-    io.emit('new-parcel', result);
     return result;
 };
 const getAllParcelsFromDB = async (query, user) => {

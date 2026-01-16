@@ -1,4 +1,9 @@
 import { Types, Document } from 'mongoose';
+export interface TLocation {
+    address: string;
+    latitude: number;
+    longitude: number;
+}
 export declare const PARCEL_STATUS: {
     readonly WAITING: "WAITING";
     readonly PENDING: "PENDING";
@@ -34,20 +39,20 @@ export interface TParcel extends Document {
     size: string;
     vehicle_type: string;
     weight: number;
-    handover_location: string;
+    handover_location: TLocation;
     priority: string;
     date: string;
     time: string;
     parcel_images: string[];
     receiver_name: string;
     receiver_phone: string;
-    sender_remarks?: string;
+    sender_remarks: TLocation;
     status: TParcelStatus;
-    final_price?: number | null;
+    final_price: number | null;
     price_status: TPriceStatus;
-    accepted_by?: Types.ObjectId | null;
-    accepted_at?: Date | null;
-    completed_at?: Date | null;
+    accepted_by: Types.ObjectId | null;
+    accepted_at: Date | null;
+    completed_at: Date | null;
 }
 export interface TParcelPriceRequest extends Document {
     parcel_id: Types.ObjectId;

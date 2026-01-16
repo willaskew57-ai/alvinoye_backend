@@ -16,11 +16,27 @@ export const initSocket = (server: HttpServer) => {
   io.on('connection', (socket: any) => {
     console.log('Socket connected:', socket.user?.user_id);
 
+    // just for testing
     socket.on('chat message', (msg: any) => {
       console.log('message: ' + msg);
     });
 
+    // Welcome message on connection
     socket.emit('chat message', 'Welcome to the chat!');
+
+    // 1. Join personal room
+    socket.join(socket.user.user_id);
+
+    // 2. If Admin, join the global support room
+    if (socket.user.role === 'ADMIN' || socket.user.role === 'SUPER_ADMIN') {
+      socket.join('admin_support_room');
+      console.log(`Admin ${socket.user.user_id} is ready for support.`);
+    }
+
+    // 3. Handle joining specific chat rooms
+    socket.on('join_chat', (chatId: string) => {
+      socket.join(chatId);
+    });
 
     socket.on('disconnect', () => {
       console.log('Socket disconnected:', socket.user?.user_id);

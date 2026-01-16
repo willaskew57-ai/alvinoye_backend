@@ -1,0 +1,52 @@
+import { Schema, model } from 'mongoose';
+import {
+  USER_ROLES,
+  type TChat,
+  type TMessage,
+  type TMessageRead,
+} from './chat.interface';
+
+const chatSchema = new Schema<TChat>(
+  {
+    participants: [
+      { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    ],
+    participant_roles: [{ type: String, enum: Object.values(USER_ROLES) }],
+    is_support_chat: { type: Boolean, default: false }, // 👈 Added this
+    last_message: { type: String },
+    last_message_at: { type: Date },
+  },
+  { timestamps: true }
+);
+
+const messageSchema = new Schema<TMessage>(
+  {
+    chat_id: { type: Schema.Types.ObjectId, ref: 'Chat', required: true },
+    sender_id: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    sender_role: {
+      type: String,
+      enum: Object.values(USER_ROLES),
+      required: true,
+    },
+    content: { type: String, required: true },
+    attachments: [{ type: String }],
+    is_read: { type: Boolean, default: false },
+  },
+  { timestamps: true }
+);
+
+const messageReadSchema = new Schema<TMessageRead>(
+  {
+    message_id: { type: Schema.Types.ObjectId, ref: 'Message', required: true },
+    user_id: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    read_at: { type: Date, default: Date.now },
+  },
+  { timestamps: false }
+);
+
+export const Chat = model<TChat>('Chat', chatSchema);
+export const Message = model<TMessage>('Message', messageSchema);
+export const MessageRead = model<TMessageRead>(
+  'MessageRead',
+  messageReadSchema
+);

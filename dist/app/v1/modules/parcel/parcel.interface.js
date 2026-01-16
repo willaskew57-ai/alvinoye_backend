@@ -8,12 +8,12 @@ export const PARCEL_STATUS = {
     REJECTED: 'REJECTED',
 };
 export const PRICE_STATUS = {
-    NOT_SET: 'NOT_SET', // Initial creation
-    PROPOSED: 'PROPOSED', // Admin's first price
-    COUNTERED: 'COUNTERED', // User's counter offer
-    FINAL_OFFER: 'FINAL_OFFER', // Admin's second and last price offer
-    ACCEPTED: 'ACCEPTED', // Negotiation successful
-    REJECTED: 'REJECTED', // Negotiation failed
+    NOT_SET: 'NOT_SET',
+    PROPOSED: 'PROPOSED',
+    COUNTERED: 'COUNTERED',
+    FINAL_OFFER: 'FINAL_OFFER',
+    ACCEPTED: 'ACCEPTED',
+    REJECTED: 'REJECTED',
 };
 export const PROPOSED_BY = {
     ADMIN: 'ADMIN',

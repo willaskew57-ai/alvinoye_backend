@@ -2,10 +2,11 @@
 import express, { Router } from 'express';
 // ** import module routes
 import { UserRoutes } from '../modules/user/user.route';
-import { SettingsRoutes } from '../modules/settings/settings.route';
 import { AuthRoutes } from '../modules/auth/auth.route';
 import { DriverRoutes } from '../modules/driver/driver.route';
 import { ParcelRoutes } from '../modules/parcel/parcel.route';
+import { SettingsRoutes } from '../modules/setting/settings.routes';
+import { ChatRoutes } from '../modules/chat/chat.routes';
 const router = express.Router();
 const modulesRoute = [
     {
@@ -23,6 +24,10 @@ const modulesRoute = [
     {
         path: '/parcel',
         route: ParcelRoutes,
+    },
+    {
+        path: '/chat',
+        route: ChatRoutes,
     },
     {
         path: '/settings',

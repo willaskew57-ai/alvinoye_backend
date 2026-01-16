@@ -4,19 +4,30 @@ import { socketAuth } from './socket-auth';
 // Use the Server type from socket.io
 let io;
 export const initSocket = (server) => {
-    // FIX: Assign to the global 'io' variable, DO NOT use 'const' or 'let' here
     io = new Server(server, {
         cors: { origin: '*' },
     });
-    // Note: If you use socket.user.user_id, you MUST have your auth middleware active
+    //  auth middleware active
     io.use(socketAuth());
     io.on('connection', (socket) => {
-        // Added optional chaining (?.) to prevent crashes if user is not defined
         console.log('Socket connected:', socket.user?.user_id);
+        // just for testing
         socket.on('chat message', (msg) => {
             console.log('message: ' + msg);
         });
-        socket.emit('chat message', "Welcome to the chat!");
+        // Welcome message on connection
+        socket.emit('chat message', 'Welcome to the chat!');
+        // 1. Join personal room
+        socket.join(socket.user.user_id);
+        // 2. If Admin, join the global support room
+        if (socket.user.role === 'ADMIN' || socket.user.role === 'SUPER_ADMIN') {
+            socket.join('admin_support_room');
+            console.log(`Admin ${socket.user.user_id} is ready for support.`);
+        }
+        // 3. Handle joining specific chat rooms
+        socket.on('join_chat', (chatId) => {
+            socket.join(chatId);
+        });
         socket.on('disconnect', () => {
             console.log('Socket disconnected:', socket.user?.user_id);
         });
