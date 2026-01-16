@@ -8,6 +8,15 @@ import {
   type TParcelPriceRequest,
 } from './parcel.interface';
 
+const LocationSchema = new Schema(
+  {
+    address: { type: String, required: true },
+    latitude: { type: Number, required: true },
+    longitude: { type: Number, required: true },
+  },
+  { _id: false }
+);
+
 // --- Parcel Schema ---
 const parcelSchema = new Schema<TParcel>(
   {
@@ -25,14 +34,14 @@ const parcelSchema = new Schema<TParcel>(
     size: { type: String, required: true },
     vehicle_type: { type: String, required: true },
     weight: { type: Number, required: true },
-    handover_location: { type: String, required: true },
+    handover_location: LocationSchema,
     priority: { type: String, required: true },
     date: { type: String, required: true },
     time: { type: String, required: true },
     parcel_images: { type: [String], default: [] },
     receiver_name: { type: String, required: true },
     receiver_phone: { type: String, required: true },
-    sender_remarks: { type: String },
+    sender_remarks: LocationSchema,
     status: {
       type: String,
       enum: Object.values(PARCEL_STATUS),

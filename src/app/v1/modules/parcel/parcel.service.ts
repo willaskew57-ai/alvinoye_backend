@@ -29,10 +29,7 @@ const createParcelIntoDB = async (userId: string, payload: TParcel) => {
   };
 
   const result = await Parcel.create(parcelData);
-
-  const io = getIO();
-  io.emit('new-parcel', result);
-
+  
   return result;
 };
 
