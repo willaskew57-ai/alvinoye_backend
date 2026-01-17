@@ -53,6 +53,7 @@ export interface TParcel extends Document {
     accepted_by: Types.ObjectId | null;
     accepted_at: Date | null;
     completed_at: Date | null;
+    stripe_checkout_session_id?: string | null;
 }
 export interface TParcelPriceRequest extends Document {
     parcel_id: Types.ObjectId;

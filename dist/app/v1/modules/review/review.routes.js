@@ -3,10 +3,10 @@ import { ReviewController } from './review.controller';
 import { auth } from '../../../../middleware/auth';
 import { createReviewValidationSchema } from './review.validation';
 import validateRequest from '../../../../middleware/validate-request';
+import { USER_ROLE } from '../user/user.interface';
 const router = Router();
-// Customer submits review
-router.post('/', auth('CUSTOMER'), validateRequest(createReviewValidationSchema), ReviewController.createReview);
-// Get reviews for a specific driver0
-router.get('/:id', ReviewController.getDriverReviews);
+router.post('/create', auth(USER_ROLE.CUSTOMER), validateRequest(createReviewValidationSchema), ReviewController.createReview);
+router.get('/get/:id', auth(), ReviewController.getSingleReview);
+router.get('/get', auth(USER_ROLE.DRIVER), ReviewController.getDriverReviews);
 export const ReviewRoutes = router;
 //# sourceMappingURL=review.routes.js.map

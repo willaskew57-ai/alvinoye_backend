@@ -2,8 +2,9 @@ import httpStatus from 'http-status';
 import { SettingsService } from './settings.service';
 import catchAsync from '../../../../utils/catch-async';
 import sendResponse from '../../../../utils/send-response';
+// ** ------------------ Faq controller
 const createFaq = catchAsync(async (req, res) => {
-    const result = await SettingsService.createFaq(req.body);
+    const result = await SettingsService.createFaqInDB(req.body);
     sendResponse(res, {
         statusCode: httpStatus.CREATED,
         success: true,
@@ -12,7 +13,17 @@ const createFaq = catchAsync(async (req, res) => {
     });
 });
 const getFaqs = catchAsync(async (req, res) => {
-    const result = await SettingsService.getAllFaqs();
+    const result = await SettingsService.getAllFaqsInDB();
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'FAQs retrieved successfully!',
+        data: result,
+    });
+});
+const getSingleFaqs = catchAsync(async (req, res) => {
+    const { id } = req.params;
+    const result = await SettingsService.getSingleFaqInDB(id);
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
@@ -22,7 +33,7 @@ const getFaqs = catchAsync(async (req, res) => {
 });
 const updateFaq = catchAsync(async (req, res) => {
     const { id } = req.params;
-    const result = await SettingsService.updateFaq(id, req.body);
+    const result = await SettingsService.updateFaqInDB(id, req.body);
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
@@ -32,7 +43,7 @@ const updateFaq = catchAsync(async (req, res) => {
 });
 const deleteFaq = catchAsync(async (req, res) => {
     const { id } = req.params;
-    const result = await SettingsService.deleteFaq(id);
+    const result = await SettingsService.deleteFaqInDB(id);
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
@@ -40,35 +51,48 @@ const deleteFaq = catchAsync(async (req, res) => {
         data: result,
     });
 });
-const manageTerms = catchAsync(async (req, res) => {
-    const result = await SettingsService.updateTerms(req.body);
+// ** --------------- Terms route ---------------
+const createTerms = catchAsync(async (req, res) => {
+    const result = await SettingsService.createTermsInDB(req.body);
     sendResponse(res, {
-        statusCode: httpStatus.OK,
+        statusCode: httpStatus.CREATED,
         success: true,
-        message: 'Terms and Conditions updated successfully!',
+        message: 'Terms and Conditions created successfully!',
         data: result,
     });
 });
-const getTerms = catchAsync(async (req, res) => {
-    const result = await SettingsService.getTerms();
+const getSingleTerms = catchAsync(async (req, res) => {
+    const result = await SettingsService.getSingleTermsInDB();
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
-        message: 'Terms and Conditions retrieved successfully!',
+        message: 'Terms and Condition retrieved successfully!',
         data: result,
     });
 });
-const managePrivacy = catchAsync(async (req, res) => {
-    const result = await SettingsService.updatePrivacy(req.body);
+const updateTerms = catchAsync(async (req, res) => {
+    const { id } = req.params;
+    const termsId = id;
+    const result = await SettingsService.updateTermsInDB(termsId, req.body);
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
-        message: 'Privacy Policy updated successfully!',
+        message: 'Terms and Condition updated successfully!',
         data: result,
     });
 });
-const getPrivacy = catchAsync(async (req, res) => {
-    const result = await SettingsService.getPrivacy();
+// ** ------------ Privacy Policy Controller --------------
+const createPrivacy = catchAsync(async (req, res) => {
+    const result = await SettingsService.createPrivacyInDB(req.body);
+    sendResponse(res, {
+        statusCode: httpStatus.CREATED,
+        success: true,
+        message: 'Privacy Policy created successfully!',
+        data: result,
+    });
+});
+const getSinglePrivacy = catchAsync(async (req, res) => {
+    const result = await SettingsService.getSinglePrivacyInDB();
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
@@ -76,14 +100,30 @@ const getPrivacy = catchAsync(async (req, res) => {
         data: result,
     });
 });
+const updatePrivacy = catchAsync(async (req, res) => {
+    const { id } = req.params; // Extract ID from params for the specific update
+    const result = await SettingsService.updatePrivacyInDB(id, req.body);
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'Privacy Policy updated successfully!',
+        data: result,
+    });
+});
 export const SettingsController = {
+    // FAQ
     createFaq,
     getFaqs,
+    getSingleFaqs,
     updateFaq,
     deleteFaq,
-    manageTerms,
-    getTerms,
-    managePrivacy,
-    getPrivacy,
+    // Terms
+    createTerms,
+    getSingleTerms,
+    updateTerms,
+    // Privacy (Fixed naming and logic)
+    createPrivacy,
+    getSinglePrivacy,
+    updatePrivacy,
 };
 //# sourceMappingURL=settings.controller.js.map

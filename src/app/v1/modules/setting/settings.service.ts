@@ -1,23 +1,35 @@
 import httpStatus from 'http-status';
 import AppError from '../../../../errors/app-error';
 import { Faq, PrivacyPolicy, TermsCondition } from './settings.model';
-import type { TFaq, TPrivacyPolicy, TTermsCondition } from './settings.interface';
+import type {
+  TFaq,
+  TPrivacyPolicy,
+  TTermsCondition,
+} from './settings.interface';
 
-/** FAQ Services */
-const createFaq = async (payload: TFaq) => {
+//** ----------------- Faq Services --------------
+const createFaqInDB = async (payload: TFaq) => {
   const result = await Faq.create(payload);
   return result;
 };
 
-const getAllFaqs = async () => {
+const getAllFaqsInDB = async () => {
   const result = await Faq.find();
   return result;
 };
 
-const updateFaq = async (id: string, payload: Partial<TFaq>) => {
-  const result = await Faq.findByIdAndUpdate(id, payload, { 
+const getSingleFaqInDB = async (id: string) => {
+  const result = await Faq.findById(id);
+  if (!result) {
+    throw new AppError(httpStatus.NOT_FOUND, 'FAQ not found');
+  }
+  return result;
+};
+
+const updateFaqInDB = async (id: string, payload: Partial<TFaq>) => {
+  const result = await Faq.findByIdAndUpdate(id, payload, {
     new: true,
-    runValidators: true 
+    runValidators: true,
   });
   if (!result) {
     throw new AppError(httpStatus.NOT_FOUND, 'FAQ not found');
@@ -25,7 +37,7 @@ const updateFaq = async (id: string, payload: Partial<TFaq>) => {
   return result;
 };
 
-const deleteFaq = async (id: string) => {
+const deleteFaqInDB = async (id: string) => {
   const result = await Faq.findByIdAndDelete(id);
   if (!result) {
     throw new AppError(httpStatus.NOT_FOUND, 'FAQ not found');
@@ -33,42 +45,83 @@ const deleteFaq = async (id: string) => {
   return result;
 };
 
-/** Terms and Condition Services */
-const updateTerms = async (payload: TTermsCondition) => {
-  // Finds the first document (since there's usually only one) and updates it or creates it
-  const result = await TermsCondition.findOneAndUpdate({}, payload, { 
-    upsert: true, 
-    new: true 
+//** ----------------- Terms & Conditions Services --------------
+
+const createTermsInDB = async (payload: TTermsCondition) => {
+  const result = await TermsCondition.create(payload);
+  return result;
+};
+
+const getSingleTermsInDB = async () => {
+  const result = await TermsCondition.findOne().sort({ created_at: -1 });
+  if (!result) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Terms and Conditions not found');
+  }
+  return result;
+};
+
+const updateTermsInDB = async (
+  id: string,
+  payload: Partial<TTermsCondition>
+) => {
+  const result = await TermsCondition.findByIdAndUpdate(id, payload, {
+    new: true,
+    runValidators: true,
   });
+  if (!result) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Terms and Conditions not found');
+  }
   return result;
 };
 
-const getTerms = async () => {
-  const result = await TermsCondition.findOne();
+//** ----------------- Privacy Policy Services --------------
+
+const createPrivacyInDB = async (payload: TPrivacyPolicy) => {
+  const result = await PrivacyPolicy.create(payload);
   return result;
 };
 
-/** Privacy Policy Services */
-const updatePrivacy = async (payload: TPrivacyPolicy) => {
-  const result = await PrivacyPolicy.findOneAndUpdate({}, payload, { 
-    upsert: true, 
-    new: true 
+const getSinglePrivacyInDB = async () => {
+  const result = await PrivacyPolicy.findOne().sort({ created_at: -1 });
+
+  if (!result) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Privacy Policy not found');
+  }
+  return result;
+};
+
+const updatePrivacyInDB = async (
+  id: string,
+  payload: Partial<TPrivacyPolicy>
+) => {
+  const result = await PrivacyPolicy.findByIdAndUpdate(id, payload, {
+    new: true,
+    runValidators: true,
   });
+
+  if (!result) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Privacy Policy not found');
+  }
   return result;
 };
 
-const getPrivacy = async () => {
-  const result = await PrivacyPolicy.findOne();
-  return result;
-};
+//** ----------------- Exporting All Services --------------
 
 export const SettingsService = {
-  createFaq,
-  getAllFaqs,
-  updateFaq,
-  deleteFaq,
-  updateTerms,
-  getTerms,
-  updatePrivacy,
-  getPrivacy,
+  // Faq
+  createFaqInDB,
+  getAllFaqsInDB,
+  getSingleFaqInDB,
+  updateFaqInDB,
+  deleteFaqInDB,
+
+  // Terms 
+  createTermsInDB,
+  getSingleTermsInDB,
+  updateTermsInDB,
+
+  // Privacy 
+  createPrivacyInDB,
+  getSinglePrivacyInDB,
+  updatePrivacyInDB,
 };

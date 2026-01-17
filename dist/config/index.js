@@ -22,6 +22,8 @@ const configs = {
     smtp_mail: process.env.SMTP_MAIL,
     smtp_password: process.env.SMTP_PASSWORD,
     smtp_service_name: process.env.SERVICE_NAME,
+    // Stripe
+    stripe_secret_key: process.env.STRIPE_SECRET_KEY || '',
 };
 export default configs;
 //# sourceMappingURL=index.js.map

@@ -1,6 +1,6 @@
 import httpStatus from 'http-status';
 import mongoose from 'mongoose';
-import QueryBuilder from '../../../../builders/QueryBuilder';
+import QueryBuilder from '../../../../builders/query-builder';
 import AppError from '../../../../errors/app-error';
 import { USER_ROLE } from '../user/user.interface';
 import { Parcel, ParcelPriceRequest } from './parcel.model';
@@ -29,7 +29,7 @@ const createParcelIntoDB = async (userId: string, payload: TParcel) => {
   };
 
   const result = await Parcel.create(parcelData);
-  
+
   return result;
 };
 
@@ -111,7 +111,7 @@ const getMyParcelsFromDB = async (
 
 const getSingleParcelFromDB = async (id: string) => {
   const result = await Parcel.findById(id).populate(
-    'user_id accepted_by price_requests'
+    'user_id accepted_by price_requests review'
   );
   if (!result) {
     throw new AppError(httpStatus.NOT_FOUND, 'Parcel not found!');

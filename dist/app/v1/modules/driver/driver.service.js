@@ -1,7 +1,7 @@
 import httpStatus from 'http-status';
 import AppError from '../../../../errors/app-error';
 import { Driver } from './driver.model';
-import QueryBuilder from '../../../../builders/QueryBuilder';
+import QueryBuilder from '../../../../builders/query-builder';
 import mongoose, { Types } from 'mongoose';
 import { Vehicle } from '../vehicle/vehicle.model';
 import User from '../user/user.model';
@@ -60,11 +60,9 @@ const addDriverInfoIntoDB = async (payload, userIdFromToken // Add this paramete
 const getAllDriversFromDB = async (query) => {
     const queryObj = { ...query };
     const search = query?.search;
-    // 1. Storage for cross-model matching IDs
     let driverIdsFromLocation = null;
     let driverIdsFromLicenseSearch = null;
     let vehicleMatchingUserIds = null;
-    // 2. Handle Location Filters (Match against nested address objects)
     if (query?.from || query?.to) {
         const locConditions = {};
         if (query.from) {
@@ -82,21 +80,18 @@ const getAllDriversFromDB = async (query) => {
         const drivers = await Driver.find(locConditions).select('user_id');
         driverIdsFromLocation = drivers.map((d) => d.user_id.toString());
     }
-    // 3. Handle License Search (For the global search bar)
     if (search) {
         const drivers = await Driver.find({
             driver_license_number: { $regex: search, $options: 'i' },
         }).select('user_id');
         driverIdsFromLicenseSearch = drivers.map((d) => d.user_id.toString());
     }
-    // 4. Handle Vehicle Type Filter
     if (query?.vehicle_type) {
         const vehicles = await Vehicle.find({
             vehicle_type: query.vehicle_type,
         }).select('user_id');
         vehicleMatchingUserIds = vehicles.map((v) => v.user_id.toString());
     }
-    // 5. Construct Main User Query (The Root)
     const excludeFields = [
         'status',
         'vehicle_type',
@@ -113,7 +108,6 @@ const getAllDriversFromDB = async (query) => {
         .populate('driver_info') // Ensure virtual/ref is set in User Schema
         .populate('vehicle'), // Ensure virtual/ref is set in User Schema
     queryObj);
-    // 6. Apply Global Search logic: (Name OR Email OR License)
     if (search) {
         const searchRegex = { $regex: search, $options: 'i' };
         userQuery.modelQuery = userQuery.modelQuery.find({
@@ -124,24 +118,19 @@ const getAllDriversFromDB = async (query) => {
             ],
         });
     }
-    // 7. Apply Strict "AND" Filters
-    // If location was provided, the user MUST be in the matching ID list
     if (driverIdsFromLocation !== null) {
         userQuery.modelQuery = userQuery.modelQuery.find({
             _id: { $in: driverIdsFromLocation },
         });
     }
-    // If vehicle type was provided, the user MUST be in the matching ID list
     if (vehicleMatchingUserIds !== null) {
         userQuery.modelQuery = userQuery.modelQuery.find({
             _id: { $in: vehicleMatchingUserIds },
         });
     }
-    // Apply Status filter (Active/Blocked)
     if (query?.status) {
         userQuery.modelQuery = userQuery.modelQuery.find({ status: query.status });
     }
-    // 8. Execute Pagination, Sorting, and Final Query
     userQuery.filter().sort().paginate().fields();
     const data = await userQuery.modelQuery;
     const meta = await userQuery.countTotal();

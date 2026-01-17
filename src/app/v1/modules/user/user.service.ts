@@ -8,7 +8,7 @@ import {
   type TUserStatus,
 } from './user.interface';
 import { Types } from 'mongoose';
-import QueryBuilder from '../../../../builders/QueryBuilder';
+import QueryBuilder from '../../../../builders/query-builder';
 
 const createAdminIntoDB = async (payload: TUser) => {
   const isUserExists = await User.isUserExistsByEmail(payload.email);
@@ -22,8 +22,8 @@ const createAdminIntoDB = async (payload: TUser) => {
 
   const userData = {
     ...payload,
-    role: "ADMIN",
-    status: "ACTIVE",
+    role: 'ADMIN',
+    status: 'ACTIVE',
     is_profile_completed: true,
     is_verified: true,
   };

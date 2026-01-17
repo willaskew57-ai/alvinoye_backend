@@ -3,21 +3,25 @@ import { Types } from 'mongoose';
 import AppError from '../../../../errors/app-error';
 import { Parcel } from '../parcel/parcel.model';
 import { Review } from './review.model';
+import { PARCEL_STATUS } from '../parcel/parcel.interface';
+import User from '../user/user.model';
 const createReview = async (customerId, payload) => {
-    // 1. Check if the parcel exists
     const parcel = await Parcel.findById(payload.parcel_id);
     if (!parcel) {
         throw new AppError(httpStatus.NOT_FOUND, 'Parcel not found');
     }
-    // 2. Security: Ensure this customer owns the parcel
+    if (parcel.status !== PARCEL_STATUS.COMPLETED) {
+        throw new AppError(httpStatus.BAD_REQUEST, 'Cannot review a parcel that is not yet completed.');
+    }
     if (parcel.user_id.toString() !== customerId) {
+        // Security: Ensure this customer owns the parcel
         throw new AppError(httpStatus.FORBIDDEN, 'You can only review your own delivered parcels');
     }
-    // 3. Ensure the parcel was accepted by a driver
+    // Ensure the parcel was accepted by a driver
     if (!parcel.accepted_by) {
         throw new AppError(httpStatus.BAD_REQUEST, 'This parcel was never accepted by a driver');
     }
-    // 4. Create the review
+    // Create the review
     const result = await Review.create({
         parcel_id: new Types.ObjectId(payload.parcel_id),
         customer_id: new Types.ObjectId(customerId),
@@ -27,12 +31,66 @@ const createReview = async (customerId, payload) => {
     });
     return result;
 };
-const getDriverReviews = async (driverId) => {
-    const result = await Review.find({ driver_id: driverId }).populate('customer_id', 'name profile_image');
+const getSingleReviewFromDB = async (review_id) => {
+    if (!Types.ObjectId.isValid(review_id)) {
+        throw new AppError(httpStatus.BAD_REQUEST, 'Invalid Review ID');
+    }
+    const result = await Review.findById(review_id).populate('customer_id', 'full_name profile_picture');
+    if (!result) {
+        throw new AppError(httpStatus.NOT_FOUND, 'Review not found');
+    }
     return result;
+};
+const getDriverReviewsFromDB = async (driverId, query) => {
+    const page = Number(query.page) || 1;
+    const limit = Number(query.limit) || 10;
+    const skip = (page - 1) * limit;
+    const filter = { driver_id: new Types.ObjectId(driverId) };
+    if (query.searchTerm) {
+        const searchTerm = query.searchTerm;
+        const matchingUsers = await User.find({
+            full_name: { $regex: searchTerm, $options: 'i' },
+        }).select('_id');
+        const userIds = matchingUsers.map((user) => user._id);
+        filter.customer_id = { $in: userIds };
+    }
+    const result = await Review.find(filter)
+        .populate('customer_id', 'full_name profile_picture')
+        .sort('-created_at')
+        .skip(skip)
+        .limit(limit);
+    //Calculate Average Rating and Total Count using Aggregation
+    const stats = await Review.aggregate([
+        {
+            $match: { driver_id: new Types.ObjectId(driverId) },
+        },
+        {
+            $group: {
+                _id: '$driver_id',
+                averageRating: { $avg: '$rating' },
+                totalReviews: { $sum: 1 },
+            },
+        },
+    ]);
+    // Extract stats or set defaults
+    const average_rating = stats.length > 0 ? Number(stats[0].averageRating.toFixed(1)) : 0;
+    const total = stats.length > 0 ? stats[0].totalReviews : 0;
+    const totalPages = Math.ceil(total / limit);
+    const meta = {
+        total,
+        page,
+        limit,
+        totalPages,
+    };
+    return {
+        meta,
+        average_rating,
+        result,
+    };
 };
 export const ReviewService = {
     createReview,
-    getDriverReviews,
+    getSingleReviewFromDB,
+    getDriverReviewsFromDB,
 };
 //# sourceMappingURL=review.service.js.map

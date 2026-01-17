@@ -9,6 +9,7 @@ type TResponse<T> = {
     statusCode: number;
     success: boolean;
     message: string;
+    average_rating?: number;
     meta?: TMeta;
     data: T;
 };

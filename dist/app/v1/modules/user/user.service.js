@@ -3,7 +3,7 @@ import AppError from '../../../../errors/app-error';
 import { User } from './user.model';
 import { USER_ROLE, USER_STATUS, } from './user.interface';
 import { Types } from 'mongoose';
-import QueryBuilder from '../../../../builders/QueryBuilder';
+import QueryBuilder from '../../../../builders/query-builder';
 const createAdminIntoDB = async (payload) => {
     const isUserExists = await User.isUserExistsByEmail(payload.email);
     if (isUserExists) {
@@ -11,8 +11,8 @@ const createAdminIntoDB = async (payload) => {
     }
     const userData = {
         ...payload,
-        role: "ADMIN",
-        status: "ACTIVE",
+        role: 'ADMIN',
+        status: 'ACTIVE',
         is_profile_completed: true,
         is_verified: true,
     };

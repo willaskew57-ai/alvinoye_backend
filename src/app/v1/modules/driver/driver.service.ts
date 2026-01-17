@@ -1,7 +1,7 @@
 import httpStatus from 'http-status';
 import AppError from '../../../../errors/app-error';
 import { Driver } from './driver.model';
-import QueryBuilder from '../../../../builders/QueryBuilder';
+import QueryBuilder from '../../../../builders/query-builder';
 import type { TDriver } from './driver.interface';
 import mongoose, { Types } from 'mongoose';
 import type { TVehicle } from '../vehicle/vehicle.interface';
@@ -99,12 +99,10 @@ const getAllDriversFromDB = async (query: Record<string, unknown>) => {
   const queryObj = { ...query };
   const search = query?.search as string;
 
-  // 1. Storage for cross-model matching IDs
   let driverIdsFromLocation: string[] | null = null;
   let driverIdsFromLicenseSearch: string[] | null = null;
   let vehicleMatchingUserIds: string[] | null = null;
 
-  // 2. Handle Location Filters (Match against nested address objects)
   if (query?.from || query?.to) {
     const locConditions: any = {};
     if (query.from) {
@@ -124,7 +122,6 @@ const getAllDriversFromDB = async (query: Record<string, unknown>) => {
     driverIdsFromLocation = drivers.map((d) => d.user_id.toString());
   }
 
-  // 3. Handle License Search (For the global search bar)
   if (search) {
     const drivers = await Driver.find({
       driver_license_number: { $regex: search, $options: 'i' },
@@ -132,7 +129,6 @@ const getAllDriversFromDB = async (query: Record<string, unknown>) => {
     driverIdsFromLicenseSearch = drivers.map((d) => d.user_id.toString());
   }
 
-  // 4. Handle Vehicle Type Filter
   if (query?.vehicle_type) {
     const vehicles = await Vehicle.find({
       vehicle_type: query.vehicle_type as string,
@@ -140,7 +136,6 @@ const getAllDriversFromDB = async (query: Record<string, unknown>) => {
     vehicleMatchingUserIds = vehicles.map((v) => v.user_id.toString());
   }
 
-  // 5. Construct Main User Query (The Root)
   const excludeFields = [
     'status',
     'vehicle_type',
@@ -161,7 +156,6 @@ const getAllDriversFromDB = async (query: Record<string, unknown>) => {
     queryObj
   );
 
-  // 6. Apply Global Search logic: (Name OR Email OR License)
   if (search) {
     const searchRegex = { $regex: search, $options: 'i' };
     userQuery.modelQuery = userQuery.modelQuery.find({
@@ -173,28 +167,22 @@ const getAllDriversFromDB = async (query: Record<string, unknown>) => {
     });
   }
 
-  // 7. Apply Strict "AND" Filters
-
-  // If location was provided, the user MUST be in the matching ID list
   if (driverIdsFromLocation !== null) {
     userQuery.modelQuery = userQuery.modelQuery.find({
       _id: { $in: driverIdsFromLocation },
     });
   }
 
-  // If vehicle type was provided, the user MUST be in the matching ID list
   if (vehicleMatchingUserIds !== null) {
     userQuery.modelQuery = userQuery.modelQuery.find({
       _id: { $in: vehicleMatchingUserIds },
     });
   }
 
-  // Apply Status filter (Active/Blocked)
   if (query?.status) {
     userQuery.modelQuery = userQuery.modelQuery.find({ status: query.status });
   }
 
-  // 8. Execute Pagination, Sorting, and Final Query
   userQuery.filter().sort().paginate().fields();
 
   const data = await userQuery.modelQuery;

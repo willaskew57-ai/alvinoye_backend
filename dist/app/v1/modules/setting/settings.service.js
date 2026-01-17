@@ -1,65 +1,98 @@
 import httpStatus from 'http-status';
 import AppError from '../../../../errors/app-error';
 import { Faq, PrivacyPolicy, TermsCondition } from './settings.model';
-/** FAQ Services */
-const createFaq = async (payload) => {
+//** ----------------- Faq Services --------------
+const createFaqInDB = async (payload) => {
     const result = await Faq.create(payload);
     return result;
 };
-const getAllFaqs = async () => {
+const getAllFaqsInDB = async () => {
     const result = await Faq.find();
     return result;
 };
-const updateFaq = async (id, payload) => {
+const getSingleFaqInDB = async (id) => {
+    const result = await Faq.findById(id);
+    if (!result) {
+        throw new AppError(httpStatus.NOT_FOUND, 'FAQ not found');
+    }
+    return result;
+};
+const updateFaqInDB = async (id, payload) => {
     const result = await Faq.findByIdAndUpdate(id, payload, {
         new: true,
-        runValidators: true
+        runValidators: true,
     });
     if (!result) {
         throw new AppError(httpStatus.NOT_FOUND, 'FAQ not found');
     }
     return result;
 };
-const deleteFaq = async (id) => {
+const deleteFaqInDB = async (id) => {
     const result = await Faq.findByIdAndDelete(id);
     if (!result) {
         throw new AppError(httpStatus.NOT_FOUND, 'FAQ not found');
     }
     return result;
 };
-/** Terms and Condition Services */
-const updateTerms = async (payload) => {
-    // Finds the first document (since there's usually only one) and updates it or creates it
-    const result = await TermsCondition.findOneAndUpdate({}, payload, {
-        upsert: true,
-        new: true
+//** ----------------- Terms & Conditions Services --------------
+const createTermsInDB = async (payload) => {
+    const result = await TermsCondition.create(payload);
+    return result;
+};
+const getSingleTermsInDB = async () => {
+    const result = await TermsCondition.findOne().sort({ created_at: -1 });
+    if (!result) {
+        throw new AppError(httpStatus.NOT_FOUND, 'Terms and Conditions not found');
+    }
+    return result;
+};
+const updateTermsInDB = async (id, payload) => {
+    const result = await TermsCondition.findByIdAndUpdate(id, payload, {
+        new: true,
+        runValidators: true,
     });
+    if (!result) {
+        throw new AppError(httpStatus.NOT_FOUND, 'Terms and Conditions not found');
+    }
     return result;
 };
-const getTerms = async () => {
-    const result = await TermsCondition.findOne();
+//** ----------------- Privacy Policy Services --------------
+const createPrivacyInDB = async (payload) => {
+    const result = await PrivacyPolicy.create(payload);
     return result;
 };
-/** Privacy Policy Services */
-const updatePrivacy = async (payload) => {
-    const result = await PrivacyPolicy.findOneAndUpdate({}, payload, {
-        upsert: true,
-        new: true
+const getSinglePrivacyInDB = async () => {
+    const result = await PrivacyPolicy.findOne().sort({ created_at: -1 });
+    if (!result) {
+        throw new AppError(httpStatus.NOT_FOUND, 'Privacy Policy not found');
+    }
+    return result;
+};
+const updatePrivacyInDB = async (id, payload) => {
+    const result = await PrivacyPolicy.findByIdAndUpdate(id, payload, {
+        new: true,
+        runValidators: true,
     });
+    if (!result) {
+        throw new AppError(httpStatus.NOT_FOUND, 'Privacy Policy not found');
+    }
     return result;
 };
-const getPrivacy = async () => {
-    const result = await PrivacyPolicy.findOne();
-    return result;
-};
+//** ----------------- Exporting All Services --------------
 export const SettingsService = {
-    createFaq,
-    getAllFaqs,
-    updateFaq,
-    deleteFaq,
-    updateTerms,
-    getTerms,
-    updatePrivacy,
-    getPrivacy,
+    // Faq
+    createFaqInDB,
+    getAllFaqsInDB,
+    getSingleFaqInDB,
+    updateFaqInDB,
+    deleteFaqInDB,
+    // Terms 
+    createTermsInDB,
+    getSingleTermsInDB,
+    updateTermsInDB,
+    // Privacy 
+    createPrivacyInDB,
+    getSinglePrivacyInDB,
+    updatePrivacyInDB,
 };
 //# sourceMappingURL=settings.service.js.map

@@ -45,7 +45,7 @@ export declare const faqValidation: {
         };
     }>;
 };
-export declare const contentValidation: z.ZodObject<{
+export declare const contentCreateValidation: z.ZodObject<{
     body: z.ZodObject<{
         title: z.ZodOptional<z.ZodString>;
         content: z.ZodString;
@@ -65,6 +65,28 @@ export declare const contentValidation: z.ZodObject<{
     body: {
         content: string;
         title?: string | undefined;
+    };
+}>;
+export declare const contentUpdateValidation: z.ZodObject<{
+    body: z.ZodObject<{
+        title: z.ZodOptional<z.ZodString>;
+        content: z.ZodOptional<z.ZodString>;
+    }, "strip", z.ZodTypeAny, {
+        title?: string | undefined;
+        content?: string | undefined;
+    }, {
+        title?: string | undefined;
+        content?: string | undefined;
+    }>;
+}, "strip", z.ZodTypeAny, {
+    body: {
+        title?: string | undefined;
+        content?: string | undefined;
+    };
+}, {
+    body: {
+        title?: string | undefined;
+        content?: string | undefined;
     };
 }>;
 //# sourceMappingURL=settings.validation.d.ts.map

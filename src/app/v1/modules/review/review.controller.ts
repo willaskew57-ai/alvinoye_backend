@@ -15,21 +15,40 @@ const createReview = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const getDriverReviews = catchAsync(async (req: Request, res: Response) => {
+const getSingleReview = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
-  const driverId = id as string;
+  const result = await ReviewService.getSingleReviewFromDB(id as string);
 
-  const result = await ReviewService.getDriverReviews(driverId);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Review retrieved successfully!',
+    data: result,
+  });
+});
+
+const getDriverReviews = catchAsync(async (req: Request, res: Response) => {
+  const { user_id } = req.user;
+  const driverId = user_id as string;
+
+  const { meta, average_rating, result } = await ReviewService.getDriverReviewsFromDB(
+    driverId,
+    req.query
+  );
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
     message: 'Driver reviews retrieved successfully!',
+    average_rating: average_rating,
+    meta: meta, 
     data: result,
   });
+  
 });
 
 export const ReviewController = {
   createReview,
+  getSingleReview,
   getDriverReviews,
 };

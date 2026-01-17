@@ -1,60 +1,81 @@
 import type { TFaq, TPrivacyPolicy, TTermsCondition } from './settings.interface';
 export declare const SettingsService: {
-    createFaq: (payload: TFaq) => Promise<import("mongoose").Document<unknown, {}, TFaq, {}, import("mongoose").DefaultSchemaOptions> & TFaq & {
+    createFaqInDB: (payload: TFaq) => Promise<import("mongoose").Document<unknown, {}, TFaq, {}, import("mongoose").DefaultSchemaOptions> & TFaq & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
     } & {
         id: string;
     }>;
-    getAllFaqs: () => Promise<(import("mongoose").Document<unknown, {}, TFaq, {}, import("mongoose").DefaultSchemaOptions> & TFaq & {
+    getAllFaqsInDB: () => Promise<(import("mongoose").Document<unknown, {}, TFaq, {}, import("mongoose").DefaultSchemaOptions> & TFaq & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
     } & {
         id: string;
     })[]>;
-    updateFaq: (id: string, payload: Partial<TFaq>) => Promise<import("mongoose").Document<unknown, {}, TFaq, {}, import("mongoose").DefaultSchemaOptions> & TFaq & {
+    getSingleFaqInDB: (id: string) => Promise<import("mongoose").Document<unknown, {}, TFaq, {}, import("mongoose").DefaultSchemaOptions> & TFaq & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
     } & {
         id: string;
     }>;
-    deleteFaq: (id: string) => Promise<import("mongoose").Document<unknown, {}, TFaq, {}, import("mongoose").DefaultSchemaOptions> & TFaq & {
+    updateFaqInDB: (id: string, payload: Partial<TFaq>) => Promise<import("mongoose").Document<unknown, {}, TFaq, {}, import("mongoose").DefaultSchemaOptions> & TFaq & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
     } & {
         id: string;
     }>;
-    updateTerms: (payload: TTermsCondition) => Promise<import("mongoose").Document<unknown, {}, TTermsCondition, {}, import("mongoose").DefaultSchemaOptions> & TTermsCondition & {
+    deleteFaqInDB: (id: string) => Promise<import("mongoose").Document<unknown, {}, TFaq, {}, import("mongoose").DefaultSchemaOptions> & TFaq & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
     } & {
         id: string;
     }>;
-    getTerms: () => Promise<(import("mongoose").Document<unknown, {}, TTermsCondition, {}, import("mongoose").DefaultSchemaOptions> & TTermsCondition & {
-        _id: import("mongoose").Types.ObjectId;
-    } & {
-        __v: number;
-    } & {
-        id: string;
-    }) | null>;
-    updatePrivacy: (payload: TPrivacyPolicy) => Promise<import("mongoose").Document<unknown, {}, TPrivacyPolicy, {}, import("mongoose").DefaultSchemaOptions> & TPrivacyPolicy & {
+    createTermsInDB: (payload: TTermsCondition) => Promise<import("mongoose").Document<unknown, {}, TTermsCondition, {}, import("mongoose").DefaultSchemaOptions> & TTermsCondition & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
     } & {
         id: string;
     }>;
-    getPrivacy: () => Promise<(import("mongoose").Document<unknown, {}, TPrivacyPolicy, {}, import("mongoose").DefaultSchemaOptions> & TPrivacyPolicy & {
+    getSingleTermsInDB: () => Promise<import("mongoose").Document<unknown, {}, TTermsCondition, {}, import("mongoose").DefaultSchemaOptions> & TTermsCondition & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
     } & {
         id: string;
-    }) | null>;
+    }>;
+    updateTermsInDB: (id: string, payload: Partial<TTermsCondition>) => Promise<import("mongoose").Document<unknown, {}, TTermsCondition, {}, import("mongoose").DefaultSchemaOptions> & TTermsCondition & {
+        _id: import("mongoose").Types.ObjectId;
+    } & {
+        __v: number;
+    } & {
+        id: string;
+    }>;
+    createPrivacyInDB: (payload: TPrivacyPolicy) => Promise<import("mongoose").Document<unknown, {}, TPrivacyPolicy, {}, import("mongoose").DefaultSchemaOptions> & TPrivacyPolicy & {
+        _id: import("mongoose").Types.ObjectId;
+    } & {
+        __v: number;
+    } & {
+        id: string;
+    }>;
+    getSinglePrivacyInDB: () => Promise<import("mongoose").Document<unknown, {}, TPrivacyPolicy, {}, import("mongoose").DefaultSchemaOptions> & TPrivacyPolicy & {
+        _id: import("mongoose").Types.ObjectId;
+    } & {
+        __v: number;
+    } & {
+        id: string;
+    }>;
+    updatePrivacyInDB: (id: string, payload: Partial<TPrivacyPolicy>) => Promise<import("mongoose").Document<unknown, {}, TPrivacyPolicy, {}, import("mongoose").DefaultSchemaOptions> & TPrivacyPolicy & {
+        _id: import("mongoose").Types.ObjectId;
+    } & {
+        __v: number;
+    } & {
+        id: string;
+    }>;
 };
 //# sourceMappingURL=settings.service.d.ts.map

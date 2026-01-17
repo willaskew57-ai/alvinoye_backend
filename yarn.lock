@@ -1517,6 +1517,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/stripe@npm:^8.0.417":
+  version: 8.0.417
+  resolution: "@types/stripe@npm:8.0.417"
+  dependencies:
+    stripe: "npm:*"
+  checksum: 10c0/97e3a5ad6948a94366d6749328b721a3c9004ba68795e7675efaa74e4b4c51d57c1dfc785747f4221192dabd7a13fb41778e88e080bafd5d3938a50df7f4ef98
+  languageName: node
+  linkType: hard
+
 "@types/webidl-conversions@npm:*":
   version: 7.0.3
   resolution: "@types/webidl-conversions@npm:7.0.3"
@@ -2969,6 +2978,7 @@ __metadata:
     "@types/node": "npm:^25.0.3"
     "@types/nodemailer": "npm:^7.0.5"
     "@types/socket.io": "npm:^3.0.2"
+    "@types/stripe": "npm:^8.0.417"
     bcrypt: "npm:^6.0.0"
     colors: "npm:^1.4.0"
     cookie-parser: "npm:^1.4.7"
@@ -2981,6 +2991,7 @@ __metadata:
     nodemailer: "npm:^7.0.12"
     nodemon: "npm:^3.1.11"
     socket.io: "npm:^4.8.3"
+    stripe: "npm:^20.2.0"
     ts-node: "npm:^10.9.2"
     tsx: "npm:^4.21.0"
     typescript: "npm:^5.9.3"
@@ -3341,6 +3352,20 @@ __metadata:
   version: 2.0.2
   resolution: "statuses@npm:2.0.2"
   checksum: 10c0/a9947d98ad60d01f6b26727570f3bcceb6c8fa789da64fe6889908fe2e294d57503b14bf2b5af7605c2d36647259e856635cd4c49eab41667658ec9d0080ec3f
+  languageName: node
+  linkType: hard
+
+"stripe@npm:*, stripe@npm:^20.2.0":
+  version: 20.2.0
+  resolution: "stripe@npm:20.2.0"
+  dependencies:
+    qs: "npm:^6.14.1"
+  peerDependencies:
+    "@types/node": ">=16"
+  peerDependenciesMeta:
+    "@types/node":
+      optional: true
+  checksum: 10c0/f91726e64fe91dfc9c40b0b305bc8d47d1d2765104e1844ee97364d742126fe95f375b7f5b1dbd17e7c3d288ae124c25dcc441c5cebdc23efc1d9b5bc7623fa6
   languageName: node
   linkType: hard
 

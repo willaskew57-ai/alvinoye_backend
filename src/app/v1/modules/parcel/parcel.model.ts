@@ -7,6 +7,7 @@ import {
   type TParcel,
   type TParcelPriceRequest,
 } from './parcel.interface';
+import { PAYMENT_STATUS } from '../payment/payment.constants';
 
 const LocationSchema = new Schema(
   {
@@ -53,6 +54,7 @@ const parcelSchema = new Schema<TParcel>(
       enum: Object.values(PRICE_STATUS),
       default: PRICE_STATUS.NOT_SET,
     },
+
     accepted_by: {
       type: Schema.Types.ObjectId,
       ref: 'User',
@@ -60,6 +62,8 @@ const parcelSchema = new Schema<TParcel>(
     },
     accepted_at: { type: Date, default: null },
     completed_at: { type: Date, default: null },
+
+    stripe_checkout_session_id: { type: String, default: null },
   },
   {
     timestamps: true,
@@ -75,6 +79,14 @@ parcelSchema.virtual('price_requests', {
   ref: 'ParcelPriceRequest',
   localField: '_id',
   foreignField: 'parcel_id',
+});
+
+// Define a virtual field 'review'
+parcelSchema.virtual('review', {
+  ref: 'Review', // The model to link to
+  localField: '_id', // The ID in the Parcel model
+  foreignField: 'parcel_id', // The field in the Review model that references Parcel
+  justOne: true, // Since one parcel only has one review
 });
 
 export const Parcel = model<TParcel>('Parcel', parcelSchema);
@@ -106,7 +118,12 @@ const priceRequestSchema = new Schema<TParcelPriceRequest>(
     },
     decided_at: { type: Date },
   },
-  { timestamps: true }
+  {
+    timestamps: {
+      createdAt: 'created_at',
+      updatedAt: 'updated_at',
+    },
+  }
 );
 
 export const ParcelPriceRequest = model<TParcelPriceRequest>(

@@ -16,7 +16,12 @@ const chatSchema = new Schema<TChat>(
     last_message: { type: String },
     last_message_at: { type: Date },
   },
-  { timestamps: true }
+  {
+    timestamps: {
+      createdAt: 'created_at',
+      updatedAt: 'updated_at',
+    }
+  },
 );
 
 const messageSchema = new Schema<TMessage>(
@@ -32,7 +37,12 @@ const messageSchema = new Schema<TMessage>(
     attachments: [{ type: String }],
     is_read: { type: Boolean, default: false },
   },
-  { timestamps: true }
+  {
+    timestamps: {
+      createdAt: 'created_at',
+      updatedAt: 'updated_at',
+    }
+  },
 );
 
 const messageReadSchema = new Schema<TMessageRead>(

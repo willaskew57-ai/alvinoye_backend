@@ -1,4 +1,5 @@
 import { Types, Document } from 'mongoose';
+import type { PAYMENT_STATUS } from '../payment/payment.constants';
 
 export interface TLocation {
   address: string;
@@ -42,8 +43,6 @@ export type TProposedBy = (typeof PROPOSED_BY)[keyof typeof PROPOSED_BY];
 export type TPriceRequestStatus =
   (typeof PRICE_REQUEST_STATUS)[keyof typeof PRICE_REQUEST_STATUS];
 
-// 1. Define the Location interface used in handover_location and sender_remarks
-
 export interface TParcel extends Document {
   parcel_id: string;
   user_id: Types.ObjectId;
@@ -65,15 +64,16 @@ export interface TParcel extends Document {
   accepted_by: Types.ObjectId | null;
   accepted_at: Date | null;
   completed_at: Date | null;
+  stripe_checkout_session_id?: string | null;
 }
 
 export interface TParcelPriceRequest extends Document {
   parcel_id: Types.ObjectId;
   proposed_by: TProposedBy;
   proposed_price: number;
-  message?: string; // Message or reason for counter/rejection
+  message?: string;
   rejection_reason?: string | null;
-  is_final_offer: boolean; // To identify the "Final Price" from Admin
+  is_final_offer: boolean;
   status: TPriceRequestStatus;
   decided_at?: Date;
 }

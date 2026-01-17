@@ -15,9 +15,15 @@ export const faqValidation = {
   }),
 };
 
-export const contentValidation = z.object({
+export const contentCreateValidation = z.object({
   body: z.object({
     title: z.string().optional(),
     content: z.string({ required_error: 'Content is required' }),
+  }),
+});
+export const contentUpdateValidation = z.object({
+  body: z.object({
+    title: z.string().optional(),
+    content: z.string({ required_error: 'Content is required' }).optional(),
   }),
 });

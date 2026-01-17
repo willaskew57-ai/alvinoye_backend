@@ -7,6 +7,8 @@ import { DriverRoutes } from '../modules/driver/driver.route';
 import { ParcelRoutes } from '../modules/parcel/parcel.route';
 import { SettingsRoutes } from '../modules/setting/settings.routes';
 import { ChatRoutes } from '../modules/chat/chat.routes';
+import { ReviewRoutes } from '../modules/review/review.routes';
+import { PaymentRoute } from '../modules/payment/payment.route';
 const router = express.Router();
 const modulesRoute = [
     {
@@ -26,8 +28,16 @@ const modulesRoute = [
         route: ParcelRoutes,
     },
     {
+        path: '/payment',
+        route: PaymentRoute,
+    },
+    {
         path: '/chat',
         route: ChatRoutes,
+    },
+    {
+        path: '/review',
+        route: ReviewRoutes,
     },
     {
         path: '/settings',

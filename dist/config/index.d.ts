@@ -16,6 +16,7 @@ declare const configs: {
     smtp_mail: string | undefined;
     smtp_password: string | undefined;
     smtp_service_name: string | undefined;
+    stripe_secret_key: string;
 };
 export default configs;
 //# sourceMappingURL=index.d.ts.map

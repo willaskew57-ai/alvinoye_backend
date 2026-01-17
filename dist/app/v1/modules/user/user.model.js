@@ -1,4 +1,4 @@
-import { Schema, model, Types } from 'mongoose';
+import { Schema, model } from 'mongoose';
 import bcrypt from 'bcrypt';
 // ** import local files
 import { USER_ROLE, USER_STATUS, } from './user.interface';

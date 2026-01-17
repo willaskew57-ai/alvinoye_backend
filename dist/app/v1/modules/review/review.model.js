@@ -4,12 +4,17 @@ const reviewSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'Parcel',
         required: true,
-        unique: true // Prevents multiple reviews for the same parcel
+        unique: true
     },
     customer_id: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     driver_id: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     rating: { type: Number, required: true, min: 1, max: 5 },
     feedback: { type: String, required: true },
-}, { timestamps: true });
+}, {
+    timestamps: {
+        createdAt: 'created_at',
+        updatedAt: 'updated_at',
+    }
+});
 export const Review = model('Review', reviewSchema);
 //# sourceMappingURL=review.model.js.map
