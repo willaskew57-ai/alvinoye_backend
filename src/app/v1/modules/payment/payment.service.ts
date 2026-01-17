@@ -25,6 +25,8 @@ export const createCheckoutSessionService = async (
   if (!parcel.final_price)
     throw new AppError(httpStatus.BAD_REQUEST, 'Parcel price not set');
 
+
+
   // Check if payment already completed
   const existingPayment = await Payment.findOne({
     parcel_id: parcel._id,
