@@ -52,7 +52,7 @@ const getMe = catchAsync(async (req, res) => {
 });
 
 const updateMe = catchAsync(async (req, res) => {
-  const { user_id } = req.user; // Extracted from token
+  const { user_id } = req.user; 
   const result = await UserServices.updateMeIntoDB(user_id, req.body);
 
   sendResponse(res, {

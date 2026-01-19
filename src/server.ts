@@ -8,7 +8,6 @@ import configs from './config';
 import { connectDB } from './db';
 import { initSocket } from './socket';
 
-
 let server: Server;
 
 async function main() {
@@ -17,11 +16,13 @@ async function main() {
     console.log(colors.blue(`Database is Connected Successfully!!!`).bold);
     server = app.listen(configs.port, () => {
       console.log(
-        colors.green(`The Server is running on ${configs.port}`).bold
+        colors.green(
+          `The Server is running on ${configs.port}`
+        ).bold
       );
     });
 
-     // 🔥 initialize socket after server starts
+    // 🔥 initialize socket after server starts
     initSocket(server);
   } catch (err) {
     console.log(err);

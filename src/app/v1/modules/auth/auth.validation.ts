@@ -24,7 +24,6 @@ const loginValidationSchema = z.object({
 
 const verifyOtpValidationSchema = z.object({
   body: z.object({
-    user_id: z.string({ required_error: 'User ID is required' }),
     otp: z
       .string({ required_error: 'OTP is required' })
       .length(6, 'OTP must be 6 digits'),
@@ -64,7 +63,6 @@ const forgetPasswordValidationSchema = z.object({
 
 const resetPasswordValidationSchema = z.object({
   body: z.object({
-    id: z.string({ required_error: 'User ID is required' }), // This is the mongo _id
     new_password: z.string({ required_error: 'New password is required' }),
   }),
 });

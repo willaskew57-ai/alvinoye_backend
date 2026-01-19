@@ -70,7 +70,8 @@ const logout = catchAsync(async (req, res) => {
 });
 
 const verifyOtp = catchAsync(async (req, res) => {
-  await AuthServices.verifyOtp(req.body);
+  const token = req.headers.authorization?.split(' ')[1];
+  await AuthServices.verifyOtp(req.body, token as string);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,

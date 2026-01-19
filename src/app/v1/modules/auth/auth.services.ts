@@ -199,21 +199,27 @@ const changePasswordIntoDB = async (
 /**
  * Verify OTP Service
  */
-const verifyOtp = async (payload: {
-  user_id: string;
-  otp: string;
-  purpose: 'REGISTER' | 'RESET_PASSWORD';
-}) => {
-  const { user_id, otp, purpose } = payload;
+const verifyOtp = async (
+  payload: {
+    otp: string;
+    purpose: 'REGISTER' | 'RESET_PASSWORD';
+  },
+  token: string
+) => {
+  const { otp, purpose } = payload;
+  const decoded = verifyToken(
+    token,
+    configs.jwt_reset_token as string
+  ) as JwtPayload;
 
   await OtpServices.verifyOtpFromDB({
-    user_id: user_id,
+    user_id: decoded.user_id,
     inputOtp: otp,
     purpose,
   });
 
   if (purpose === 'REGISTER') {
-    await User.findByIdAndUpdate(user_id, { is_verified: true });
+    await User.findByIdAndUpdate(decoded.user_id, { is_verified: true });
   }
 
   return null;
@@ -237,6 +243,8 @@ const resendOtp = async (payload: {
     user_id: user._id as Types.ObjectId,
     purpose,
   });
+
+  console.log(otp)
 
   // Send resend OTP email
   await EmailHelpers.sendOtpResendEmail(email, {
@@ -322,6 +330,8 @@ const forgetPassword = async (email: string) => {
     purpose: 'RESET_PASSWORD',
   });
 
+  console.log(otp);
+
   // Send reset password email
   await EmailHelpers.sendResetPasswordEmail(email, {
     name: user.full_name || 'User',
@@ -351,7 +361,7 @@ const forgetPassword = async (email: string) => {
  * Reset Password Service (Final Step)
  */
 const resetPassword = async (
-  payload: { id: string; new_password: string },
+  payload: { new_password: string },
   token: string
 ) => {
   const decoded = verifyToken(
@@ -359,11 +369,7 @@ const resetPassword = async (
     configs.jwt_reset_token as string
   ) as JwtPayload;
 
-  if (payload.id !== decoded.user_id) {
-    throw new AppError(httpStatus.FORBIDDEN, 'Invalid reset request!');
-  }
-
-  const user = await User.findById(payload.id);
+  const user = await User.findById(decoded.user_id);
 
   if (
     !user ||

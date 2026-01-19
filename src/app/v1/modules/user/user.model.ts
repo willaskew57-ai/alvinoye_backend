@@ -45,6 +45,11 @@ const UserSchema = new Schema<TUser, IUserModel>(
       type: String,
       trim: true,
     },
+    address: {
+      type: String,
+      trim: true,
+      default: '',
+    },
     profile_picture: {
       type: String,
       trim: true,

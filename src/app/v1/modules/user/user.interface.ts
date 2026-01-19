@@ -26,6 +26,7 @@ export interface TUser extends Document {
   email: string;
   password: string;
   phone_number?: string;
+  address?: string;
   profile_picture?: string;
   role: TUserRole;
   status: TUserStatus;
@@ -34,7 +35,7 @@ export interface TUser extends Document {
 
   // Auth Logic
   password_changed_at?: Date;
-  
+
   // Moderation & Soft Deletion
   removed_by?: Types.ObjectId | null;
   blocked_by?: Types.ObjectId | null;
