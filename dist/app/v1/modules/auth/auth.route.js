@@ -14,7 +14,7 @@ router
 router.route('/logout').post(AuthControllers.logout);
 router
     .route('/verify-otp')
-    .post(validateRequest(AuthValidations.verifyOtpValidationSchema), AuthControllers.verifyOtp);
+    .post(auth(USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN, USER_ROLE.DRIVER, USER_ROLE.CUSTOMER), validateRequest(AuthValidations.verifyOtpValidationSchema), AuthControllers.verifyOtp);
 router
     .route('/resend-otp')
     .post(validateRequest(AuthValidations.resendOtpValidationSchema), AuthControllers.resendOtp);
@@ -29,6 +29,6 @@ router
     .post(validateRequest(AuthValidations.forgetPasswordValidationSchema), AuthControllers.forgetPassword);
 router
     .route('/reset-password')
-    .post(validateRequest(AuthValidations.resetPasswordValidationSchema), AuthControllers.resetPassword);
+    .post(auth(USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN, USER_ROLE.DRIVER, USER_ROLE.CUSTOMER), validateRequest(AuthValidations.resetPasswordValidationSchema), AuthControllers.resetPassword);
 export const AuthRoutes = router;
 //# sourceMappingURL=auth.route.js.map

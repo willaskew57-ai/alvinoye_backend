@@ -1,7 +1,6 @@
 import AppError from '../../../../errors/app-error';
 import httpStatus from 'http-status';
 import { createCheckoutSessionService, handleStripeWebhookService, refundPaymentService, getPaymentHistoryService, } from './payment.service';
-import { PAYMENT_STATUS } from './payment.constants';
 import catchAsync from '../../../../utils/catch-async';
 import stripe from '../../../../config/stripe';
 /**
@@ -44,8 +43,8 @@ export const stripeWebhook = catchAsync(async (req, res) => {
  * Refund a payment (ADMIN only)
  */
 export const refundPayment = catchAsync(async (req, res) => {
-    const { paymentId, reason } = req.body;
-    if (!paymentId)
+    const { payment_id, reason } = req.body;
+    if (!payment_id)
         throw new AppError(httpStatus.BAD_REQUEST, 'Payment ID is required');
     // reason must be one of the allowed Stripe values
     const validReasons = [
@@ -54,7 +53,7 @@ export const refundPayment = catchAsync(async (req, res) => {
         'requested_by_customer',
     ];
     const refundReason = validReasons.includes(reason) ? reason : 'requested_by_customer';
-    const refund = await refundPaymentService(paymentId, refundReason);
+    const refund = await refundPaymentService(payment_id, refundReason);
     res.status(httpStatus.OK).json({
         success: true,
         refund,
@@ -66,7 +65,7 @@ export const refundPayment = catchAsync(async (req, res) => {
  */
 export const getPaymentHistory = catchAsync(async (req, res) => {
     const user = req.user;
-    const payments = await getPaymentHistoryService(user.userId);
+    const payments = await getPaymentHistoryService(user.user_id);
     res.status(httpStatus.OK).json({
         success: true,
         payments,

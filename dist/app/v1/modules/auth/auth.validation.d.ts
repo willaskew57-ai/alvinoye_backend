@@ -56,27 +56,22 @@ export declare const AuthValidations: {
     }>;
     verifyOtpValidationSchema: z.ZodObject<{
         body: z.ZodObject<{
-            user_id: z.ZodString;
             otp: z.ZodString;
             purpose: z.ZodEnum<["REGISTER", "RESET_PASSWORD"]>;
         }, "strip", z.ZodTypeAny, {
-            user_id: string;
             otp: string;
             purpose: "REGISTER" | "RESET_PASSWORD";
         }, {
-            user_id: string;
             otp: string;
             purpose: "REGISTER" | "RESET_PASSWORD";
         }>;
     }, "strip", z.ZodTypeAny, {
         body: {
-            user_id: string;
             otp: string;
             purpose: "REGISTER" | "RESET_PASSWORD";
         };
     }, {
         body: {
-            user_id: string;
             otp: string;
             purpose: "REGISTER" | "RESET_PASSWORD";
         };
@@ -161,23 +156,18 @@ export declare const AuthValidations: {
     }>;
     resetPasswordValidationSchema: z.ZodObject<{
         body: z.ZodObject<{
-            id: z.ZodString;
             new_password: z.ZodString;
         }, "strip", z.ZodTypeAny, {
-            id: string;
             new_password: string;
         }, {
-            id: string;
             new_password: string;
         }>;
     }, "strip", z.ZodTypeAny, {
         body: {
-            id: string;
             new_password: string;
         };
     }, {
         body: {
-            id: string;
             new_password: string;
         };
     }>;

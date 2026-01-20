@@ -70,7 +70,6 @@ router
 
 router
   .route('/reset-password')
-
   .post(
     auth(
       USER_ROLE.SUPER_ADMIN,

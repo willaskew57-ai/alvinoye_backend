@@ -117,15 +117,16 @@ const changePasswordIntoDB = async (userData, payload) => {
 /**
  * Verify OTP Service
  */
-const verifyOtp = async (payload) => {
-    const { user_id, otp, purpose } = payload;
+const verifyOtp = async (payload, token) => {
+    const { otp, purpose } = payload;
+    const decoded = verifyToken(token, configs.jwt_reset_token);
     await OtpServices.verifyOtpFromDB({
-        user_id: user_id,
+        user_id: decoded.user_id,
         inputOtp: otp,
         purpose,
     });
     if (purpose === 'REGISTER') {
-        await User.findByIdAndUpdate(user_id, { is_verified: true });
+        await User.findByIdAndUpdate(decoded.user_id, { is_verified: true });
     }
     return null;
 };
@@ -142,6 +143,7 @@ const resendOtp = async (payload) => {
         user_id: user._id,
         purpose,
     });
+    console.log(otp);
     // Send resend OTP email
     await EmailHelpers.sendOtpResendEmail(email, {
         user: user.full_name || 'User',
@@ -192,6 +194,7 @@ const forgetPassword = async (email) => {
         user_id: user_id,
         purpose: 'RESET_PASSWORD',
     });
+    console.log(otp);
     // Send reset password email
     await EmailHelpers.sendResetPasswordEmail(email, {
         name: user.full_name || 'User',
@@ -214,10 +217,7 @@ const forgetPassword = async (email) => {
  */
 const resetPassword = async (payload, token) => {
     const decoded = verifyToken(token, configs.jwt_reset_token);
-    if (payload.id !== decoded.user_id) {
-        throw new AppError(httpStatus.FORBIDDEN, 'Invalid reset request!');
-    }
-    const user = await User.findById(payload.id);
+    const user = await User.findById(decoded.user_id);
     if (!user ||
         (await User.isUserDeleted(user)) ||
         (await User.isUserBlocked(user))) {

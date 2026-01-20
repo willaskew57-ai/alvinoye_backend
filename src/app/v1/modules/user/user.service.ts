@@ -99,21 +99,21 @@ const changeUserStatusInDB = async (
 };
 
 const getAllUsersFromDB = async (query: Record<string, unknown>) => {
-  // 1. Define the fields you want to enable for searching (full_name)
   const userSearchableFields = ['full_name', 'email', 'phone_number'];
 
-  // 2. Initialize the QueryBuilder with the User model and the query object
-  const userQuery = new QueryBuilder(User.find(), query)
+  const baseQuery = User.find({
+    role: { $in: [USER_ROLE.CUSTOMER, USER_ROLE.DRIVER] },
+  });
+
+  const userQuery = new QueryBuilder(baseQuery, query)
     .search(userSearchableFields)
     .filter()
     .sort()
     .paginate()
     .fields();
 
-  // 3. Execute the query to get the data
   const data = await userQuery.modelQuery;
 
-  // 4. Get the pagination metadata
   const meta = await userQuery.countTotal();
 
   return {
@@ -176,7 +176,7 @@ const updateUserInDB = async (id: string, payload: Partial<TUser>) => {
 const deleteUserFromDB = async (id: string) => {
   const result = await User.findByIdAndUpdate(
     id,
-    { is_deleted: true, deleted_date: new Date() },
+    { status: 'DELETED', deleted_date: new Date() },
     { new: true }
   );
   if (!result) throw new AppError(httpStatus.NOT_FOUND, 'User not found!');
@@ -191,6 +191,5 @@ export const UserServices = {
   updateMeIntoDB,
   getSingleUserFromDB,
   updateUserInDB,
-
   deleteUserFromDB,
 };

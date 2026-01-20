@@ -9,10 +9,8 @@ export const createCheckoutSchema = z.object({
 });
 export const refundPaymentSchema = z.object({
     body: z.object({
-        paymentId: z.string().min(1, 'Payment ID is required'),
-        reason: z
-            .enum(['duplicate', 'fraudulent', 'requested_by_customer'])
-            .optional(),
+        payment_id: z.string().min(1, 'Payment ID is required'),
+        reason: z.string().optional(),
     }),
 });
 //# sourceMappingURL=payment.validation.js.map

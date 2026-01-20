@@ -19,6 +19,7 @@ const updateUserValidationSchema = z.object({
         full_name: z.string().optional(),
         phone_number: z.string().optional(),
         profile_picture: z.string().optional(),
+        address: z.string().optional(),
     }),
 });
 const changeStatusValidationSchema = z.object({

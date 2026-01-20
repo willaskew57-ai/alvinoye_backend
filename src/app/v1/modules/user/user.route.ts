@@ -23,7 +23,7 @@ router.patch(
 );
 
 router.get(
-  '/get',
+  '/get-all',
   auth(
     USER_ROLE.SUPER_ADMIN,
     USER_ROLE.ADMIN,

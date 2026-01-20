@@ -8,7 +8,7 @@ const router = express.Router();
 // Only SUPER_ADMIN can create a user directly via this admin route
 router.post('/create-admin', auth(USER_ROLE.SUPER_ADMIN), validateRequest(UserValidation.createAdminValidationSchema), UserControllers.createAdmin);
 router.patch('/change-status/:id', auth(USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN), validateRequest(UserValidation.changeStatusValidationSchema), UserControllers.changeStatus);
-router.get('/get', auth(USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN, USER_ROLE.CUSTOMER, USER_ROLE.DRIVER), UserControllers.getAllUser);
+router.get('/get-all', auth(USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN, USER_ROLE.CUSTOMER, USER_ROLE.DRIVER), UserControllers.getAllUser);
 // --- Profile Routes ---
 router.get('/get-me', auth(USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN, USER_ROLE.CUSTOMER, USER_ROLE.DRIVER), UserControllers.getMe);
 router.patch('/update-me', auth(USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN, USER_ROLE.CUSTOMER, USER_ROLE.DRIVER), validateRequest(UserValidation.updateUserValidationSchema), // Reuse or create a specific Zod schema

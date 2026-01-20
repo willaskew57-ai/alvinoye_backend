@@ -37,6 +37,11 @@ const UserSchema = new Schema({
         type: String,
         trim: true,
     },
+    address: {
+        type: String,
+        trim: true,
+        default: '',
+    },
     profile_picture: {
         type: String,
         trim: true,

@@ -26,10 +26,9 @@ export declare const AuthServices: {
         };
     }>;
     verifyOtp: (payload: {
-        user_id: string;
         otp: string;
         purpose: "REGISTER" | "RESET_PASSWORD";
-    }) => Promise<null>;
+    }, token: string) => Promise<null>;
     resendOtp: (payload: {
         email: string;
         purpose: "REGISTER" | "RESET_PASSWORD";
@@ -44,7 +43,6 @@ export declare const AuthServices: {
         user_id: Types.ObjectId | undefined;
     }>;
     resetPassword: (payload: {
-        id: string;
         new_password: string;
     }, token: string) => Promise<null>;
 };

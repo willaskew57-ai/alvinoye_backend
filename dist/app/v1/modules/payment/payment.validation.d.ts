@@ -21,24 +21,24 @@ export declare const createCheckoutSchema: z.ZodObject<{
 }>;
 export declare const refundPaymentSchema: z.ZodObject<{
     body: z.ZodObject<{
-        paymentId: z.ZodString;
-        reason: z.ZodOptional<z.ZodEnum<["duplicate", "fraudulent", "requested_by_customer"]>>;
+        payment_id: z.ZodString;
+        reason: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
-        paymentId: string;
-        reason?: "duplicate" | "fraudulent" | "requested_by_customer" | undefined;
+        payment_id: string;
+        reason?: string | undefined;
     }, {
-        paymentId: string;
-        reason?: "duplicate" | "fraudulent" | "requested_by_customer" | undefined;
+        payment_id: string;
+        reason?: string | undefined;
     }>;
 }, "strip", z.ZodTypeAny, {
     body: {
-        paymentId: string;
-        reason?: "duplicate" | "fraudulent" | "requested_by_customer" | undefined;
+        payment_id: string;
+        reason?: string | undefined;
     };
 }, {
     body: {
-        paymentId: string;
-        reason?: "duplicate" | "fraudulent" | "requested_by_customer" | undefined;
+        payment_id: string;
+        reason?: string | undefined;
     };
 }>;
 //# sourceMappingURL=payment.validation.d.ts.map

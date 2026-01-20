@@ -59,25 +59,30 @@ export declare const UserValidation: {
             full_name: z.ZodOptional<z.ZodString>;
             phone_number: z.ZodOptional<z.ZodString>;
             profile_picture: z.ZodOptional<z.ZodString>;
+            address: z.ZodOptional<z.ZodString>;
         }, "strip", z.ZodTypeAny, {
             full_name?: string | undefined;
             phone_number?: string | undefined;
+            address?: string | undefined;
             profile_picture?: string | undefined;
         }, {
             full_name?: string | undefined;
             phone_number?: string | undefined;
+            address?: string | undefined;
             profile_picture?: string | undefined;
         }>;
     }, "strip", z.ZodTypeAny, {
         body: {
             full_name?: string | undefined;
             phone_number?: string | undefined;
+            address?: string | undefined;
             profile_picture?: string | undefined;
         };
     }, {
         body: {
             full_name?: string | undefined;
             phone_number?: string | undefined;
+            address?: string | undefined;
             profile_picture?: string | undefined;
         };
     }>;

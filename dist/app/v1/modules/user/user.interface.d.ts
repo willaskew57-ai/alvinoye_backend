@@ -20,6 +20,7 @@ export interface TUser extends Document {
     email: string;
     password: string;
     phone_number?: string;
+    address?: string;
     profile_picture?: string;
     role: TUserRole;
     status: TUserStatus;
