@@ -12,7 +12,8 @@ export const USER_STATUS = {
   PENDING: 'PENDING',
   ACTIVE: 'ACTIVE',
   BLOCKED: 'BLOCKED',
-  REMOVED: 'REMOVED',
+  
+  REJECTED: 'REJECTED',
   DELETED: 'DELETED',
 } as const;
 
@@ -37,7 +38,6 @@ export interface TUser extends Document {
   password_changed_at?: Date;
 
   // Moderation & Soft Deletion
-  removed_by?: Types.ObjectId | null;
   blocked_by?: Types.ObjectId | null;
   deleted_date?: Date | null;
 
@@ -55,6 +55,7 @@ export interface IUserModel extends Model<TUser> {
   isUserBlocked(user: TUser): Promise<boolean>;
   isUserDeleted(user: TUser): Promise<boolean>;
   isUserVerified(user: TUser): Promise<boolean>;
+  isUserRejected(user: TUser): Promise<boolean>;
 
   // Auth & Security
   compareUserPassword(

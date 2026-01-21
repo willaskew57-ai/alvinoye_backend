@@ -10,6 +10,7 @@ import { SettingsRoutes } from '../modules/setting/settings.routes';
 import { ChatRoutes } from '../modules/chat/chat.routes';
 import { ReviewRoutes } from '../modules/review/review.routes';
 import { PaymentRoute } from '../modules/payment/payment.route';
+import { CustomerRoutes } from '../modules/cusotmer/customer.route';
 
 const router = express.Router();
 
@@ -30,6 +31,10 @@ const modulesRoute: TModuleRoutes[] = [
   {
     path: '/driver',
     route: DriverRoutes,
+  },
+  {
+    path: '/customer',
+    route: CustomerRoutes,
   },
   {
     path: '/parcel',

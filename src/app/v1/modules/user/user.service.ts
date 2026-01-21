@@ -32,7 +32,6 @@ const createAdminIntoDB = async (payload: TUser) => {
 };
 
 // ** ------------- User Status update Service -------------
-
 const changeUserStatusInDB = async (
   targetId: string,
   payload: { status: TUserStatus },
@@ -76,16 +75,8 @@ const changeUserStatusInDB = async (
       updateData.blocked_by = adminObjectId;
       break;
 
-    case USER_STATUS.REMOVED:
-    case USER_STATUS.DELETED:
-      updateData.removed_by = adminObjectId;
-      updateData.deleted_date = new Date();
-      break;
-
     case USER_STATUS.ACTIVE:
       updateData.blocked_by = null;
-      updateData.removed_by = null;
-      updateData.deleted_date = null;
       break;
   }
 

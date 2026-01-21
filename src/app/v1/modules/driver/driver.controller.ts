@@ -17,6 +17,8 @@ const registerDriver = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllDrivers = catchAsync(async (req: Request, res: Response) => {
+
+
   const result = await DriverServices.getAllDriversFromDB(req.query);
   sendResponse(res, {
     statusCode: httpStatus.OK,
