@@ -16,7 +16,6 @@ import {
 } from './parcel.interface';
 import type { TUserPayload } from '../../../../interfaces';
 import { generateParcelId } from './parcel.utils';
-import { getIO } from '../../../../socket';
 
 // ** ----- create parcel -----
 const createParcelIntoDB = async (userId: string, payload: TParcel) => {
@@ -37,17 +36,14 @@ const getAllParcelsFromDB = async (
   query: Record<string, unknown>,
   user: TUserPayload
 ) => {
-  const parcelSearchableFields = [
-    'parcel_id',
-    'parcel_name',
-    'receiver_phone',
-    'receiver_name',
-  ];
+  const parcelSearchableFields = ['parcel_id', 'parcel_name'];
 
   const queryObj = { ...query };
 
-  if (queryObj.search) {
-    queryObj.searchTerm = queryObj.search;
+  if (Object.hasOwn(queryObj, 'search')) {
+    if (queryObj.search) {
+      queryObj.searchTerm = queryObj.search;
+    }
     delete queryObj.search;
   }
 
@@ -132,6 +128,36 @@ const updateParcelInDB = async (id: string, payload: Partial<TParcel>) => {
   if (!result) {
     throw new AppError(httpStatus.NOT_FOUND, 'Parcel not found!');
   }
+  return result;
+};
+
+const rejectParcelFromDB = async (id: string, payload: { rejection_reason: string }) => {
+  const parcel = await Parcel.findById(id);
+
+  if (!parcel) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Parcel not found!');
+  }
+
+  // Optional: Check if the parcel is already in a state that cannot be rejected
+  if (parcel.status !== PARCEL_STATUS.WAITING) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      `Cannot reject a parcel that is already ${parcel.status.toLowerCase()}`
+    );
+  }
+
+  const result = await Parcel.findByIdAndUpdate(
+    id,
+    {
+      status: PARCEL_STATUS.REJECTED,
+      rejection_reason: payload.rejection_reason,
+    },
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+
   return result;
 };
 
@@ -234,9 +260,8 @@ const acceptPriceProposalInDB = async (
   try {
     session.startTransaction();
 
-    const priceRequest = await ParcelPriceRequest.findById(requestId).session(
-      session
-    );
+    const priceRequest =
+      await ParcelPriceRequest.findById(requestId).session(session);
     if (!priceRequest)
       throw new AppError(httpStatus.NOT_FOUND, 'Request not found!');
     if (priceRequest.status !== PRICE_REQUEST_STATUS.PENDING) {
@@ -304,9 +329,8 @@ const rejectAndCounterPriceInDB = async (
     session.startTransaction();
 
     // 1Mark Admin's previous proposal as REJECTED
-    const currentRequest = await ParcelPriceRequest.findById(requestId).session(
-      session
-    );
+    const currentRequest =
+      await ParcelPriceRequest.findById(requestId).session(session);
     if (!currentRequest)
       throw new AppError(httpStatus.NOT_FOUND, 'Price request not found!');
 
@@ -362,9 +386,8 @@ const adminRejectAndFinalOfferInDB = async (
     session.startTransaction();
 
     // Mark Customer's counter-offer as REJECTED
-    const customerRequest = await ParcelPriceRequest.findById(
-      requestId
-    ).session(session);
+    const customerRequest =
+      await ParcelPriceRequest.findById(requestId).session(session);
     if (!customerRequest)
       throw new AppError(httpStatus.NOT_FOUND, 'Counter offer not found');
 
@@ -410,6 +433,7 @@ export const ParcelServices = {
   getMyParcelsFromDB,
   getSingleParcelFromDB,
   updateParcelInDB,
+  rejectParcelFromDB,
   proposePriceInDB,
   acceptPriceProposalInDB,
   rejectAndCounterPriceInDB,

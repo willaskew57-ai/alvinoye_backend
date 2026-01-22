@@ -104,10 +104,9 @@ const getAllDriversFromDB = async (query) => {
         'fields',
     ];
     excludeFields.forEach((el) => delete queryObj[el]);
-    const userQuery = new QueryBuilder(User.find({ role: 'DRIVER' })
-        .populate('driver_info') // Ensure virtual/ref is set in User Schema
-        .populate('vehicle'), // Ensure virtual/ref is set in User Schema
-    queryObj);
+    const userQuery = new QueryBuilder(User.find({ role: 'DRIVER', is_profile_completed: true })
+        .populate('driver_info')
+        .populate('vehicle'), queryObj);
     if (search) {
         const searchRegex = { $regex: search, $options: 'i' };
         userQuery.modelQuery = userQuery.modelQuery.find({

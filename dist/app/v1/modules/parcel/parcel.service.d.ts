@@ -53,6 +53,15 @@ export declare const ParcelServices: {
     } & {
         id: string;
     }>;
+    rejectParcelFromDB: (id: string, payload: {
+        rejection_reason: string;
+    }) => Promise<(mongoose.Document<unknown, {}, TParcel, {}, mongoose.DefaultSchemaOptions> & TParcel & Required<{
+        _id: mongoose.Types.ObjectId;
+    }> & {
+        __v: number;
+    } & {
+        id: string;
+    }) | null>;
     proposePriceInDB: (userId: string, role: string, payload: Partial<TParcelPriceRequest>) => Promise<(mongoose.Document<unknown, {}, TParcelPriceRequest, {}, mongoose.DefaultSchemaOptions> & TParcelPriceRequest & Required<{
         _id: mongoose.Types.ObjectId;
     }> & {

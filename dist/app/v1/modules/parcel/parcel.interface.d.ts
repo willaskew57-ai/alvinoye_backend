@@ -20,6 +20,7 @@ export declare const PRICE_STATUS: {
     readonly REJECTED: "REJECTED";
 };
 export declare const PROPOSED_BY: {
+    readonly SUPER_ADMIN: "SUPER_ADMIN";
     readonly ADMIN: "ADMIN";
     readonly CUSTOMER: "CUSTOMER";
 };
@@ -50,6 +51,7 @@ export interface TParcel extends Document {
     status: TParcelStatus;
     final_price: number | null;
     price_status: TPriceStatus;
+    rejection_reason?: string;
     accepted_by: Types.ObjectId | null;
     accepted_at: Date | null;
     completed_at: Date | null;

@@ -69,10 +69,6 @@ const UserSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'User',
     },
-    removed_by: {
-        type: Schema.Types.ObjectId,
-        ref: 'User',
-    },
     deleted_date: {
         type: Date,
     },
@@ -113,11 +109,14 @@ UserSchema.statics.isUserExistsByEmail = async function (email) {
 UserSchema.statics.isUserActive = async function (user) {
     return user?.status === 'ACTIVE' || false;
 };
-UserSchema.statics.isUserDeleted = async function (user) {
-    return user?.status === 'REMOVED' || false;
-};
 UserSchema.statics.isUserBlocked = async function (user) {
     return user?.status === 'BLOCKED' || false;
+};
+UserSchema.statics.isUserRejected = async function (user) {
+    return user?.status === 'REJECTED' || false;
+};
+UserSchema.statics.isUserDeleted = async function (user) {
+    return user?.status === 'DELETED' || false;
 };
 UserSchema.statics.isUserVerified = async function (user) {
     return user?.is_verified || false;

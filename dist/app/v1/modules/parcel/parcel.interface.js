@@ -16,6 +16,7 @@ export const PRICE_STATUS = {
     REJECTED: 'REJECTED',
 };
 export const PROPOSED_BY = {
+    SUPER_ADMIN: 'SUPER_ADMIN',
     ADMIN: 'ADMIN',
     CUSTOMER: 'CUSTOMER',
 };

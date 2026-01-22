@@ -13,6 +13,7 @@ const createParcel = catchAsync(async (req, res) => {
     });
 });
 const getAllParcels = catchAsync(async (req, res) => {
+    console.log("get all  parcel params", req.query);
     const result = await ParcelServices.getAllParcelsFromDB(req.query, req.user);
     sendResponse(res, {
         statusCode: httpStatus.OK,
@@ -48,6 +49,16 @@ const updateParcel = catchAsync(async (req, res) => {
         statusCode: httpStatus.OK,
         success: true,
         message: 'Parcel updated successfully',
+        data: result,
+    });
+});
+const rejectParcel = catchAsync(async (req, res) => {
+    const { id } = req.params;
+    const result = await ParcelServices.rejectParcelFromDB(id, req.body);
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'Parcel rejected successfully',
         data: result,
     });
 });
@@ -108,6 +119,7 @@ export const ParcelControllers = {
     getMyParcels,
     getSingleParcel,
     updateParcel,
+    rejectParcel,
     proposePrice,
     acceptPrice,
     rejectAndCounter,

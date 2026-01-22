@@ -49,6 +49,13 @@ router.patch(
   ParcelControllers.updateParcel
 );
 
+router.patch(
+  '/reject/:id',
+  auth(USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN),
+  validateRequest(ParcelValidations.rejectParcelValidationSchema),
+  ParcelControllers.rejectParcel
+);
+
 // ** ------- Negotiation Flow -------
 
 // Admin sets first price

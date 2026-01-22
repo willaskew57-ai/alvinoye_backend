@@ -147,7 +147,6 @@ const resendOtp = async (payload) => {
     // Send resend OTP email
     await EmailHelpers.sendOtpResendEmail(email, {
         user: user.full_name || 'User',
-        code: otp,
         expiresIn: configs.otp_expiry_minutes || 5,
     });
     return null;
@@ -208,7 +207,6 @@ const forgetPassword = async (email) => {
     const resetToken = createToken(jwtPayload, configs.jwt_reset_token, configs.jwt_reset_expiresIn);
     return {
         resetToken,
-        otp,
         user_id: user._id,
     };
 };

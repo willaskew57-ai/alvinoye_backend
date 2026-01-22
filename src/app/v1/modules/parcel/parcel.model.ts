@@ -7,7 +7,6 @@ import {
   type TParcel,
   type TParcelPriceRequest,
 } from './parcel.interface';
-import { PAYMENT_STATUS } from '../payment/payment.constants';
 
 const LocationSchema = new Schema(
   {
@@ -54,6 +53,7 @@ const parcelSchema = new Schema<TParcel>(
       enum: Object.values(PRICE_STATUS),
       default: PRICE_STATUS.NOT_SET,
     },
+    rejection_reason: { type: String, default: null },
 
     accepted_by: {
       type: Schema.Types.ObjectId,
@@ -83,10 +83,10 @@ parcelSchema.virtual('price_requests', {
 
 // Define a virtual field 'review'
 parcelSchema.virtual('review', {
-  ref: 'Review', // The model to link to
-  localField: '_id', // The ID in the Parcel model
-  foreignField: 'parcel_id', // The field in the Review model that references Parcel
-  justOne: true, // Since one parcel only has one review
+  ref: 'Review',
+  localField: '_id',
+  foreignField: 'parcel_id',
+  justOne: true,
 });
 
 export const Parcel = model<TParcel>('Parcel', parcelSchema);

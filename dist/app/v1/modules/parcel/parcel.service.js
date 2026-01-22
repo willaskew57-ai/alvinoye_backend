@@ -6,7 +6,6 @@ import { USER_ROLE } from '../user/user.interface';
 import { Parcel, ParcelPriceRequest } from './parcel.model';
 import { PARCEL_STATUS, PRICE_REQUEST_STATUS, PRICE_STATUS, PROPOSED_BY, } from './parcel.interface';
 import { generateParcelId } from './parcel.utils';
-import { getIO } from '../../../../socket';
 // ** ----- create parcel -----
 const createParcelIntoDB = async (userId, payload) => {
     const parcelData = {
@@ -20,15 +19,12 @@ const createParcelIntoDB = async (userId, payload) => {
     return result;
 };
 const getAllParcelsFromDB = async (query, user) => {
-    const parcelSearchableFields = [
-        'parcel_id',
-        'parcel_name',
-        'receiver_phone',
-        'receiver_name',
-    ];
+    const parcelSearchableFields = ['parcel_id', 'parcel_name'];
     const queryObj = { ...query };
-    if (queryObj.search) {
-        queryObj.searchTerm = queryObj.search;
+    if (Object.hasOwn(queryObj, 'search')) {
+        if (queryObj.search) {
+            queryObj.searchTerm = queryObj.search;
+        }
         delete queryObj.search;
     }
     if (user.role === USER_ROLE.CUSTOMER) {
@@ -88,6 +84,24 @@ const updateParcelInDB = async (id, payload) => {
     if (!result) {
         throw new AppError(httpStatus.NOT_FOUND, 'Parcel not found!');
     }
+    return result;
+};
+const rejectParcelFromDB = async (id, payload) => {
+    const parcel = await Parcel.findById(id);
+    if (!parcel) {
+        throw new AppError(httpStatus.NOT_FOUND, 'Parcel not found!');
+    }
+    // Optional: Check if the parcel is already in a state that cannot be rejected
+    if (parcel.status !== PARCEL_STATUS.WAITING) {
+        throw new AppError(httpStatus.BAD_REQUEST, `Cannot reject a parcel that is already ${parcel.status.toLowerCase()}`);
+    }
+    const result = await Parcel.findByIdAndUpdate(id, {
+        status: PARCEL_STATUS.REJECTED,
+        rejection_reason: payload.rejection_reason,
+    }, {
+        new: true,
+        runValidators: true,
+    });
     return result;
 };
 // ** --- Price Negotiation  ---
@@ -276,6 +290,7 @@ export const ParcelServices = {
     getMyParcelsFromDB,
     getSingleParcelFromDB,
     updateParcelInDB,
+    rejectParcelFromDB,
     proposePriceInDB,
     acceptPriceProposalInDB,
     rejectAndCounterPriceInDB,

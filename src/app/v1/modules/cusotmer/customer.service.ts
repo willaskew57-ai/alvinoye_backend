@@ -5,7 +5,7 @@ import { USER_ROLE, USER_STATUS } from '../user/user.interface';
 import QueryBuilder from '../../../../builders/query-builder';
 
 const getAllUsersFromDB = async (query: Record<string, unknown>) => {
-  const userSearchableFields = ['full_name', 'email', 'phone_number'];
+  const userSearchableFields = ['full_name', 'email'];
 
   const baseQuery = User.find({
     role: { $in: [USER_ROLE.CUSTOMER] },

@@ -22,7 +22,7 @@ export declare const AuthServices: {
             full_name: string;
             email: string;
             role: "SUPER_ADMIN" | "ADMIN" | "CUSTOMER" | "DRIVER";
-            status: "PENDING" | "ACTIVE" | "BLOCKED" | "REMOVED" | "DELETED";
+            status: "PENDING" | "ACTIVE" | "BLOCKED" | "REJECTED" | "DELETED";
         };
     }>;
     verifyOtp: (payload: {
@@ -39,7 +39,6 @@ export declare const AuthServices: {
     }>;
     forgetPassword: (email: string) => Promise<{
         resetToken: string;
-        otp: string;
         user_id: Types.ObjectId | undefined;
     }>;
     resetPassword: (payload: {

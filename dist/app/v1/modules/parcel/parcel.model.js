@@ -1,6 +1,5 @@
 import { Schema, model } from 'mongoose';
 import { PARCEL_STATUS, PRICE_REQUEST_STATUS, PRICE_STATUS, PROPOSED_BY, } from './parcel.interface';
-import { PAYMENT_STATUS } from '../payment/payment.constants';
 const LocationSchema = new Schema({
     address: { type: String, required: true },
     latitude: { type: Number, required: true },
@@ -41,6 +40,7 @@ const parcelSchema = new Schema({
         enum: Object.values(PRICE_STATUS),
         default: PRICE_STATUS.NOT_SET,
     },
+    rejection_reason: { type: String, default: null },
     accepted_by: {
         type: Schema.Types.ObjectId,
         ref: 'User',
@@ -64,10 +64,10 @@ parcelSchema.virtual('price_requests', {
 });
 // Define a virtual field 'review'
 parcelSchema.virtual('review', {
-    ref: 'Review', // The model to link to
-    localField: '_id', // The ID in the Parcel model
-    foreignField: 'parcel_id', // The field in the Review model that references Parcel
-    justOne: true, // Since one parcel only has one review
+    ref: 'Review',
+    localField: '_id',
+    foreignField: 'parcel_id',
+    justOne: true,
 });
 export const Parcel = model('Parcel', parcelSchema);
 // --- Price Request Schema ---

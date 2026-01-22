@@ -15,7 +15,7 @@ const changeStatus = catchAsync(async (req, res) => {
     const { id } = req.params;
     const userId = id;
     const { status } = req.body;
-    const performerId = req.user.userId;
+    const performerId = req.user.user_id;
     const performerRole = req.user.role;
     const result = await UserServices.changeUserStatusInDB(userId, { status }, performerId, performerRole);
     sendResponse(res, {
@@ -47,6 +47,7 @@ const updateMe = catchAsync(async (req, res) => {
     });
 });
 const getAllUser = catchAsync(async (req, res) => {
+    console.log("query", req.query);
     const result = await UserServices.getAllUsersFromDB(req.query);
     sendResponse(res, {
         statusCode: httpStatus.OK,

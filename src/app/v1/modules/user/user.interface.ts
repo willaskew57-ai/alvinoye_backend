@@ -12,7 +12,6 @@ export const USER_STATUS = {
   PENDING: 'PENDING',
   ACTIVE: 'ACTIVE',
   BLOCKED: 'BLOCKED',
-  
   REJECTED: 'REJECTED',
   DELETED: 'DELETED',
 } as const;

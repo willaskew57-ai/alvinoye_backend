@@ -150,9 +150,9 @@ const getAllDriversFromDB = async (query: Record<string, unknown>) => {
   excludeFields.forEach((el) => delete queryObj[el]);
 
   const userQuery = new QueryBuilder(
-    User.find({ role: 'DRIVER' })
-      .populate('driver_info') // Ensure virtual/ref is set in User Schema
-      .populate('vehicle'), // Ensure virtual/ref is set in User Schema
+    User.find({ role: 'DRIVER', is_profile_completed: true  })
+      .populate('driver_info') 
+      .populate('vehicle'), 
     queryObj
   );
 

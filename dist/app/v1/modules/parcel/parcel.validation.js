@@ -46,6 +46,17 @@ export const updateParcelValidationSchema = z.object({
         sender_remarks: locationValidationSchema.partial().optional(),
     }),
 });
+const rejectParcelValidationSchema = z.object({
+    body: z.object({
+        rejection_reason: z
+            .string({
+            required_error: 'Rejection reason is required',
+            invalid_type_error: 'Rejection reason must be a string',
+        })
+            .trim()
+            .min(1, 'Rejection reason cannot be empty'),
+    }),
+});
 const createPriceRequestValidationSchema = z.object({
     body: z.object({
         parcel_id: z.string({ required_error: 'Parcel ID (ObjectId) is required' }),
@@ -92,6 +103,7 @@ const adminUpdateParcelValidationSchema = z.object({
 export const ParcelValidations = {
     createParcelValidationSchema,
     updateParcelValidationSchema,
+    rejectParcelValidationSchema,
     createPriceRequestValidationSchema,
     customerRejectAndCounterValidationSchema,
     adminRejectAndFinalOfferValidationSchema,

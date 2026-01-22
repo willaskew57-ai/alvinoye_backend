@@ -44,15 +44,8 @@ const changeUserStatusInDB = async (targetId, payload, performerId, performerRol
         case USER_STATUS.BLOCKED:
             updateData.blocked_by = adminObjectId;
             break;
-        case USER_STATUS.REMOVED:
-        case USER_STATUS.DELETED:
-            updateData.removed_by = adminObjectId;
-            updateData.deleted_date = new Date();
-            break;
         case USER_STATUS.ACTIVE:
             updateData.blocked_by = null;
-            updateData.removed_by = null;
-            updateData.deleted_date = null;
             break;
     }
     const result = await User.findByIdAndUpdate(targetId, { $set: updateData }, { new: true, runValidators: true });

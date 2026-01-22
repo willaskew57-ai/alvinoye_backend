@@ -244,12 +244,11 @@ const resendOtp = async (payload: {
     purpose,
   });
 
-  console.log(otp)
+  console.log(otp);
 
   // Send resend OTP email
   await EmailHelpers.sendOtpResendEmail(email, {
     user: user.full_name || 'User',
-    code: otp,
     expiresIn: configs.otp_expiry_minutes || 5,
   });
 
@@ -352,7 +351,6 @@ const forgetPassword = async (email: string) => {
 
   return {
     resetToken,
-    otp,
     user_id: user._id,
   };
 };

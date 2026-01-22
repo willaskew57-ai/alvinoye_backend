@@ -9,11 +9,10 @@ const verifyOtpValidationSchema = z.object({
   }),
 });
 
-
 const resendOtpValidationSchema = z.object({
   body: z.object({
-    email: z.string().email("Valid email is required"),
-    purpose: z.enum(['REGISTER', 'LOGIN', 'RESET_PASSWORD']),
+    email: z.string().email('Valid email is required'),
+    purpose: z.enum(['REGISTER', 'RESET_PASSWORD']),
   }),
 });
 

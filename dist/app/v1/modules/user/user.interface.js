@@ -10,7 +10,7 @@ export const USER_STATUS = {
     PENDING: 'PENDING',
     ACTIVE: 'ACTIVE',
     BLOCKED: 'BLOCKED',
-    REMOVED: 'REMOVED',
+    REJECTED: 'REJECTED',
     DELETED: 'DELETED',
 };
 //# sourceMappingURL=user.interface.js.map

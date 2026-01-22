@@ -92,21 +92,21 @@ export declare const UserValidation: {
                 readonly PENDING: "PENDING";
                 readonly ACTIVE: "ACTIVE";
                 readonly BLOCKED: "BLOCKED";
-                readonly REMOVED: "REMOVED";
+                readonly REJECTED: "REJECTED";
                 readonly DELETED: "DELETED";
             }>;
         }, "strip", z.ZodTypeAny, {
-            status: "PENDING" | "ACTIVE" | "BLOCKED" | "REMOVED" | "DELETED";
+            status: "PENDING" | "ACTIVE" | "BLOCKED" | "REJECTED" | "DELETED";
         }, {
-            status: "PENDING" | "ACTIVE" | "BLOCKED" | "REMOVED" | "DELETED";
+            status: "PENDING" | "ACTIVE" | "BLOCKED" | "REJECTED" | "DELETED";
         }>;
     }, "strip", z.ZodTypeAny, {
         body: {
-            status: "PENDING" | "ACTIVE" | "BLOCKED" | "REMOVED" | "DELETED";
+            status: "PENDING" | "ACTIVE" | "BLOCKED" | "REJECTED" | "DELETED";
         };
     }, {
         body: {
-            status: "PENDING" | "ACTIVE" | "BLOCKED" | "REMOVED" | "DELETED";
+            status: "PENDING" | "ACTIVE" | "BLOCKED" | "REJECTED" | "DELETED";
         };
     }>;
 };

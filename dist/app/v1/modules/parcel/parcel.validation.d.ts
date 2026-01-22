@@ -512,6 +512,23 @@ export declare const ParcelValidations: {
             } | undefined;
         };
     }>;
+    rejectParcelValidationSchema: z.ZodObject<{
+        body: z.ZodObject<{
+            rejection_reason: z.ZodString;
+        }, "strip", z.ZodTypeAny, {
+            rejection_reason: string;
+        }, {
+            rejection_reason: string;
+        }>;
+    }, "strip", z.ZodTypeAny, {
+        body: {
+            rejection_reason: string;
+        };
+    }, {
+        body: {
+            rejection_reason: string;
+        };
+    }>;
     createPriceRequestValidationSchema: z.ZodObject<{
         body: z.ZodObject<{
             parcel_id: z.ZodString;
@@ -629,23 +646,23 @@ export declare const ParcelValidations: {
                 readonly REJECTED: "REJECTED";
             }>>;
         }, "strip", z.ZodTypeAny, {
-            status?: "PENDING" | "WAITING" | "ONGOING" | "COMPLETED" | "REJECTED" | undefined;
+            status?: "PENDING" | "REJECTED" | "WAITING" | "ONGOING" | "COMPLETED" | undefined;
             final_price?: number | undefined;
             price_status?: "REJECTED" | "NOT_SET" | "PROPOSED" | "COUNTERED" | "FINAL_OFFER" | "ACCEPTED" | undefined;
         }, {
-            status?: "PENDING" | "WAITING" | "ONGOING" | "COMPLETED" | "REJECTED" | undefined;
+            status?: "PENDING" | "REJECTED" | "WAITING" | "ONGOING" | "COMPLETED" | undefined;
             final_price?: number | undefined;
             price_status?: "REJECTED" | "NOT_SET" | "PROPOSED" | "COUNTERED" | "FINAL_OFFER" | "ACCEPTED" | undefined;
         }>;
     }, "strip", z.ZodTypeAny, {
         body: {
-            status?: "PENDING" | "WAITING" | "ONGOING" | "COMPLETED" | "REJECTED" | undefined;
+            status?: "PENDING" | "REJECTED" | "WAITING" | "ONGOING" | "COMPLETED" | undefined;
             final_price?: number | undefined;
             price_status?: "REJECTED" | "NOT_SET" | "PROPOSED" | "COUNTERED" | "FINAL_OFFER" | "ACCEPTED" | undefined;
         };
     }, {
         body: {
-            status?: "PENDING" | "WAITING" | "ONGOING" | "COMPLETED" | "REJECTED" | undefined;
+            status?: "PENDING" | "REJECTED" | "WAITING" | "ONGOING" | "COMPLETED" | undefined;
             final_price?: number | undefined;
             price_status?: "REJECTED" | "NOT_SET" | "PROPOSED" | "COUNTERED" | "FINAL_OFFER" | "ACCEPTED" | undefined;
         };

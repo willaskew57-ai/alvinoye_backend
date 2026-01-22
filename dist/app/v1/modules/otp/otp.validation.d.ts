@@ -35,23 +35,23 @@ export declare const OtpValidations: {
     resendOtpValidationSchema: z.ZodObject<{
         body: z.ZodObject<{
             email: z.ZodString;
-            purpose: z.ZodEnum<["REGISTER", "LOGIN", "RESET_PASSWORD"]>;
+            purpose: z.ZodEnum<["REGISTER", "RESET_PASSWORD"]>;
         }, "strip", z.ZodTypeAny, {
             email: string;
-            purpose: "REGISTER" | "RESET_PASSWORD" | "LOGIN";
+            purpose: "REGISTER" | "RESET_PASSWORD";
         }, {
             email: string;
-            purpose: "REGISTER" | "RESET_PASSWORD" | "LOGIN";
+            purpose: "REGISTER" | "RESET_PASSWORD";
         }>;
     }, "strip", z.ZodTypeAny, {
         body: {
             email: string;
-            purpose: "REGISTER" | "RESET_PASSWORD" | "LOGIN";
+            purpose: "REGISTER" | "RESET_PASSWORD";
         };
     }, {
         body: {
             email: string;
-            purpose: "REGISTER" | "RESET_PASSWORD" | "LOGIN";
+            purpose: "REGISTER" | "RESET_PASSWORD";
         };
     }>;
 };
