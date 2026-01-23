@@ -1,4 +1,4 @@
-import type { Types } from "mongoose";
+import type { Types } from 'mongoose';
 export type TLocation = {
     address: string;
     latitude: number;
@@ -12,9 +12,7 @@ export type TDriver = {
     driver_license_number: string;
     license_image: string;
     daily_commute_time: string;
-    available_for_delivery: string;
     max_parcel_weight: string;
-    pickup_time: string;
     notes?: string;
 };
 //# sourceMappingURL=driver.interface.d.ts.map

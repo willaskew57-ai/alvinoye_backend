@@ -610,23 +610,6 @@ export declare const ParcelValidations: {
             message?: string | undefined;
         };
     }>;
-    acceptPriceRequestValidationSchema: z.ZodObject<{
-        body: z.ZodObject<{
-            status: z.ZodEnum<["ACCEPTED"]>;
-        }, "strip", z.ZodTypeAny, {
-            status: "ACCEPTED";
-        }, {
-            status: "ACCEPTED";
-        }>;
-    }, "strip", z.ZodTypeAny, {
-        body: {
-            status: "ACCEPTED";
-        };
-    }, {
-        body: {
-            status: "ACCEPTED";
-        };
-    }>;
     adminUpdateParcelValidationSchema: z.ZodObject<{
         body: z.ZodObject<{
             status: z.ZodOptional<z.ZodNativeEnum<{

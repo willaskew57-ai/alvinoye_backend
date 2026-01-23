@@ -19,9 +19,9 @@ const driverInfoValidationSchema = z.object({
     required_error: 'License image URL is required',
   }),
   daily_commute_time: z.string({ required_error: 'Commute time is required' }),
-  available_for_delivery: z.string({
-    required_error: 'Availability is required',
-  }),
+  // available_for_delivery: z.string({
+  //   required_error: 'Availability is required',
+  // }),
   max_parcel_weight: z.string({ required_error: 'Max weight is required' }),
   pickup_time: z.string({ required_error: 'Pickup time is required' }),
   notes: z.string().optional(),
@@ -49,5 +49,5 @@ const verifyParcelOtpValidationSchema = z.object({
 export const DriverValidation = {
   driverInfoValidationSchema,
   createDriverWithVehicleValidationSchema,
-  verifyParcelOtpValidationSchema
+  verifyParcelOtpValidationSchema,
 };

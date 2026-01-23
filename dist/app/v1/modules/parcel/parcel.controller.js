@@ -13,7 +13,7 @@ const createParcel = catchAsync(async (req, res) => {
     });
 });
 const getAllParcels = catchAsync(async (req, res) => {
-    console.log("get all  parcel params", req.query);
+    console.log('get all  parcel params', req.query);
     const result = await ParcelServices.getAllParcelsFromDB(req.query, req.user);
     sendResponse(res, {
         statusCode: httpStatus.OK,
@@ -64,9 +64,8 @@ const rejectParcel = catchAsync(async (req, res) => {
 });
 // --- Price Negotiation ---
 const proposePrice = catchAsync(async (req, res) => {
-    const { user_id, role } = req.user;
-    console.log('user', role);
-    const result = await ParcelServices.proposePriceInDB(user_id, role, req.body);
+    const { role } = req.user;
+    const result = await ParcelServices.proposePriceInDB(role, req.body);
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
@@ -76,10 +75,9 @@ const proposePrice = catchAsync(async (req, res) => {
 });
 const acceptPrice = catchAsync(async (req, res) => {
     const { id } = req.params; // Request ID
-    const { status } = req.body;
     const user = req.user;
     console.log('user', user);
-    const result = await ParcelServices.acceptPriceProposalInDB(id, status, user);
+    const result = await ParcelServices.acceptPriceProposalInDB(id, user);
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,

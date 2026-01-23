@@ -86,7 +86,6 @@ router.patch(
 router.patch(
   '/accept-price/:id',
   auth(USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.CUSTOMER),
-  validateRequest(ParcelValidations.acceptPriceRequestValidationSchema),
   ParcelControllers.acceptPrice
 );
 

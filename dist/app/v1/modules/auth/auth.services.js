@@ -28,6 +28,7 @@ const registerUser = async (payload) => {
         user_id: newUser._id,
         purpose: 'REGISTER',
     });
+    console.log(otp, "register Otp");
     // Send registration email
     await EmailHelpers.sendRegisterEmail(newUser.email, {
         user: newUser.full_name || 'User',

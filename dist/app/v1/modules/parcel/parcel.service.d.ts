@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { type TParcel, type TParcelPriceRequest, type TPriceRequestStatus } from './parcel.interface';
+import { type TParcel, type TParcelPriceRequest } from './parcel.interface';
 import type { TUserPayload } from '../../../../interfaces';
 export declare const ParcelServices: {
     createParcelIntoDB: (userId: string, payload: TParcel) => Promise<mongoose.Document<unknown, {}, TParcel, {}, mongoose.DefaultSchemaOptions> & TParcel & Required<{
@@ -62,14 +62,14 @@ export declare const ParcelServices: {
     } & {
         id: string;
     }) | null>;
-    proposePriceInDB: (userId: string, role: string, payload: Partial<TParcelPriceRequest>) => Promise<(mongoose.Document<unknown, {}, TParcelPriceRequest, {}, mongoose.DefaultSchemaOptions> & TParcelPriceRequest & Required<{
+    proposePriceInDB: (role: string, payload: any) => Promise<mongoose.Document<unknown, {}, TParcelPriceRequest, {}, mongoose.DefaultSchemaOptions> & TParcelPriceRequest & Required<{
         _id: mongoose.Types.ObjectId;
     }> & {
         __v: number;
     } & {
         id: string;
-    }) | undefined>;
-    acceptPriceProposalInDB: (requestId: string, status: TPriceRequestStatus, user: {
+    }>;
+    acceptPriceProposalInDB: (requestId: string, user: {
         user_id: string;
         role: string;
     }) => Promise<mongoose.Document<unknown, {}, TParcelPriceRequest, {}, mongoose.DefaultSchemaOptions> & TParcelPriceRequest & Required<{
@@ -83,23 +83,23 @@ export declare const ParcelServices: {
         parcel_id: string;
         rejection_reason: string;
         suggested_price: number;
-    }) => Promise<(mongoose.Document<unknown, {}, TParcelPriceRequest, {}, mongoose.DefaultSchemaOptions> & TParcelPriceRequest & Required<{
+    }) => Promise<mongoose.Document<unknown, {}, TParcelPriceRequest, {}, mongoose.DefaultSchemaOptions> & TParcelPriceRequest & Required<{
         _id: mongoose.Types.ObjectId;
     }> & {
         __v: number;
     } & {
         id: string;
-    }) | undefined>;
+    }>;
     adminRejectAndFinalOfferInDB: (requestId: string, payload: {
         parcel_id: string;
         final_price: number;
         message?: string;
-    }) => Promise<(mongoose.Document<unknown, {}, TParcelPriceRequest, {}, mongoose.DefaultSchemaOptions> & TParcelPriceRequest & Required<{
+    }) => Promise<mongoose.Document<unknown, {}, TParcelPriceRequest, {}, mongoose.DefaultSchemaOptions> & TParcelPriceRequest & Required<{
         _id: mongoose.Types.ObjectId;
     }> & {
         __v: number;
     } & {
         id: string;
-    }) | undefined>;
+    }>;
 };
 //# sourceMappingURL=parcel.service.d.ts.map

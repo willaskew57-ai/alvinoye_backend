@@ -1,4 +1,3 @@
-import { is } from 'zod/locales';
 import { Schema, model } from 'mongoose';
 import type { TVehicle } from './vehicle.interface';
 

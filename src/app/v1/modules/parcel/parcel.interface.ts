@@ -25,6 +25,12 @@ export const PRICE_STATUS = {
   REJECTED: 'REJECTED',
 } as const;
 
+export const PRICE_TYPE = {
+  PROPOSED: 'PROPOSED',
+  COUNTERED: 'COUNTERED',
+  FINAL_OFFER: 'FINAL_OFFER',
+} as const;
+
 export const PROPOSED_BY = {
   SUPER_ADMIN: 'SUPER_ADMIN',
   ADMIN: 'ADMIN',
@@ -40,6 +46,7 @@ export const PRICE_REQUEST_STATUS = {
 // Derived Types
 export type TParcelStatus = (typeof PARCEL_STATUS)[keyof typeof PARCEL_STATUS];
 export type TPriceStatus = (typeof PRICE_STATUS)[keyof typeof PRICE_STATUS];
+export type TPriceType = (typeof PRICE_TYPE)[keyof typeof PRICE_TYPE];
 export type TProposedBy = (typeof PROPOSED_BY)[keyof typeof PROPOSED_BY];
 export type TPriceRequestStatus =
   (typeof PRICE_REQUEST_STATUS)[keyof typeof PRICE_REQUEST_STATUS];
@@ -51,6 +58,7 @@ export interface TParcel extends Document {
   size: string;
   vehicle_type: string;
   weight: number;
+  pickup_location: TLocation;
   handover_location: TLocation;
   priority: string;
   date: string;
@@ -72,6 +80,7 @@ export interface TParcel extends Document {
 export interface TParcelPriceRequest extends Document {
   parcel_id: Types.ObjectId;
   proposed_by: TProposedBy;
+  price_type: TPriceType;
   proposed_price: number;
   message?: string;
   rejection_reason?: string | null;

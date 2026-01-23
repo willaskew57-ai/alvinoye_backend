@@ -41,6 +41,7 @@ const registerUser = async (payload: TUser) => {
     user_id: newUser._id as Types.ObjectId,
     purpose: 'REGISTER',
   });
+  console.log(otp, "register Otp")
 
   // Send registration email
   await EmailHelpers.sendRegisterEmail(newUser.email, {
@@ -207,10 +208,14 @@ const verifyOtp = async (
   token: string
 ) => {
   const { otp, purpose } = payload;
+  
   const decoded = verifyToken(
     token,
+
     configs.jwt_reset_token as string
   ) as JwtPayload;
+
+  
 
   await OtpServices.verifyOtpFromDB({
     user_id: decoded.user_id,

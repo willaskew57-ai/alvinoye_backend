@@ -86,13 +86,6 @@ const adminRejectAndFinalOfferValidationSchema = z.object({
         message: z.string().optional(),
     }),
 });
-const acceptPriceRequestValidationSchema = z.object({
-    body: z.object({
-        status: z.enum([PRICE_REQUEST_STATUS.ACCEPTED], {
-            required_error: 'Status must be either ACCEPTED',
-        }),
-    }),
-});
 const adminUpdateParcelValidationSchema = z.object({
     body: z.object({
         status: ParcelStatusEnum.optional(),
@@ -107,7 +100,6 @@ export const ParcelValidations = {
     createPriceRequestValidationSchema,
     customerRejectAndCounterValidationSchema,
     adminRejectAndFinalOfferValidationSchema,
-    acceptPriceRequestValidationSchema,
     adminUpdateParcelValidationSchema,
 };
 //# sourceMappingURL=parcel.validation.js.map

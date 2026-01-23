@@ -44,7 +44,6 @@ export declare const DriverValidation: {
         driver_license_number: z.ZodString;
         license_image: z.ZodString;
         daily_commute_time: z.ZodString;
-        available_for_delivery: z.ZodString;
         max_parcel_weight: z.ZodString;
         pickup_time: z.ZodString;
         notes: z.ZodOptional<z.ZodString>;
@@ -62,7 +61,6 @@ export declare const DriverValidation: {
         driver_license_number: string;
         license_image: string;
         daily_commute_time: string;
-        available_for_delivery: string;
         max_parcel_weight: string;
         pickup_time: string;
         user_id?: string | undefined;
@@ -86,7 +84,6 @@ export declare const DriverValidation: {
         driver_license_number: string;
         license_image: string;
         daily_commute_time: string;
-        available_for_delivery: string;
         max_parcel_weight: string;
         pickup_time: string;
         user_id?: string | undefined;
@@ -143,7 +140,6 @@ export declare const DriverValidation: {
                 driver_license_number: z.ZodString;
                 license_image: z.ZodString;
                 daily_commute_time: z.ZodString;
-                available_for_delivery: z.ZodString;
                 max_parcel_weight: z.ZodString;
                 pickup_time: z.ZodString;
                 notes: z.ZodOptional<z.ZodString>;
@@ -161,7 +157,6 @@ export declare const DriverValidation: {
                 driver_license_number: string;
                 license_image: string;
                 daily_commute_time: string;
-                available_for_delivery: string;
                 max_parcel_weight: string;
                 pickup_time: string;
                 user_id?: string | undefined;
@@ -185,7 +180,6 @@ export declare const DriverValidation: {
                 driver_license_number: string;
                 license_image: string;
                 daily_commute_time: string;
-                available_for_delivery: string;
                 max_parcel_weight: string;
                 pickup_time: string;
                 user_id?: string | undefined;
@@ -234,7 +228,6 @@ export declare const DriverValidation: {
                 driver_license_number: string;
                 license_image: string;
                 daily_commute_time: string;
-                available_for_delivery: string;
                 max_parcel_weight: string;
                 pickup_time: string;
                 user_id?: string | undefined;
@@ -266,7 +259,6 @@ export declare const DriverValidation: {
                 driver_license_number: string;
                 license_image: string;
                 daily_commute_time: string;
-                available_for_delivery: string;
                 max_parcel_weight: string;
                 pickup_time: string;
                 user_id?: string | undefined;
@@ -300,7 +292,6 @@ export declare const DriverValidation: {
                 driver_license_number: string;
                 license_image: string;
                 daily_commute_time: string;
-                available_for_delivery: string;
                 max_parcel_weight: string;
                 pickup_time: string;
                 user_id?: string | undefined;
@@ -334,7 +325,6 @@ export declare const DriverValidation: {
                 driver_license_number: string;
                 license_image: string;
                 daily_commute_time: string;
-                available_for_delivery: string;
                 max_parcel_weight: string;
                 pickup_time: string;
                 user_id?: string | undefined;

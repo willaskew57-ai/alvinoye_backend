@@ -1,5 +1,5 @@
 import { Schema, model } from 'mongoose';
-import { PARCEL_STATUS, PRICE_REQUEST_STATUS, PRICE_STATUS, PROPOSED_BY, } from './parcel.interface';
+import { PARCEL_STATUS, PRICE_REQUEST_STATUS, PRICE_STATUS, PRICE_TYPE, PROPOSED_BY, } from './parcel.interface';
 const LocationSchema = new Schema({
     address: { type: String, required: true },
     latitude: { type: Number, required: true },
@@ -21,6 +21,7 @@ const parcelSchema = new Schema({
     size: { type: String, required: true },
     vehicle_type: { type: String, required: true },
     weight: { type: Number, required: true },
+    pickup_location: LocationSchema,
     handover_location: LocationSchema,
     priority: { type: String, required: true },
     date: { type: String, required: true },
@@ -80,6 +81,11 @@ const priceRequestSchema = new Schema({
     proposed_by: {
         type: String,
         enum: Object.values(PROPOSED_BY),
+        required: true,
+    },
+    price_type: {
+        type: String,
+        enum: Object.values(PRICE_TYPE),
         required: true,
     },
     proposed_price: { type: Number, required: true },

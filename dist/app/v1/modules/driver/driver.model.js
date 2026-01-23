@@ -18,9 +18,8 @@ const DriverInfoSchema = new Schema({
     license_image: { type: String, required: true },
     stops: [LocationSchema],
     daily_commute_time: { type: String, required: true },
-    available_for_delivery: { type: String, required: true },
+    // available_for_delivery: { type: String, required: true },
     max_parcel_weight: { type: String, required: true },
-    pickup_time: { type: String, required: true },
     notes: { type: String },
 }, {
     timestamps: {

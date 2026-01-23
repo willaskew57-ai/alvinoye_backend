@@ -19,6 +19,6 @@ router.patch('/reject-and-counter/:id', auth(USER_ROLE.CUSTOMER), validateReques
 // Admin Reject & Final Price
 router.patch('/final-offer/:id', auth(USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN), validateRequest(ParcelValidations.adminRejectAndFinalOfferValidationSchema), ParcelControllers.adminFinalOffer);
 // Simple Accept or Reject (Final choice)
-router.patch('/accept-price/:id', auth(USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.CUSTOMER), validateRequest(ParcelValidations.acceptPriceRequestValidationSchema), ParcelControllers.acceptPrice);
+router.patch('/accept-price/:id', auth(USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.CUSTOMER), ParcelControllers.acceptPrice);
 export const ParcelRoutes = router;
 //# sourceMappingURL=parcel.route.js.map

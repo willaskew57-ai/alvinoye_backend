@@ -1,4 +1,3 @@
-import { is } from 'zod/locales';
 import { Schema, model } from 'mongoose';
 const VehicleSchema = new Schema({
     user_id: {

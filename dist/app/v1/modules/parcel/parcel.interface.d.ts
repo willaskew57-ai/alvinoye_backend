@@ -19,6 +19,11 @@ export declare const PRICE_STATUS: {
     readonly ACCEPTED: "ACCEPTED";
     readonly REJECTED: "REJECTED";
 };
+export declare const PRICE_TYPE: {
+    readonly PROPOSED: "PROPOSED";
+    readonly COUNTERED: "COUNTERED";
+    readonly FINAL_OFFER: "FINAL_OFFER";
+};
 export declare const PROPOSED_BY: {
     readonly SUPER_ADMIN: "SUPER_ADMIN";
     readonly ADMIN: "ADMIN";
@@ -31,6 +36,7 @@ export declare const PRICE_REQUEST_STATUS: {
 };
 export type TParcelStatus = (typeof PARCEL_STATUS)[keyof typeof PARCEL_STATUS];
 export type TPriceStatus = (typeof PRICE_STATUS)[keyof typeof PRICE_STATUS];
+export type TPriceType = (typeof PRICE_TYPE)[keyof typeof PRICE_TYPE];
 export type TProposedBy = (typeof PROPOSED_BY)[keyof typeof PROPOSED_BY];
 export type TPriceRequestStatus = (typeof PRICE_REQUEST_STATUS)[keyof typeof PRICE_REQUEST_STATUS];
 export interface TParcel extends Document {
@@ -40,6 +46,7 @@ export interface TParcel extends Document {
     size: string;
     vehicle_type: string;
     weight: number;
+    pickup_location: TLocation;
     handover_location: TLocation;
     priority: string;
     date: string;
@@ -60,6 +67,7 @@ export interface TParcel extends Document {
 export interface TParcelPriceRequest extends Document {
     parcel_id: Types.ObjectId;
     proposed_by: TProposedBy;
+    price_type: TPriceType;
     proposed_price: number;
     message?: string;
     rejection_reason?: string | null;

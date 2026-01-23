@@ -15,6 +15,11 @@ export const PRICE_STATUS = {
     ACCEPTED: 'ACCEPTED',
     REJECTED: 'REJECTED',
 };
+export const PRICE_TYPE = {
+    PROPOSED: 'PROPOSED',
+    COUNTERED: 'COUNTERED',
+    FINAL_OFFER: 'FINAL_OFFER',
+};
 export const PROPOSED_BY = {
     SUPER_ADMIN: 'SUPER_ADMIN',
     ADMIN: 'ADMIN',

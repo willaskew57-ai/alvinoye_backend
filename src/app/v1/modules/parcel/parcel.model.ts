@@ -3,6 +3,7 @@ import {
   PARCEL_STATUS,
   PRICE_REQUEST_STATUS,
   PRICE_STATUS,
+  PRICE_TYPE,
   PROPOSED_BY,
   type TParcel,
   type TParcelPriceRequest,
@@ -34,6 +35,7 @@ const parcelSchema = new Schema<TParcel>(
     size: { type: String, required: true },
     vehicle_type: { type: String, required: true },
     weight: { type: Number, required: true },
+    pickup_location: LocationSchema,
     handover_location: LocationSchema,
     priority: { type: String, required: true },
     date: { type: String, required: true },
@@ -102,6 +104,11 @@ const priceRequestSchema = new Schema<TParcelPriceRequest>(
     proposed_by: {
       type: String,
       enum: Object.values(PROPOSED_BY),
+      required: true,
+    },
+    price_type: {
+      type: String,
+      enum: Object.values(PRICE_TYPE),
       required: true,
     },
     proposed_price: { type: Number, required: true },
