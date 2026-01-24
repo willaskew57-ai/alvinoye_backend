@@ -1,6 +1,6 @@
 import httpStatus from 'http-status';
 import type { JwtPayload } from 'jsonwebtoken';
-import configs from '../../../../config';
+import configs from '../../../../config/env.config';
 import AppError from '../../../../errors/app-error';
 import { createToken, verifyToken } from './auth.utils';
 import type { IChangePassword, ILoginUser } from './auth.interface';

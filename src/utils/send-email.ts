@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer';
 import type { SentMessageInfo } from 'nodemailer';
-import configs from '../config';
+import configs from '../config/env.config';
 
 interface IEmailOptions {
   email: string;

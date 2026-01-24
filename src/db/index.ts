@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import configs from '../config/index';
+import configs from '../config/env.config';
 
 // Global DB status object for health checks
 export const dbStatus = {

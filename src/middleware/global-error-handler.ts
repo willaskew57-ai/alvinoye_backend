@@ -4,7 +4,7 @@ import httpStatus from 'http-status';
 import { ZodError } from 'zod';
 
 // ** import local files
-import configs from '../config';
+import configs from '../config/env.config';
 import type { IErrorSources } from '../interfaces/errors';
 import handleZodError from '../errors/handleZodError';
 import handleValidationError from '../errors/handle-validation-error';

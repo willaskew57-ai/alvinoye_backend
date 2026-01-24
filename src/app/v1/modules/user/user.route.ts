@@ -1,9 +1,14 @@
-import express from 'express';
+import express, {
+  type NextFunction,
+  type Request,
+  type Response,
+} from 'express';
 import { UserControllers } from './user.controller';
 import { UserValidation } from './user.zod-validation';
 import validateRequest from '../../../../middleware/validate-request';
 import { auth } from '../../../../middleware/auth';
 import { USER_ROLE } from './user.interface';
+import { uploadFile } from '../../../../aws/multer-s3-uploader';
 
 const router = express.Router();
 
@@ -54,7 +59,15 @@ router.patch(
     USER_ROLE.CUSTOMER,
     USER_ROLE.DRIVER
   ),
-  validateRequest(UserValidation.updateUserValidationSchema), // Reuse or create a specific Zod schema
+  uploadFile(),
+  (req: Request, res: Response, next: NextFunction) => {
+    console.log(req.body)
+    if (req.body.data) {
+      req.body = JSON.parse(req.body.data);
+    }
+    next();
+  },
+  validateRequest(UserValidation.updateUserValidationSchema),
   UserControllers.updateMe
 );
 

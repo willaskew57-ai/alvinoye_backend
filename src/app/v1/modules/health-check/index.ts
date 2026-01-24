@@ -2,7 +2,7 @@
 import type { Request, Response } from 'express';
 
 // ** import local files
-import configs from '../../../../config';
+import configs from '../../../../config/env.config';
 import { getDBStatus } from '../../../../db';
 
 const healthCheck = async (req: Request, res: Response) => {

@@ -31,6 +31,13 @@ const configs = {
 
   // Stripe
   stripe_secret_key: process.env.STRIPE_SECRET_KEY || '',
+
+  // S3 Configuration (lowercase)
+  aws_access_key_id: process.env.AWS_ACCESS_KEY_ID || '',
+  aws_secret_access_key: process.env.AWS_SECRET_ACCESS_KEY || '',
+  aws_region: process.env.AWS_REGION || "",
+  aws_s3_bucket_name: process.env.AWS_S3_BUCKET_NAME || '',
+  cloudfront_url: process.env.CLOUDFRONT_URL || ''
 };
 
 export default configs;

@@ -2,6 +2,8 @@ import httpStatus from 'http-status';
 import catchAsync from '../../../../utils/catch-async';
 import sendResponse from '../../../../utils/send-response';
 import { UserServices } from './user.service';
+import { getCloudFrontUrl } from '../../../../aws/multer-s3-uploader';
+import type { TCustomFile } from '../../../../interfaces';
 
 const createAdmin = catchAsync(async (req, res) => {
   const result = await UserServices.createAdminIntoDB(req.body);
@@ -52,11 +54,18 @@ const getMe = catchAsync(async (req, res) => {
 });
 
 const updateMe = catchAsync(async (req, res) => {
-  const { user_id } = req.user; 
+  const files = req.files as { [fieldname: string]: TCustomFile[] | undefined };
+
+  if (files?.profile_image && files.profile_image.length > 0) {
+    const file = files.profile_image[0];
+    req.body.profile_picture = getCloudFrontUrl((file as any).key);
+  }
+
+  const { user_id } = req.user;
   const result = await UserServices.updateMeIntoDB(user_id, req.body);
 
   sendResponse(res, {
-    statusCode: httpStatus.OK,
+    statusCode: 200,
     success: true,
     message: 'Profile updated successfully',
     data: result,
@@ -64,8 +73,7 @@ const updateMe = catchAsync(async (req, res) => {
 });
 
 const getAllUser = catchAsync(async (req, res) => {
-
-  console.log("query", req.query)
+  console.log('query', req.query);
 
   const result = await UserServices.getAllUsersFromDB(req.query);
   sendResponse(res, {

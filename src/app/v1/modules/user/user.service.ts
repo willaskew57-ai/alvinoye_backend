@@ -9,6 +9,7 @@ import {
 } from './user.interface';
 import { Types } from 'mongoose';
 import QueryBuilder from '../../../../builders/query-builder';
+import { deleteFileFromS3 } from '../../../../aws/deleteFromS3';
 
 const createAdminIntoDB = async (payload: TUser) => {
   const isUserExists = await User.isUserExistsByEmail(payload.email);
@@ -143,6 +144,14 @@ const updateMeIntoDB = async (id: string, payload: Partial<TUser>) => {
       delete (payload as any)[field];
     }
   });
+
+  if (payload.profile_picture) {
+    const existingUser = await User.findById(id);
+
+    if (existingUser && existingUser.profile_picture) {
+      await deleteFileFromS3(existingUser.profile_picture);
+    }
+  }
 
   const result = await User.findByIdAndUpdate(id, payload, {
     new: true,

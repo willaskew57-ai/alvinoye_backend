@@ -4,7 +4,7 @@ import colors from 'colors';
 
 // ** import local files
 import app from './app';
-import configs from './config';
+import configs from './config/env.config';
 import { connectDB } from './db';
 import { initSocket } from './socket';
 
@@ -16,9 +16,7 @@ async function main() {
     console.log(colors.blue(`Database is Connected Successfully!!!`).bold);
     server = app.listen(configs.port, () => {
       console.log(
-        colors.green(
-          `The Server is running on ${configs.port}`
-        ).bold
+        colors.green(`The Server is running on ${configs.port}`).bold
       );
     });
 

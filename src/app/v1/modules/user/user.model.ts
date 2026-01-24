@@ -8,7 +8,7 @@ import {
   type IUserModel,
   type TUser,
 } from './user.interface';
-import configs from '../../../../config';
+import configs from '../../../../config/env.config';
 
 const UserSchema = new Schema<TUser, IUserModel>(
   {
