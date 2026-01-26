@@ -2,6 +2,7 @@ import httpStatus from 'http-status';
 import catchAsync from '../../../../utils/catch-async';
 import sendResponse from '../../../../utils/send-response';
 import { UserServices } from './user.service';
+import { getLocalFileUrl } from '../../../../utils/fileUploadHelper';
 const createAdmin = catchAsync(async (req, res) => {
     const result = await UserServices.createAdminIntoDB(req.body);
     sendResponse(res, {
@@ -37,17 +38,26 @@ const getMe = catchAsync(async (req, res) => {
     });
 });
 const updateMe = catchAsync(async (req, res) => {
+    // Use Express.Multer.File type instead of TCustomFile for local uploads
+    const files = req.files;
+    console.log(files, 'profile image file');
+    if (files?.profile_image && files.profile_image.length > 0) {
+        const file = files.profile_image[0];
+        // file.path contains the local directory (e.g., "uploads/profile_images/filename.jpg")
+        // We transform this into a full URL
+        req.body.profile_picture = getLocalFileUrl(file.path);
+    }
     const { user_id } = req.user;
     const result = await UserServices.updateMeIntoDB(user_id, req.body);
     sendResponse(res, {
-        statusCode: httpStatus.OK,
+        statusCode: 200,
         success: true,
         message: 'Profile updated successfully',
         data: result,
     });
 });
 const getAllUser = catchAsync(async (req, res) => {
-    console.log("query", req.query);
+    console.log('query', req.query);
     const result = await UserServices.getAllUsersFromDB(req.query);
     sendResponse(res, {
         statusCode: httpStatus.OK,

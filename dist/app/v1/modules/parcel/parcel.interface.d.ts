@@ -5,6 +5,7 @@ export interface TLocation {
     longitude: number;
 }
 export declare const PARCEL_STATUS: {
+    readonly INITIAL: "INITIAL";
     readonly WAITING: "WAITING";
     readonly PENDING: "PENDING";
     readonly ONGOING: "ONGOING";
@@ -54,7 +55,7 @@ export interface TParcel extends Document {
     parcel_images: string[];
     receiver_name: string;
     receiver_phone: string;
-    sender_remarks: TLocation;
+    sender_remarks: string;
     status: TParcelStatus;
     final_price: number | null;
     price_status: TPriceStatus;

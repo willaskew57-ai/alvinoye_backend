@@ -46,13 +46,15 @@ export declare const ParcelServices: {
     } & {
         id: string;
     }>;
-    updateParcelInDB: (id: string, payload: Partial<TParcel>) => Promise<mongoose.Document<unknown, {}, TParcel, {}, mongoose.DefaultSchemaOptions> & TParcel & Required<{
+    updateParcelInDB: (id: string, payload: Partial<TParcel> & {
+        existing_parcel_images?: string[];
+    }) => Promise<(mongoose.Document<unknown, {}, TParcel, {}, mongoose.DefaultSchemaOptions> & TParcel & Required<{
         _id: mongoose.Types.ObjectId;
     }> & {
         __v: number;
     } & {
         id: string;
-    }>;
+    }) | null>;
     rejectParcelFromDB: (id: string, payload: {
         rejection_reason: string;
     }) => Promise<(mongoose.Document<unknown, {}, TParcel, {}, mongoose.DefaultSchemaOptions> & TParcel & Required<{

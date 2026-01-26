@@ -18,13 +18,7 @@ export declare const createParcelValidationSchema: z.ZodObject<{
             latitude: number;
             longitude: number;
         }>;
-        priority: z.ZodString;
-        date: z.ZodString;
-        time: z.ZodString;
-        parcel_images: z.ZodDefault<z.ZodOptional<z.ZodArray<z.ZodString, "many">>>;
-        receiver_name: z.ZodString;
-        receiver_phone: z.ZodString;
-        sender_remarks: z.ZodObject<{
+        pickup_location: z.ZodObject<{
             address: z.ZodString;
             latitude: z.ZodNumber;
             longitude: z.ZodNumber;
@@ -37,6 +31,13 @@ export declare const createParcelValidationSchema: z.ZodObject<{
             latitude: number;
             longitude: number;
         }>;
+        priority: z.ZodString;
+        date: z.ZodString;
+        time: z.ZodString;
+        parcel_images: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+        receiver_name: z.ZodString;
+        receiver_phone: z.ZodString;
+        sender_remarks: z.ZodString;
     }, "strip", z.ZodTypeAny, {
         date: string;
         size: string;
@@ -45,19 +46,20 @@ export declare const createParcelValidationSchema: z.ZodObject<{
         parcel_name: string;
         vehicle_type: string;
         weight: number;
+        pickup_location: {
+            address: string;
+            latitude: number;
+            longitude: number;
+        };
         handover_location: {
             address: string;
             latitude: number;
             longitude: number;
         };
-        parcel_images: string[];
         receiver_name: string;
         receiver_phone: string;
-        sender_remarks: {
-            address: string;
-            latitude: number;
-            longitude: number;
-        };
+        sender_remarks: string;
+        parcel_images?: string[] | undefined;
     }, {
         date: string;
         size: string;
@@ -66,6 +68,11 @@ export declare const createParcelValidationSchema: z.ZodObject<{
         parcel_name: string;
         vehicle_type: string;
         weight: number;
+        pickup_location: {
+            address: string;
+            latitude: number;
+            longitude: number;
+        };
         handover_location: {
             address: string;
             latitude: number;
@@ -73,11 +80,7 @@ export declare const createParcelValidationSchema: z.ZodObject<{
         };
         receiver_name: string;
         receiver_phone: string;
-        sender_remarks: {
-            address: string;
-            latitude: number;
-            longitude: number;
-        };
+        sender_remarks: string;
         parcel_images?: string[] | undefined;
     }>;
 }, "strip", z.ZodTypeAny, {
@@ -89,19 +92,20 @@ export declare const createParcelValidationSchema: z.ZodObject<{
         parcel_name: string;
         vehicle_type: string;
         weight: number;
+        pickup_location: {
+            address: string;
+            latitude: number;
+            longitude: number;
+        };
         handover_location: {
             address: string;
             latitude: number;
             longitude: number;
         };
-        parcel_images: string[];
         receiver_name: string;
         receiver_phone: string;
-        sender_remarks: {
-            address: string;
-            latitude: number;
-            longitude: number;
-        };
+        sender_remarks: string;
+        parcel_images?: string[] | undefined;
     };
 }, {
     body: {
@@ -112,6 +116,11 @@ export declare const createParcelValidationSchema: z.ZodObject<{
         parcel_name: string;
         vehicle_type: string;
         weight: number;
+        pickup_location: {
+            address: string;
+            latitude: number;
+            longitude: number;
+        };
         handover_location: {
             address: string;
             latitude: number;
@@ -119,11 +128,7 @@ export declare const createParcelValidationSchema: z.ZodObject<{
         };
         receiver_name: string;
         receiver_phone: string;
-        sender_remarks: {
-            address: string;
-            latitude: number;
-            longitude: number;
-        };
+        sender_remarks: string;
         parcel_images?: string[] | undefined;
     };
 }>;
@@ -146,13 +151,7 @@ export declare const updateParcelValidationSchema: z.ZodObject<{
             latitude?: number | undefined;
             longitude?: number | undefined;
         }>>;
-        priority: z.ZodOptional<z.ZodString>;
-        date: z.ZodOptional<z.ZodString>;
-        time: z.ZodOptional<z.ZodString>;
-        parcel_images: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
-        receiver_name: z.ZodOptional<z.ZodString>;
-        receiver_phone: z.ZodOptional<z.ZodString>;
-        sender_remarks: z.ZodOptional<z.ZodObject<{
+        pickup_location: z.ZodOptional<z.ZodObject<{
             address: z.ZodOptional<z.ZodString>;
             latitude: z.ZodOptional<z.ZodNumber>;
             longitude: z.ZodOptional<z.ZodNumber>;
@@ -165,94 +164,110 @@ export declare const updateParcelValidationSchema: z.ZodObject<{
             latitude?: number | undefined;
             longitude?: number | undefined;
         }>>;
+        priority: z.ZodOptional<z.ZodString>;
+        date: z.ZodOptional<z.ZodString>;
+        time: z.ZodOptional<z.ZodString>;
+        parcel_images: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+        receiver_name: z.ZodOptional<z.ZodString>;
+        receiver_phone: z.ZodOptional<z.ZodString>;
+        sender_remarks: z.ZodOptional<z.ZodString>;
+        existing_parcel_images: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
     }, "strip", z.ZodTypeAny, {
         date?: string | undefined;
         size?: string | undefined;
         time?: string | undefined;
+        parcel_images?: string[] | undefined;
         priority?: string | undefined;
         parcel_name?: string | undefined;
         vehicle_type?: string | undefined;
         weight?: number | undefined;
+        pickup_location?: {
+            address?: string | undefined;
+            latitude?: number | undefined;
+            longitude?: number | undefined;
+        } | undefined;
         handover_location?: {
             address?: string | undefined;
             latitude?: number | undefined;
             longitude?: number | undefined;
         } | undefined;
-        parcel_images?: string[] | undefined;
         receiver_name?: string | undefined;
         receiver_phone?: string | undefined;
-        sender_remarks?: {
-            address?: string | undefined;
-            latitude?: number | undefined;
-            longitude?: number | undefined;
-        } | undefined;
+        sender_remarks?: string | undefined;
+        existing_parcel_images?: string[] | undefined;
     }, {
         date?: string | undefined;
         size?: string | undefined;
         time?: string | undefined;
+        parcel_images?: string[] | undefined;
         priority?: string | undefined;
         parcel_name?: string | undefined;
         vehicle_type?: string | undefined;
         weight?: number | undefined;
+        pickup_location?: {
+            address?: string | undefined;
+            latitude?: number | undefined;
+            longitude?: number | undefined;
+        } | undefined;
         handover_location?: {
             address?: string | undefined;
             latitude?: number | undefined;
             longitude?: number | undefined;
         } | undefined;
-        parcel_images?: string[] | undefined;
         receiver_name?: string | undefined;
         receiver_phone?: string | undefined;
-        sender_remarks?: {
-            address?: string | undefined;
-            latitude?: number | undefined;
-            longitude?: number | undefined;
-        } | undefined;
+        sender_remarks?: string | undefined;
+        existing_parcel_images?: string[] | undefined;
     }>;
 }, "strip", z.ZodTypeAny, {
     body: {
         date?: string | undefined;
         size?: string | undefined;
         time?: string | undefined;
+        parcel_images?: string[] | undefined;
         priority?: string | undefined;
         parcel_name?: string | undefined;
         vehicle_type?: string | undefined;
         weight?: number | undefined;
+        pickup_location?: {
+            address?: string | undefined;
+            latitude?: number | undefined;
+            longitude?: number | undefined;
+        } | undefined;
         handover_location?: {
             address?: string | undefined;
             latitude?: number | undefined;
             longitude?: number | undefined;
         } | undefined;
-        parcel_images?: string[] | undefined;
         receiver_name?: string | undefined;
         receiver_phone?: string | undefined;
-        sender_remarks?: {
-            address?: string | undefined;
-            latitude?: number | undefined;
-            longitude?: number | undefined;
-        } | undefined;
+        sender_remarks?: string | undefined;
+        existing_parcel_images?: string[] | undefined;
     };
 }, {
     body: {
         date?: string | undefined;
         size?: string | undefined;
         time?: string | undefined;
+        parcel_images?: string[] | undefined;
         priority?: string | undefined;
         parcel_name?: string | undefined;
         vehicle_type?: string | undefined;
         weight?: number | undefined;
+        pickup_location?: {
+            address?: string | undefined;
+            latitude?: number | undefined;
+            longitude?: number | undefined;
+        } | undefined;
         handover_location?: {
             address?: string | undefined;
             latitude?: number | undefined;
             longitude?: number | undefined;
         } | undefined;
-        parcel_images?: string[] | undefined;
         receiver_name?: string | undefined;
         receiver_phone?: string | undefined;
-        sender_remarks?: {
-            address?: string | undefined;
-            latitude?: number | undefined;
-            longitude?: number | undefined;
-        } | undefined;
+        sender_remarks?: string | undefined;
+        existing_parcel_images?: string[] | undefined;
     };
 }>;
 export declare const ParcelValidations: {
@@ -275,13 +290,7 @@ export declare const ParcelValidations: {
                 latitude: number;
                 longitude: number;
             }>;
-            priority: z.ZodString;
-            date: z.ZodString;
-            time: z.ZodString;
-            parcel_images: z.ZodDefault<z.ZodOptional<z.ZodArray<z.ZodString, "many">>>;
-            receiver_name: z.ZodString;
-            receiver_phone: z.ZodString;
-            sender_remarks: z.ZodObject<{
+            pickup_location: z.ZodObject<{
                 address: z.ZodString;
                 latitude: z.ZodNumber;
                 longitude: z.ZodNumber;
@@ -294,6 +303,13 @@ export declare const ParcelValidations: {
                 latitude: number;
                 longitude: number;
             }>;
+            priority: z.ZodString;
+            date: z.ZodString;
+            time: z.ZodString;
+            parcel_images: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+            receiver_name: z.ZodString;
+            receiver_phone: z.ZodString;
+            sender_remarks: z.ZodString;
         }, "strip", z.ZodTypeAny, {
             date: string;
             size: string;
@@ -302,19 +318,20 @@ export declare const ParcelValidations: {
             parcel_name: string;
             vehicle_type: string;
             weight: number;
+            pickup_location: {
+                address: string;
+                latitude: number;
+                longitude: number;
+            };
             handover_location: {
                 address: string;
                 latitude: number;
                 longitude: number;
             };
-            parcel_images: string[];
             receiver_name: string;
             receiver_phone: string;
-            sender_remarks: {
-                address: string;
-                latitude: number;
-                longitude: number;
-            };
+            sender_remarks: string;
+            parcel_images?: string[] | undefined;
         }, {
             date: string;
             size: string;
@@ -323,6 +340,11 @@ export declare const ParcelValidations: {
             parcel_name: string;
             vehicle_type: string;
             weight: number;
+            pickup_location: {
+                address: string;
+                latitude: number;
+                longitude: number;
+            };
             handover_location: {
                 address: string;
                 latitude: number;
@@ -330,11 +352,7 @@ export declare const ParcelValidations: {
             };
             receiver_name: string;
             receiver_phone: string;
-            sender_remarks: {
-                address: string;
-                latitude: number;
-                longitude: number;
-            };
+            sender_remarks: string;
             parcel_images?: string[] | undefined;
         }>;
     }, "strip", z.ZodTypeAny, {
@@ -346,19 +364,20 @@ export declare const ParcelValidations: {
             parcel_name: string;
             vehicle_type: string;
             weight: number;
+            pickup_location: {
+                address: string;
+                latitude: number;
+                longitude: number;
+            };
             handover_location: {
                 address: string;
                 latitude: number;
                 longitude: number;
             };
-            parcel_images: string[];
             receiver_name: string;
             receiver_phone: string;
-            sender_remarks: {
-                address: string;
-                latitude: number;
-                longitude: number;
-            };
+            sender_remarks: string;
+            parcel_images?: string[] | undefined;
         };
     }, {
         body: {
@@ -369,6 +388,11 @@ export declare const ParcelValidations: {
             parcel_name: string;
             vehicle_type: string;
             weight: number;
+            pickup_location: {
+                address: string;
+                latitude: number;
+                longitude: number;
+            };
             handover_location: {
                 address: string;
                 latitude: number;
@@ -376,11 +400,7 @@ export declare const ParcelValidations: {
             };
             receiver_name: string;
             receiver_phone: string;
-            sender_remarks: {
-                address: string;
-                latitude: number;
-                longitude: number;
-            };
+            sender_remarks: string;
             parcel_images?: string[] | undefined;
         };
     }>;
@@ -403,13 +423,7 @@ export declare const ParcelValidations: {
                 latitude?: number | undefined;
                 longitude?: number | undefined;
             }>>;
-            priority: z.ZodOptional<z.ZodString>;
-            date: z.ZodOptional<z.ZodString>;
-            time: z.ZodOptional<z.ZodString>;
-            parcel_images: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
-            receiver_name: z.ZodOptional<z.ZodString>;
-            receiver_phone: z.ZodOptional<z.ZodString>;
-            sender_remarks: z.ZodOptional<z.ZodObject<{
+            pickup_location: z.ZodOptional<z.ZodObject<{
                 address: z.ZodOptional<z.ZodString>;
                 latitude: z.ZodOptional<z.ZodNumber>;
                 longitude: z.ZodOptional<z.ZodNumber>;
@@ -422,94 +436,110 @@ export declare const ParcelValidations: {
                 latitude?: number | undefined;
                 longitude?: number | undefined;
             }>>;
+            priority: z.ZodOptional<z.ZodString>;
+            date: z.ZodOptional<z.ZodString>;
+            time: z.ZodOptional<z.ZodString>;
+            parcel_images: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
+            receiver_name: z.ZodOptional<z.ZodString>;
+            receiver_phone: z.ZodOptional<z.ZodString>;
+            sender_remarks: z.ZodOptional<z.ZodString>;
+            existing_parcel_images: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
         }, "strip", z.ZodTypeAny, {
             date?: string | undefined;
             size?: string | undefined;
             time?: string | undefined;
+            parcel_images?: string[] | undefined;
             priority?: string | undefined;
             parcel_name?: string | undefined;
             vehicle_type?: string | undefined;
             weight?: number | undefined;
+            pickup_location?: {
+                address?: string | undefined;
+                latitude?: number | undefined;
+                longitude?: number | undefined;
+            } | undefined;
             handover_location?: {
                 address?: string | undefined;
                 latitude?: number | undefined;
                 longitude?: number | undefined;
             } | undefined;
-            parcel_images?: string[] | undefined;
             receiver_name?: string | undefined;
             receiver_phone?: string | undefined;
-            sender_remarks?: {
-                address?: string | undefined;
-                latitude?: number | undefined;
-                longitude?: number | undefined;
-            } | undefined;
+            sender_remarks?: string | undefined;
+            existing_parcel_images?: string[] | undefined;
         }, {
             date?: string | undefined;
             size?: string | undefined;
             time?: string | undefined;
+            parcel_images?: string[] | undefined;
             priority?: string | undefined;
             parcel_name?: string | undefined;
             vehicle_type?: string | undefined;
             weight?: number | undefined;
+            pickup_location?: {
+                address?: string | undefined;
+                latitude?: number | undefined;
+                longitude?: number | undefined;
+            } | undefined;
             handover_location?: {
                 address?: string | undefined;
                 latitude?: number | undefined;
                 longitude?: number | undefined;
             } | undefined;
-            parcel_images?: string[] | undefined;
             receiver_name?: string | undefined;
             receiver_phone?: string | undefined;
-            sender_remarks?: {
-                address?: string | undefined;
-                latitude?: number | undefined;
-                longitude?: number | undefined;
-            } | undefined;
+            sender_remarks?: string | undefined;
+            existing_parcel_images?: string[] | undefined;
         }>;
     }, "strip", z.ZodTypeAny, {
         body: {
             date?: string | undefined;
             size?: string | undefined;
             time?: string | undefined;
+            parcel_images?: string[] | undefined;
             priority?: string | undefined;
             parcel_name?: string | undefined;
             vehicle_type?: string | undefined;
             weight?: number | undefined;
+            pickup_location?: {
+                address?: string | undefined;
+                latitude?: number | undefined;
+                longitude?: number | undefined;
+            } | undefined;
             handover_location?: {
                 address?: string | undefined;
                 latitude?: number | undefined;
                 longitude?: number | undefined;
             } | undefined;
-            parcel_images?: string[] | undefined;
             receiver_name?: string | undefined;
             receiver_phone?: string | undefined;
-            sender_remarks?: {
-                address?: string | undefined;
-                latitude?: number | undefined;
-                longitude?: number | undefined;
-            } | undefined;
+            sender_remarks?: string | undefined;
+            existing_parcel_images?: string[] | undefined;
         };
     }, {
         body: {
             date?: string | undefined;
             size?: string | undefined;
             time?: string | undefined;
+            parcel_images?: string[] | undefined;
             priority?: string | undefined;
             parcel_name?: string | undefined;
             vehicle_type?: string | undefined;
             weight?: number | undefined;
+            pickup_location?: {
+                address?: string | undefined;
+                latitude?: number | undefined;
+                longitude?: number | undefined;
+            } | undefined;
             handover_location?: {
                 address?: string | undefined;
                 latitude?: number | undefined;
                 longitude?: number | undefined;
             } | undefined;
-            parcel_images?: string[] | undefined;
             receiver_name?: string | undefined;
             receiver_phone?: string | undefined;
-            sender_remarks?: {
-                address?: string | undefined;
-                latitude?: number | undefined;
-                longitude?: number | undefined;
-            } | undefined;
+            sender_remarks?: string | undefined;
+            existing_parcel_images?: string[] | undefined;
         };
     }>;
     rejectParcelValidationSchema: z.ZodObject<{
@@ -613,6 +643,7 @@ export declare const ParcelValidations: {
     adminUpdateParcelValidationSchema: z.ZodObject<{
         body: z.ZodObject<{
             status: z.ZodOptional<z.ZodNativeEnum<{
+                readonly INITIAL: "INITIAL";
                 readonly WAITING: "WAITING";
                 readonly PENDING: "PENDING";
                 readonly ONGOING: "ONGOING";
@@ -629,23 +660,23 @@ export declare const ParcelValidations: {
                 readonly REJECTED: "REJECTED";
             }>>;
         }, "strip", z.ZodTypeAny, {
-            status?: "PENDING" | "REJECTED" | "WAITING" | "ONGOING" | "COMPLETED" | undefined;
+            status?: "PENDING" | "REJECTED" | "INITIAL" | "WAITING" | "ONGOING" | "COMPLETED" | undefined;
             final_price?: number | undefined;
             price_status?: "REJECTED" | "NOT_SET" | "PROPOSED" | "COUNTERED" | "FINAL_OFFER" | "ACCEPTED" | undefined;
         }, {
-            status?: "PENDING" | "REJECTED" | "WAITING" | "ONGOING" | "COMPLETED" | undefined;
+            status?: "PENDING" | "REJECTED" | "INITIAL" | "WAITING" | "ONGOING" | "COMPLETED" | undefined;
             final_price?: number | undefined;
             price_status?: "REJECTED" | "NOT_SET" | "PROPOSED" | "COUNTERED" | "FINAL_OFFER" | "ACCEPTED" | undefined;
         }>;
     }, "strip", z.ZodTypeAny, {
         body: {
-            status?: "PENDING" | "REJECTED" | "WAITING" | "ONGOING" | "COMPLETED" | undefined;
+            status?: "PENDING" | "REJECTED" | "INITIAL" | "WAITING" | "ONGOING" | "COMPLETED" | undefined;
             final_price?: number | undefined;
             price_status?: "REJECTED" | "NOT_SET" | "PROPOSED" | "COUNTERED" | "FINAL_OFFER" | "ACCEPTED" | undefined;
         };
     }, {
         body: {
-            status?: "PENDING" | "REJECTED" | "WAITING" | "ONGOING" | "COMPLETED" | undefined;
+            status?: "PENDING" | "REJECTED" | "INITIAL" | "WAITING" | "ONGOING" | "COMPLETED" | undefined;
             final_price?: number | undefined;
             price_status?: "REJECTED" | "NOT_SET" | "PROPOSED" | "COUNTERED" | "FINAL_OFFER" | "ACCEPTED" | undefined;
         };

@@ -26,13 +26,14 @@ export const createParcelValidationSchema = z.object({
     vehicle_type: z.string({ required_error: 'Vehicle type is required' }),
     weight: z.number({ required_error: 'Weight is required' }).positive(),
     handover_location: locationValidationSchema,
+    pickup_location: locationValidationSchema,
     priority: z.string({ required_error: 'Priority is required' }),
     date: z.string({ required_error: 'Date is required' }),
     time: z.string({ required_error: 'Time is required' }),
-    parcel_images: z.array(z.string().url()).optional().default([]),
+    parcel_images: z.array(z.string().url()).optional(),
     receiver_name: z.string({ required_error: 'Receiver name is required' }),
     receiver_phone: z.string({ required_error: 'Receiver phone is required' }),
-    sender_remarks: locationValidationSchema,
+    sender_remarks: z.string({ required_error: 'Sender remarks is required' }),
   }),
 });
 
@@ -42,20 +43,16 @@ export const updateParcelValidationSchema = z.object({
     size: z.string().optional(),
     vehicle_type: z.string().optional(),
     weight: z.number().positive().optional(),
-
-    // Updated to optional object validation
-    // .partial() allows updating just the address or just the lat/long if preferred
     handover_location: locationValidationSchema.partial().optional(),
-
+    pickup_location: locationValidationSchema.partial().optional(),
     priority: z.string().optional(),
     date: z.string().optional(),
     time: z.string().optional(),
     parcel_images: z.array(z.string().url()).optional(),
     receiver_name: z.string().optional(),
     receiver_phone: z.string().optional(),
-
-    // Updated to optional object validation
-    sender_remarks: locationValidationSchema.partial().optional(),
+    sender_remarks: z.string().optional(),
+    existing_parcel_images: z.array(z.string()).optional(),
   }),
 });
 
@@ -102,8 +99,6 @@ const adminRejectAndFinalOfferValidationSchema = z.object({
     message: z.string().optional(),
   }),
 });
-
-
 
 const adminUpdateParcelValidationSchema = z.object({
   body: z.object({

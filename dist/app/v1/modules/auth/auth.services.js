@@ -1,5 +1,5 @@
 import httpStatus from 'http-status';
-import configs from '../../../../config';
+import configs from '../../../../config/env.config';
 import AppError from '../../../../errors/app-error';
 import { createToken, verifyToken } from './auth.utils';
 import User from '../user/user.model';
@@ -28,7 +28,7 @@ const registerUser = async (payload) => {
         user_id: newUser._id,
         purpose: 'REGISTER',
     });
-    console.log(otp, "register Otp");
+    console.log(otp, 'register Otp');
     // Send registration email
     await EmailHelpers.sendRegisterEmail(newUser.email, {
         user: newUser.full_name || 'User',
@@ -120,7 +120,10 @@ const changePasswordIntoDB = async (userData, payload) => {
  */
 const verifyOtp = async (payload, token) => {
     const { otp, purpose } = payload;
-    const decoded = verifyToken(token, configs.jwt_reset_token);
+    const secretKey = purpose === 'REGISTER'
+        ? configs.jwt_access_token
+        : configs.jwt_reset_token;
+    const decoded = verifyToken(token, secretKey);
     await OtpServices.verifyOtpFromDB({
         user_id: decoded.user_id,
         inputOtp: otp,

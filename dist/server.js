@@ -3,7 +3,7 @@ import { Server } from 'http';
 import colors from 'colors';
 // ** import local files
 import app from './app';
-import configs from './config';
+import configs from './config/env.config';
 import { connectDB } from './db';
 import { initSocket } from './socket';
 let server;

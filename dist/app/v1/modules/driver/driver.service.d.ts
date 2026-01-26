@@ -6,21 +6,31 @@ export declare const DriverServices: {
         driverInfo: TDriver;
         vehicle: TVehicle;
     }, userIdFromToken: string) => Promise<{
-        driver: (mongoose.Document<unknown, {}, TDriver, {}, mongoose.DefaultSchemaOptions> & TDriver & {
+        driver: mongoose.Document<unknown, {}, TDriver, {}, mongoose.DefaultSchemaOptions> & TDriver & {
             _id: Types.ObjectId;
         } & {
             __v: number;
         } & {
             id: string;
-        }) | undefined;
-        vehicle: (mongoose.Document<unknown, {}, TVehicle, {}, mongoose.DefaultSchemaOptions> & TVehicle & {
+        };
+        vehicle: mongoose.Document<unknown, {}, TVehicle, {}, mongoose.DefaultSchemaOptions> & TVehicle & {
             _id: Types.ObjectId;
         } & {
             __v: number;
         } & {
             id: string;
-        }) | undefined;
+        };
     }>;
+    updateDriverInfoInDB: (userId: string, payload: {
+        driverInfo?: Partial<TDriver>;
+        vehicle?: any;
+    }) => Promise<(mongoose.Document<unknown, {}, TDriver, {}, mongoose.DefaultSchemaOptions> & TDriver & {
+        _id: Types.ObjectId;
+    } & {
+        __v: number;
+    } & {
+        id: string;
+    }) | null>;
     getAllDriversFromDB: (query: Record<string, unknown>) => Promise<{
         meta: {
             total: number;

@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer';
-import configs from '../config';
+import configs from '../config/env.config';
 /**
  * Sends an email using SMTP configuration.
  * @param options - Object containing recipient email, subject, and HTML content.

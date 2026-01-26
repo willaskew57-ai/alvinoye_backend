@@ -7,8 +7,8 @@ const VehicleSchema = new Schema({
     },
     vehicle_type: { type: String, required: true },
     vehicle_number: { type: String, required: true, unique: true },
-    number_plate_image: { type: String, required: true },
-    vehicle_images: { type: [String], required: true },
+    number_plate_image: { type: String },
+    vehicle_images: { type: [String] },
     is_deleted: { type: Boolean, default: false },
 }, {
     timestamps: {

@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
 export declare const DriverController: {
     registerDriver: (req: Request, res: Response, next: import("express").NextFunction) => void;
+    updateDriverInfo: (req: Request, res: Response, next: import("express").NextFunction) => void;
     getAllDrivers: (req: Request, res: Response, next: import("express").NextFunction) => void;
     getSingleDriver: (req: Request, res: Response, next: import("express").NextFunction) => void;
     acceptParcel: (req: Request, res: Response, next: import("express").NextFunction) => void;

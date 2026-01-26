@@ -1,6 +1,7 @@
 import { Types, Document } from 'mongoose';
 // Enums as Constants
 export const PARCEL_STATUS = {
+    INITIAL: 'INITIAL',
     WAITING: 'WAITING',
     PENDING: 'PENDING',
     ONGOING: 'ONGOING',

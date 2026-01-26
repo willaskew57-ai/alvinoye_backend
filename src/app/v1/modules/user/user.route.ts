@@ -9,6 +9,7 @@ import validateRequest from '../../../../middleware/validate-request';
 import { auth } from '../../../../middleware/auth';
 import { USER_ROLE } from './user.interface';
 import { uploadFile } from '../../../../aws/multer-s3-uploader';
+import { upload } from '../../../../utils/fileUploadHelper';
 
 const router = express.Router();
 
@@ -59,9 +60,8 @@ router.patch(
     USER_ROLE.CUSTOMER,
     USER_ROLE.DRIVER
   ),
-  uploadFile(),
+  upload.fields([{ name: 'profile_image', maxCount: 1 }]), // Use multer fields
   (req: Request, res: Response, next: NextFunction) => {
-    console.log(req.body)
     if (req.body.data) {
       req.body = JSON.parse(req.body.data);
     }

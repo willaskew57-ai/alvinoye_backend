@@ -2,7 +2,7 @@ import { Schema, model } from 'mongoose';
 import bcrypt from 'bcrypt';
 // ** import local files
 import { USER_ROLE, USER_STATUS, } from './user.interface';
-import configs from '../../../../config';
+import configs from '../../../../config/env.config';
 const UserSchema = new Schema({
     full_name: {
         type: String,

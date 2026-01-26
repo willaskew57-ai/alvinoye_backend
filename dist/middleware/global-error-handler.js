@@ -1,7 +1,7 @@
 import httpStatus from 'http-status';
 import { ZodError } from 'zod';
 // ** import local files
-import configs from '../config';
+import configs from '../config/env.config';
 import handleZodError from '../errors/handleZodError';
 import handleValidationError from '../errors/handle-validation-error';
 import handleCastError from '../errors/handle-cast-error';

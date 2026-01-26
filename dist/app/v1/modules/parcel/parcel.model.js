@@ -29,7 +29,7 @@ const parcelSchema = new Schema({
     parcel_images: { type: [String], default: [] },
     receiver_name: { type: String, required: true },
     receiver_phone: { type: String, required: true },
-    sender_remarks: LocationSchema,
+    sender_remarks: { type: String, required: true },
     status: {
         type: String,
         enum: Object.values(PARCEL_STATUS),

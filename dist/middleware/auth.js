@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken'; // removed JwtPayload import as we'll use your c
 import AppError from '../errors/app-error';
 import catchAsync from '../utils/catch-async';
 import User from '../app/v1/modules/user/user.model';
-import configs from '../config';
+import configs from '../config/env.config';
 export const auth = (...requiredRoles) => {
     return catchAsync(async (req, res, next) => {
         const token = req.headers.authorization?.split(' ')[1];

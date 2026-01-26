@@ -1,5 +1,6 @@
 // ** import packages **
 import express, {} from 'express';
+import path from 'path';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 // ** import local files **
@@ -13,6 +14,8 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({ origin: ['http://localhost:3000'], credentials: true }));
+// For local file 
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 // test route:
 app.get('/health', healthCheck);
 // application routes:

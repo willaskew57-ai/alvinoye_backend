@@ -6,13 +6,15 @@ import { USER_ROLE } from '../user/user.interface';
 import { Parcel, ParcelPriceRequest } from './parcel.model';
 import { PARCEL_STATUS, PRICE_REQUEST_STATUS, PRICE_STATUS, PROPOSED_BY, } from './parcel.interface';
 import { generateParcelId } from './parcel.utils';
+import { deleteLocalFile } from '../../../../utils/deleteFileHelper';
 // ** ----- create parcel -----
+// parcel.service.ts
 const createParcelIntoDB = async (userId, payload) => {
     const parcelData = {
         ...payload,
         user_id: userId,
-        parcel_id: generateParcelId(),
-        status: 'WAITING',
+        parcel_id: generateParcelId(), // Ensure you have this helper
+        status: 'INITIAL',
         price_status: 'NOT_SET',
     };
     const result = await Parcel.create(parcelData);
@@ -74,16 +76,46 @@ const getSingleParcelFromDB = async (id) => {
     return result;
 };
 const updateParcelInDB = async (id, payload) => {
-    // Prevent direct update of price or status via this general update method
-    const restrictedFields = ['final_price', 'price_status', 'parcel_id'];
+    // 1. Fetch the existing parcel
+    const existingParcel = await Parcel.findById(id);
+    if (!existingParcel) {
+        throw new AppError(httpStatus.NOT_FOUND, 'Parcel not found!');
+    }
+    // 2. CRITICAL: Only allow update if status is INITIAL
+    if (existingParcel.status !== PARCEL_STATUS.INITIAL) {
+        throw new AppError(httpStatus.FORBIDDEN, `Cannot update parcel. Updates are only allowed when status is '${PARCEL_STATUS.INITIAL}'.`);
+    }
+    // 3. Prevent direct update of restricted fields
+    const restrictedFields = [
+        'final_price',
+        'price_status',
+        'parcel_id',
+        'status',
+        'user_id',
+    ];
     restrictedFields.forEach((field) => delete payload[field]);
+    // 4. Handle Image Sync (Deletion of removed images)
+    let finalParcelImages = existingParcel.parcel_images || [];
+    if (payload.existing_parcel_images) {
+        // Identify images that were in the DB but are NOT in the 'keep' list
+        const imagesToDelete = existingParcel.parcel_images.filter((img) => !payload.existing_parcel_images?.includes(img));
+        // Physically delete them from the local folder
+        imagesToDelete.forEach((img) => deleteLocalFile(img));
+        // Update our array to contain only the kept images
+        finalParcelImages = payload.existing_parcel_images;
+    }
+    // 5. Add new uploaded images
+    if (payload.parcel_images && payload.parcel_images.length > 0) {
+        finalParcelImages = [...finalParcelImages, ...payload.parcel_images];
+    }
+    // Assign the finalized image list back to the payload
+    payload.parcel_images = finalParcelImages;
+    delete payload.existing_parcel_images; // Clean up the helper field
+    // 6. Update the database
     const result = await Parcel.findByIdAndUpdate(id, payload, {
         new: true,
         runValidators: true,
     });
-    if (!result) {
-        throw new AppError(httpStatus.NOT_FOUND, 'Parcel not found!');
-    }
     return result;
 };
 const rejectParcelFromDB = async (id, payload) => {

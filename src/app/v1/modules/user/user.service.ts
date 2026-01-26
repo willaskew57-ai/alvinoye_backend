@@ -10,6 +10,7 @@ import {
 import { Types } from 'mongoose';
 import QueryBuilder from '../../../../builders/query-builder';
 import { deleteFileFromS3 } from '../../../../aws/deleteFromS3';
+import { deleteLocalFile } from '../../../../utils/deleteFileHelper';
 
 const createAdminIntoDB = async (payload: TUser) => {
   const isUserExists = await User.isUserExistsByEmail(payload.email);
@@ -130,8 +131,9 @@ const getMeFromDB = async (id: string) => {
   return result;
 };
 
+
 const updateMeIntoDB = async (id: string, payload: Partial<TUser>) => {
-  // Prevent users from updating sensitive fields via the "update-me" route
+  // 1. Prevent users from updating sensitive fields
   const forbiddenFields: (keyof TUser)[] = [
     'role',
     'status',
@@ -145,14 +147,17 @@ const updateMeIntoDB = async (id: string, payload: Partial<TUser>) => {
     }
   });
 
+  // 2. Handle local file deletion if a new profile picture is provided
   if (payload.profile_picture) {
     const existingUser = await User.findById(id);
 
+    // If user exists and already has a picture, delete the old one from local storage
     if (existingUser && existingUser.profile_picture) {
-      await deleteFileFromS3(existingUser.profile_picture);
+      deleteLocalFile(existingUser.profile_picture);
     }
   }
 
+  // 3. Update the database
   const result = await User.findByIdAndUpdate(id, payload, {
     new: true,
     runValidators: true,
@@ -161,6 +166,7 @@ const updateMeIntoDB = async (id: string, payload: Partial<TUser>) => {
   if (!result) {
     throw new AppError(httpStatus.NOT_FOUND, 'User not found!');
   }
+
   return result;
 };
 

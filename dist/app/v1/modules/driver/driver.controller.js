@@ -2,14 +2,38 @@ import httpStatus from 'http-status';
 import catchAsync from '../../../../utils/catch-async';
 import sendResponse from '../../../../utils/send-response';
 import { DriverServices } from './driver.service';
+import { getLocalFileUrl } from '../../../../utils/fileUploadHelper';
 const registerDriver = catchAsync(async (req, res) => {
     const user_id = req.user.user_id;
-    console.log('User ID from token:', req.user);
+    const files = req.files;
+    // 1. Handle License Image
+    if (files?.license_image?.[0]) {
+        req.body.driverInfo.license_image = getLocalFileUrl(files.license_image[0].path);
+    }
+    // 2. Handle Number Plate Image
+    if (files?.number_plate_image?.[0]) {
+        req.body.vehicle.number_plate_image = getLocalFileUrl(files.number_plate_image[0].path);
+    }
+    // 3. Handle Multiple Vehicle Images
+    if (files?.vehicle_images) {
+        req.body.vehicle.vehicle_images = files.vehicle_images.map((file) => getLocalFileUrl(file.path));
+    }
     const result = await DriverServices.addDriverInfoIntoDB(req.body, user_id);
     sendResponse(res, {
         statusCode: httpStatus.CREATED,
         success: true,
         message: 'Driver profile created successfully!',
+        data: result,
+    });
+});
+// driver.controller.ts
+const updateDriverInfo = catchAsync(async (req, res) => {
+    const user_id = req.user.user_id;
+    const result = await DriverServices.updateDriverInfoInDB(user_id, req.body);
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'Driver info updated successfully',
         data: result,
     });
 });
@@ -74,6 +98,7 @@ const completeParcel = catchAsync(async (req, res) => {
 });
 export const DriverController = {
     registerDriver,
+    updateDriverInfo,
     getAllDrivers,
     getSingleDriver,
     acceptParcel,

@@ -12,86 +12,121 @@ import { PARCEL_STATUS } from '../parcel/parcel.interface';
 import { OtpServices } from '../otp/otp.services';
 import Otp from '../otp/otp.model';
 import { EmailHelpers } from '../../../../utils/email-helper';
+import { deleteLocalFile } from '../../../../utils/deleteFileHelper';
 
 const addDriverInfoIntoDB = async (
   payload: { driverInfo: TDriver; vehicle: TVehicle },
-  userIdFromToken: string // Add this parameter
+  userIdFromToken: string
 ) => {
   const { driverInfo, vehicle } = payload;
-
   const finalUserId = driverInfo.user_id || userIdFromToken;
 
   if (!finalUserId) {
     throw new AppError(httpStatus.BAD_REQUEST, 'User ID is required!');
   }
 
-  const session = await mongoose.startSession();
+  // 1. Check if Driver already exists
+  const isDriverExists = await Driver.findOne({ user_id: finalUserId });
+  if (isDriverExists) {
+    throw new AppError(httpStatus.CONFLICT, 'Driver profile already exists!');
+  }
+
+  // 2. Create Driver
+  const driverData = { ...driverInfo, user_id: finalUserId };
+  const newDriver = await Driver.create(driverData); // Removed array wrapper []
 
   try {
-    session.startTransaction();
-
-    const isDriverExists = await Driver.findOne({
-      user_id: finalUserId,
-    }).session(session);
-
-    if (isDriverExists) {
-      throw new AppError(
-        httpStatus.CONFLICT,
-        'Driver profile already exists for this user!'
-      );
-    }
-
-    const driverData = { ...driverInfo, user_id: finalUserId };
-    const newDriver = await Driver.create([driverData], { session });
-
-    if (!newDriver.length) {
-      throw new AppError(
-        httpStatus.BAD_REQUEST,
-        'Failed to create driver profile'
-      );
-    }
-
+    // 3. Create Vehicle
     const vehicleData: TVehicle = {
       ...vehicle,
       user_id: finalUserId as any,
     };
+    const newVehicle = await Vehicle.create(vehicleData);
 
-    const newVehicle = await Vehicle.create([vehicleData], { session });
-
-    if (!newVehicle.length) {
-      throw new AppError(
-        httpStatus.BAD_REQUEST,
-        'Failed to create vehicle record'
-      );
-    }
-
+    // 4. Update User Status
     const updatedUser = await User.findByIdAndUpdate(
       finalUserId,
       { is_profile_completed: true, status: 'ACTIVE' },
-      { session, new: true } // Must pass the session here!
+      { new: true }
     );
 
     if (!updatedUser) {
-      throw new AppError(
-        httpStatus.NOT_FOUND,
-        'User not found to update profile status'
-      );
+      throw new AppError(httpStatus.NOT_FOUND, 'User not found');
     }
 
-    await session.commitTransaction();
-    await session.endSession();
-
     return {
-      driver: newDriver[0],
-      vehicle: newVehicle[0],
+      driver: newDriver,
+      vehicle: newVehicle,
     };
   } catch (error: any) {
-    await session.abortTransaction();
-    await session.endSession();
+    // Manually delete the driver if vehicle creation fails (Manual Rollback)
+    await Driver.findByIdAndDelete(newDriver._id);
     throw new AppError(
       httpStatus.BAD_REQUEST,
       error.message || 'Registration failed'
     );
+  }
+};
+
+const updateDriverInfoInDB = async (
+  userId: string,
+  payload: { driverInfo?: Partial<TDriver>; vehicle?: any }
+) => {
+  const { driverInfo, vehicle } = payload;
+  const session = await mongoose.startSession();
+
+  try {
+    // session.startTransaction();
+
+    if (driverInfo) {
+      const existingDriver = await Driver.findOne({ user_id: userId });
+      if (driverInfo.license_image && existingDriver?.license_image) {
+        deleteLocalFile(existingDriver.license_image);
+      }
+      await Driver.findOneAndUpdate({ user_id: userId }, driverInfo, {
+        session,
+      });
+    }
+
+    if (vehicle) {
+      const existingVehicle = await Vehicle.findOne({ user_id: userId });
+      if (!existingVehicle) throw new Error('Vehicle not found');
+
+      let finalImages = existingVehicle.vehicle_images || [];
+
+      // Logic to delete images removed by user
+      if (vehicle.existing_vehicle_images) {
+        const toDelete = existingVehicle.vehicle_images.filter(
+          (img: string) => !vehicle.existing_vehicle_images.includes(img)
+        );
+        toDelete.forEach((img: string) => deleteLocalFile(img));
+        finalImages = vehicle.existing_vehicle_images;
+      }
+
+      // Add new uploaded images
+      if (vehicle.vehicle_images) {
+        finalImages = [...finalImages, ...vehicle.vehicle_images];
+      }
+
+      if (vehicle.number_plate_image && existingVehicle.number_plate_image) {
+        deleteLocalFile(existingVehicle.number_plate_image);
+      }
+
+      const vehicleData = { ...vehicle, vehicle_images: finalImages };
+      delete vehicleData.existing_vehicle_images;
+
+      await Vehicle.findOneAndUpdate({ user_id: userId }, vehicleData, {
+        session,
+      });
+    }
+
+    // await session.commitTransaction();
+    return await Driver.findOne({ user_id: userId }).populate('vehicle');
+  } catch (error) {
+    await session.abortTransaction();
+    throw error;
+  } finally {
+    await session.endSession();
   }
 };
 
@@ -150,9 +185,9 @@ const getAllDriversFromDB = async (query: Record<string, unknown>) => {
   excludeFields.forEach((el) => delete queryObj[el]);
 
   const userQuery = new QueryBuilder(
-    User.find({ role: 'DRIVER', is_profile_completed: true  })
-      .populate('driver_info') 
-      .populate('vehicle'), 
+    User.find({ role: 'DRIVER', is_profile_completed: true })
+      .populate('driver_info')
+      .populate('vehicle'),
     queryObj
   );
 
@@ -360,6 +395,7 @@ const completeParcelFromDB = async (parcel_id: string, driver_id: string) => {
 
 export const DriverServices = {
   addDriverInfoIntoDB,
+  updateDriverInfoInDB,
   getAllDriversFromDB,
   getSingleDriverFromDB,
   acceptParcelFromDB,

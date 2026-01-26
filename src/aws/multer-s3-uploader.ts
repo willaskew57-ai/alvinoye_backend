@@ -148,3 +148,5 @@ console.log("we get the file", file)
 export const getCloudFrontUrl = (s3FilePath: string): string => {
   return `${configs.cloudfront_url}/${s3FilePath}`;
 };
+
+

@@ -3,12 +3,12 @@ import catchAsync from '../../../../utils/catch-async';
 import sendResponse from '../../../../utils/send-response';
 import { ParcelServices } from './parcel.service';
 
+// parcel.controller.ts
 const createParcel = catchAsync(async (req, res) => {
-  // Extract user_id from token (TUserPayload)
-  const result = await ParcelServices.createParcelIntoDB(
-    req.user.user_id,
-    req.body
-  );
+  const user_id = req.user.user_id;
+
+  // req.body now contains parcel_images as an array of URLs
+  const result = await ParcelServices.createParcelIntoDB(user_id, req.body);
 
   sendResponse(res, {
     statusCode: httpStatus.CREATED,
@@ -60,6 +60,8 @@ const getSingleParcel = catchAsync(async (req, res) => {
 
 const updateParcel = catchAsync(async (req, res) => {
   const { id } = req.params;
+
+  // req.body now contains synced image arrays and parsed numbers
   const result = await ParcelServices.updateParcelInDB(id as string, req.body);
 
   sendResponse(res, {

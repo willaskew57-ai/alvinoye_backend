@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 // ** import local files
 import AppError from '../errors/app-error';
 import User from '../app/v1/modules/user/user.model';
-import configs from '../config';
+import configs from '../config/env.config';
 export const socketAuth = (...requiredRoles) => async (socket, next) => {
     try {
         // 🔑 token from socket handshake

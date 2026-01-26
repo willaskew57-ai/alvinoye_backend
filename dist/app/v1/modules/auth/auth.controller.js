@@ -1,6 +1,6 @@
 import httpStatus from 'http-status';
 import catchAsync from '../../../../utils/catch-async';
-import configs from '../../../../config';
+import configs from '../../../../config/env.config';
 import sendResponse from '../../../../utils/send-response';
 import { AuthServices } from './auth.services';
 // ** Register user controller:
