@@ -71,7 +71,8 @@ const sendMessage = async (
     });
   }
 
-  const message = await Message.create({
+  // 1. Create the message
+  let message = await Message.create({
     chat_id: new Types.ObjectId(chat_id),
     sender_id: new Types.ObjectId(senderId),
     sender_role: senderRole,
@@ -79,19 +80,22 @@ const sendMessage = async (
     attachments: attachments || [],
   });
 
+  // 2. IMPORTANT: Populate the sender_id so the frontend gets name/profile_image instantly
+  message = await message.populate('sender_id', 'name profile_image');
+
   await Chat.findByIdAndUpdate(chat_id, {
     last_message: content,
     last_message_at: new Date(),
   });
 
-  // Socket.io Real-time logic
+  // 3. Socket.io Real-time logic
   const io = getIO();
   if (io) {
-
     console.log('Emitting new_message to room:', chat_id);
-    // Notify the specific room
-    // io.to(chat_id).emit('new_message', message);
-    io.emit('new_message', message);
+    
+    // ✅ FIX: Uncomment this line to notify the specific room
+    // Use .toString() to ensure the room ID is a string
+    io.to(chat_id.toString()).emit('new_message', message);
 
     // If customer sends a message, alert all admins in the global admin room
     if (!isAdmin) {
@@ -112,7 +116,7 @@ const getMyChats = async (userId: string, userRole: USER_ROLES) => {
     return await Chat.find({
       is_support_chat: true,
     })
-      .populate('participants', 'name email profile_image')
+      .populate('participants', 'full_name email profile_picture role')
       .sort({ last_message_at: -1 }); // Newest activity at the top
   }
 
@@ -120,7 +124,7 @@ const getMyChats = async (userId: string, userRole: USER_ROLES) => {
   return await Chat.find({
     participants: userId,
   })
-    .populate('participants', 'name email profile_image')
+    .populate('participants', 'full_name email profile_picture role')
     .sort({ last_message_at: -1 });
 };
 

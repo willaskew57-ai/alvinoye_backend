@@ -254,6 +254,13 @@ const proposePriceInDB = async (
     throw new AppError(httpStatus.NOT_FOUND, 'Parcel not found!');
   }
 
+  if (parcel.status !== PARCEL_STATUS.WAITING) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      'You can only propose a price when the parcel is in WAITING status.'
+    );
+  }
+
   const isAdmin = role === 'ADMIN' || role === 'SUPER_ADMIN';
   const currentStatus = parcel.price_status;
 
