@@ -100,6 +100,12 @@ router.patch(
   ParcelControllers.rejectParcel
 );
 
+router.patch(
+  '/request-for-price/:id',
+  auth(USER_ROLE.CUSTOMER),
+  ParcelControllers.requestForPrice
+);
+
 // ** ------- Negotiation Flow -------
 
 // Admin sets first price

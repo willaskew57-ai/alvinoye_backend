@@ -212,7 +212,37 @@ const rejectParcelFromDB = async (
   return result;
 };
 
-// ** --- Price Negotiation  ---
+const requestForPriceInDB = async (id: string) => {
+  const parcel = await Parcel.findById(id);
+
+  if (!parcel) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Parcel not found!');
+  }
+
+  // Optional: Check if the parcel is already in a state that cannot be rejected
+  if (parcel.status !== PARCEL_STATUS.INITIAL) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      `Cannot request price for a parcel that is already ${parcel.status.toLowerCase()}`
+    );
+  }
+
+  const result = await Parcel.findByIdAndUpdate(
+    id,
+    {
+      status: PARCEL_STATUS.WAITING,
+    },
+    {
+      new: true,
+      runValidators: true,
+      select: 'status',
+    }
+  );
+
+  return result;
+};
+
+// ** ---------- Price Negotiation  ----------
 
 const proposePriceInDB = async (
   role: string,
@@ -454,6 +484,7 @@ export const ParcelServices = {
   getSingleParcelFromDB,
   updateParcelInDB,
   rejectParcelFromDB,
+  requestForPriceInDB,
   proposePriceInDB,
   acceptPriceProposalInDB,
   rejectAndCounterPriceInDB,

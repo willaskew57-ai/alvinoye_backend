@@ -87,6 +87,18 @@ const rejectParcel = catchAsync(async (req, res) => {
   });
 });
 
+const requestForPrice = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const result = await ParcelServices.requestForPriceInDB(id as string);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Price request sent successfully',
+    data: result,
+  });
+});
+
 // --- Price Negotiation ---
 
 const proposePrice = catchAsync(async (req, res) => {
@@ -102,15 +114,9 @@ const proposePrice = catchAsync(async (req, res) => {
 });
 
 const acceptPrice = catchAsync(async (req, res) => {
-  const { id } = req.params; // Request ID
-  const user = (req as any).user;
+  const { id } = req.params;
 
-  console.log('user', user);
-
-  const result = await ParcelServices.acceptPriceProposalInDB(
-    id as string,
-    user
-  );
+  const result = await ParcelServices.requestForPriceInDB(id as string);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -162,7 +168,9 @@ export const ParcelControllers = {
   getMyParcels,
   getSingleParcel,
   updateParcel,
+  requestForPrice,
   rejectParcel,
+
   proposePrice,
   acceptPrice,
   rejectAndCounter,
