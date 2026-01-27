@@ -25,4 +25,13 @@ export type TMessageRead = {
     user_id: Types.ObjectId;
     read_at: Date;
 };
+export type TPopulatedMessage = TMessage & {
+    _id: Types.ObjectId;
+    created_at: Date;
+    sender_id: {
+        _id: Types.ObjectId;
+        full_name: string;
+        profile_picture: string;
+    };
+};
 //# sourceMappingURL=chat.interface.d.ts.map

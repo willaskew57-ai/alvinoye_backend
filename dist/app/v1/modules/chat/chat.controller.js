@@ -33,7 +33,7 @@ const sendMessage = catchAsync(async (req, res) => {
     });
 });
 const getMyChats = catchAsync(async (req, res) => {
-    const result = await ChatService.getMyChats(req.user.user_id, req.user.role);
+    const result = await ChatService.getMyChats(req.user.user_id, req.user.role, req.query);
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
@@ -43,13 +43,14 @@ const getMyChats = catchAsync(async (req, res) => {
 });
 const getMessages = catchAsync(async (req, res) => {
     const { id } = req.params;
-    // Pass both chatId and current userId to handle read receipts
-    const result = await ChatService.getMessages(id, req.user.user_id, req.user.role);
+    // Pass req.query to enable pagination (e.g., ?page=1&limit=20)
+    const result = await ChatService.getMessages(id, req.user.user_id, req.user.role, req.query);
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
         message: 'Messages retrieved successfully!',
-        data: result,
+        meta: result.meta,
+        data: result.data,
     });
 });
 const markAsRead = catchAsync(async (req, res) => {

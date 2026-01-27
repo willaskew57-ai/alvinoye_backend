@@ -36,6 +36,7 @@ router.get('/get-all', auth(USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN, USER_ROLE.DR
 router.get('/get-my-parcels', auth(USER_ROLE.CUSTOMER, USER_ROLE.DRIVER), ParcelControllers.getMyParcels);
 router.get('/get/:id', auth(USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN, USER_ROLE.DRIVER, USER_ROLE.CUSTOMER), ParcelControllers.getSingleParcel);
 router.patch('/reject/:id', auth(USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN), validateRequest(ParcelValidations.rejectParcelValidationSchema), ParcelControllers.rejectParcel);
+router.patch('/request-for-price/:id', auth(USER_ROLE.CUSTOMER), ParcelControllers.requestForPrice);
 // ** ------- Negotiation Flow -------
 // Admin sets first price
 router.post('/propose-price', auth(USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN), validateRequest(ParcelValidations.createPriceRequestValidationSchema), ParcelControllers.proposePrice);

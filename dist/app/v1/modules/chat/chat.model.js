@@ -5,7 +5,7 @@ const chatSchema = new Schema({
         { type: Schema.Types.ObjectId, ref: 'User', required: true },
     ],
     participant_roles: [{ type: String, enum: Object.values(USER_ROLES) }],
-    is_support_chat: { type: Boolean, default: false }, // 👈 Added this
+    is_support_chat: { type: Boolean, default: false },
     last_message: { type: String },
     last_message_at: { type: Date },
 }, {

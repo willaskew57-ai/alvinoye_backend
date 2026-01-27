@@ -136,13 +136,34 @@ const rejectParcelFromDB = async (id, payload) => {
     });
     return result;
 };
-// ** --- Price Negotiation  ---
+const requestForPriceInDB = async (id) => {
+    const parcel = await Parcel.findById(id);
+    if (!parcel) {
+        throw new AppError(httpStatus.NOT_FOUND, 'Parcel not found!');
+    }
+    // Optional: Check if the parcel is already in a state that cannot be rejected
+    if (parcel.status !== PARCEL_STATUS.INITIAL) {
+        throw new AppError(httpStatus.BAD_REQUEST, `Cannot request price for a parcel that is already ${parcel.status.toLowerCase()}`);
+    }
+    const result = await Parcel.findByIdAndUpdate(id, {
+        status: PARCEL_STATUS.WAITING,
+    }, {
+        new: true,
+        runValidators: true,
+        select: 'status',
+    });
+    return result;
+};
+// ** ---------- Price Negotiation  ----------
 const proposePriceInDB = async (role, payload // This matches your createPriceRequestValidationSchema
 ) => {
     // 1. Verify the Parcel exists
     const parcel = await Parcel.findById(payload.parcel_id);
     if (!parcel) {
         throw new AppError(httpStatus.NOT_FOUND, 'Parcel not found!');
+    }
+    if (parcel.status !== PARCEL_STATUS.WAITING) {
+        throw new AppError(httpStatus.BAD_REQUEST, 'You can only propose a price when the parcel is in WAITING status.');
     }
     const isAdmin = role === 'ADMIN' || role === 'SUPER_ADMIN';
     const currentStatus = parcel.price_status;
@@ -297,6 +318,7 @@ export const ParcelServices = {
     getSingleParcelFromDB,
     updateParcelInDB,
     rejectParcelFromDB,
+    requestForPriceInDB,
     proposePriceInDB,
     acceptPriceProposalInDB,
     rejectAndCounterPriceInDB,

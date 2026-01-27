@@ -64,6 +64,13 @@ export declare const ParcelServices: {
     } & {
         id: string;
     }) | null>;
+    requestForPriceInDB: (id: string) => Promise<(mongoose.Document<unknown, {}, TParcel, {}, mongoose.DefaultSchemaOptions> & TParcel & Required<{
+        _id: mongoose.Types.ObjectId;
+    }> & {
+        __v: number;
+    } & {
+        id: string;
+    }) | null>;
     proposePriceInDB: (role: string, payload: any) => Promise<mongoose.Document<unknown, {}, TParcelPriceRequest, {}, mongoose.DefaultSchemaOptions> & TParcelPriceRequest & Required<{
         _id: mongoose.Types.ObjectId;
     }> & {

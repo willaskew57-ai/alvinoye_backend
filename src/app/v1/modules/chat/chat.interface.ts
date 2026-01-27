@@ -24,8 +24,19 @@ export type TMessage = {
   is_read: boolean;
 };
 
+
 export type TMessageRead = {
   message_id: Types.ObjectId;
   user_id: Types.ObjectId;
   read_at: Date;
+};
+
+export type TPopulatedMessage = TMessage & {
+  _id: Types.ObjectId;
+  created_at: Date;
+  sender_id: {
+    _id: Types.ObjectId;
+    full_name: string;
+    profile_picture: string;
+  };
 };

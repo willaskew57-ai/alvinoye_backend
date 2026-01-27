@@ -1,4 +1,4 @@
-import type{ Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import { ChatService } from './chat.service';
 import { USER_ROLES } from './chat.interface';
@@ -21,7 +21,7 @@ const initiateChat = catchAsync(async (req: Request, res: Response) => {
 
 const initiateP2PChat = catchAsync(async (req: Request, res: Response) => {
   const { recipientId } = req.body;
-  
+
   const result = await ChatService.initiateChat(
     req.user.user_id,
     req.user.role as USER_ROLES,
@@ -54,7 +54,8 @@ const sendMessage = catchAsync(async (req: Request, res: Response) => {
 const getMyChats = catchAsync(async (req: Request, res: Response) => {
   const result = await ChatService.getMyChats(
     req.user.user_id,
-    req.user.role as USER_ROLES 
+    req.user.role as USER_ROLES,
+    req.query
   );
 
   sendResponse(res, {
@@ -67,14 +68,21 @@ const getMyChats = catchAsync(async (req: Request, res: Response) => {
 
 const getMessages = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
-  // Pass both chatId and current userId to handle read receipts
-  const result = await ChatService.getMessages(id as string, req.user.user_id, req.user.role as USER_ROLES );
+
+  // Pass req.query to enable pagination (e.g., ?page=1&limit=20)
+  const result = await ChatService.getMessages(
+    id as string,
+    req.user.user_id,
+    req.user.role as USER_ROLES,
+    req.query
+  );
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
     message: 'Messages retrieved successfully!',
-    data: result,
+    meta: result.meta,
+    data: result.data,
   });
 });
 
@@ -91,7 +99,6 @@ const markAsRead = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
-
 
 export const ChatController = {
   initiateChat,
