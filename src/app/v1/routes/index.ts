@@ -11,6 +11,7 @@ import { ChatRoutes } from '../modules/chat/chat.routes';
 import { ReviewRoutes } from '../modules/review/review.routes';
 import { PaymentRoute } from '../modules/payment/payment.route';
 import { CustomerRoutes } from '../modules/cusotmer/customer.route';
+import { DashboardRoute } from '../modules/dashboard/dashboard.route';
 
 const router = express.Router();
 
@@ -55,6 +56,10 @@ const modulesRoute: TModuleRoutes[] = [
   {
     path: '/settings',
     route: SettingsRoutes,
+  },
+  {
+    path: '/dashboard',
+    route: DashboardRoute,
   },
 ];
 
