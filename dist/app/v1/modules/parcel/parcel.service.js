@@ -251,8 +251,51 @@ const acceptPriceProposalInDB = async (requestId, user) => {
         await session.endSession();
     }
 };
+// ** Rejecting price proposal
+const rejectPriceProposalInDB = async (requestId, user) => {
+    const session = await mongoose.startSession();
+    try {
+        session.startTransaction();
+        // 1. Find the proposal request
+        const priceRequest = await ParcelPriceRequest.findById(requestId).session(session);
+        if (!priceRequest) {
+            throw new AppError(httpStatus.NOT_FOUND, 'Request not found!');
+        }
+        // 2. Validate status
+        if (priceRequest.status !== PRICE_REQUEST_STATUS.PENDING) {
+            throw new AppError(httpStatus.BAD_REQUEST, 'This proposal has already been decided!');
+        }
+        // 3. Prevent user from rejecting their own proposal
+        const isAdmin = user.role === 'ADMIN' || user.role === 'SUPER_ADMIN';
+        const userRoleType = isAdmin ? PROPOSED_BY.ADMIN : PROPOSED_BY.CUSTOMER;
+        if (priceRequest.proposed_by === userRoleType) {
+            throw new AppError(httpStatus.FORBIDDEN, 'You cannot respond to your own proposal.');
+        }
+        // 4. Update Request Status to REJECTED
+        priceRequest.status = 'REJECTED';
+        priceRequest.decided_at = new Date();
+        await priceRequest.save({ session });
+        // 5. Update Parcel Price Status
+        // Note: We do NOT set final_price here because the proposal was rejected.
+        const updatedParcel = await Parcel.findByIdAndUpdate(priceRequest.parcel_id, {
+            price_status: PRICE_STATUS.REJECTED,
+        }, { session, new: true });
+        if (!updatedParcel) {
+            throw new AppError(httpStatus.NOT_FOUND, 'Associated parcel not found!');
+        }
+        await session.commitTransaction();
+        return priceRequest;
+    }
+    catch (err) {
+        await session.abortTransaction();
+        throw err;
+    }
+    finally {
+        await session.endSession();
+    }
+};
 /**
- * Logic: CUSTOMER Rejects Admin's price and suggests their own (Popup)
+ * Logic: CUSTOMER Rejects Admin's price and suggests their own
  */
 const rejectAndCounterPriceInDB = async (requestId, payload) => {
     const currentRequest = await ParcelPriceRequest.findById(requestId);
@@ -277,7 +320,7 @@ const rejectAndCounterPriceInDB = async (requestId, payload) => {
     return newCounterOffer;
 };
 /**
- * ADMIN Rejects Customer's price and sets the TAKE-IT-OR-LEAVE-IT price
+ * ADMIN Rejects Customer's price and sets the
  */
 const adminRejectAndFinalOfferInDB = async (requestId, payload) => {
     // 1. Mark Customer's counter-offer as REJECTED
@@ -323,5 +366,6 @@ export const ParcelServices = {
     acceptPriceProposalInDB,
     rejectAndCounterPriceInDB,
     adminRejectAndFinalOfferInDB,
+    rejectPriceProposalInDB,
 };
 //# sourceMappingURL=parcel.service.js.map

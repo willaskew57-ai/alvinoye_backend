@@ -86,9 +86,9 @@ const sendMessage = async (senderId, senderRole, payload) => {
         chat.participants.forEach((participantId) => {
             io.to(participantId.toString()).emit('update_chat_list', {
                 chat_id: chat_id,
+                sender_id: senderId,
                 last_message: content,
                 last_message_at: updatedChat?.last_message_at,
-                sender_id: senderId,
             });
         });
         // C. Special Notification for Admin Support Room

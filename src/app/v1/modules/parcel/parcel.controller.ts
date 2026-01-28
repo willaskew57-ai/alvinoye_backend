@@ -126,6 +126,20 @@ const acceptPrice = catchAsync(async (req, res) => {
   });
 });
 
+const rejectPrice = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const user = req.user; 
+
+  const result = await ParcelServices.rejectPriceProposalInDB(id as string, user);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Price proposal rejected successfully',
+    data: result,
+  });
+});
+
 /**
  * Controller: Handles the "Reject reason" + "Suggested price" popup from Customer
  */
@@ -172,6 +186,7 @@ export const ParcelControllers = {
   rejectParcel,
 
   proposePrice,
+  rejectPrice,
   acceptPrice,
   rejectAndCounter,
   adminFinalOffer,

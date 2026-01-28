@@ -139,4 +139,10 @@ router.patch(
   ParcelControllers.acceptPrice
 );
 
+router.patch(
+  '/reject-price/:id',
+  auth(USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.CUSTOMER),
+  ParcelControllers.rejectPrice
+);
+
 export const ParcelRoutes = router;

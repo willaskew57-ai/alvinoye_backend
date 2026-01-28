@@ -7,6 +7,7 @@ export declare const ParcelControllers: {
     requestForPrice: (req: import("express").Request, res: import("express").Response, next: import("express").NextFunction) => void;
     rejectParcel: (req: import("express").Request, res: import("express").Response, next: import("express").NextFunction) => void;
     proposePrice: (req: import("express").Request, res: import("express").Response, next: import("express").NextFunction) => void;
+    rejectPrice: (req: import("express").Request, res: import("express").Response, next: import("express").NextFunction) => void;
     acceptPrice: (req: import("express").Request, res: import("express").Response, next: import("express").NextFunction) => void;
     rejectAndCounter: (req: import("express").Request, res: import("express").Response, next: import("express").NextFunction) => void;
     adminFinalOffer: (req: import("express").Request, res: import("express").Response, next: import("express").NextFunction) => void;

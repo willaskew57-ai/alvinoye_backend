@@ -110,5 +110,15 @@ export declare const ParcelServices: {
     } & {
         id: string;
     }>;
+    rejectPriceProposalInDB: (requestId: string, user: {
+        user_id: string;
+        role: string;
+    }) => Promise<mongoose.Document<unknown, {}, TParcelPriceRequest, {}, mongoose.DefaultSchemaOptions> & TParcelPriceRequest & Required<{
+        _id: mongoose.Types.ObjectId;
+    }> & {
+        __v: number;
+    } & {
+        id: string;
+    }>;
 };
 //# sourceMappingURL=parcel.service.d.ts.map
