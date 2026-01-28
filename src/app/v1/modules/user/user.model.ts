@@ -97,11 +97,10 @@ const UserSchema = new Schema<TUser, IUserModel>(
   }
 );
 
-// --- Virtual Populates ---
 
 // Link to DriverInfo
 UserSchema.virtual('driver_info', {
-  ref: 'DriverInfo', // Matches the model name in Driver model
+  ref: 'DriverInfo', 
   localField: '_id',
   foreignField: 'user_id',
   justOne: true,
@@ -109,7 +108,7 @@ UserSchema.virtual('driver_info', {
 
 // Link to Vehicle
 UserSchema.virtual('vehicle', {
-  ref: 'Vehicle', // Matches the model name in Vehicle model
+  ref: 'Vehicle', 
   localField: '_id',
   foreignField: 'user_id',
   justOne: true,

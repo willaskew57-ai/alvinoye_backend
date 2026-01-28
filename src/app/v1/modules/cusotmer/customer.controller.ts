@@ -15,18 +15,6 @@ const getAllCustomer = catchAsync(async (req, res) => {
   });
 });
 
-const deleteCustomerAccount = catchAsync(async (req, res) => {
-  const id = req.user.user_id as string;
-  await CustomerServices.deleteUserFromDB(id);
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: 'User deleted successfully',
-    data: null,
-  });
-});
-
 export const UserControllers = {
   getAllCustomer,
-  deleteCustomerAccount,
 };

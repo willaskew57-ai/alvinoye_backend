@@ -12,6 +12,7 @@ import { ReviewRoutes } from '../modules/review/review.routes';
 import { PaymentRoute } from '../modules/payment/payment.route';
 import { CustomerRoutes } from '../modules/cusotmer/customer.route';
 import { DashboardRoute } from '../modules/dashboard/dashboard.route';
+import { RefundRoutes } from '../modules/refund/refund.route';
 
 const router = express.Router();
 
@@ -42,8 +43,12 @@ const modulesRoute: TModuleRoutes[] = [
     route: ParcelRoutes,
   },
   {
-    path: '/payment',
-    route: PaymentRoute,
+    path: '/parcel',
+    route: ParcelRoutes,
+  },
+  {
+    path: '/refund',
+    route: RefundRoutes,
   },
   {
     path: '/chat',

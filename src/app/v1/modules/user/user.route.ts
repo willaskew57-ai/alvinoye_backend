@@ -94,7 +94,7 @@ router.patch(
   UserControllers.updateUser
 );
 
-router.delete(
+router.patch(
   '/delete/:id',
   auth(
     USER_ROLE.ADMIN,

@@ -1,11 +1,11 @@
 // refund.model.ts
 import { Schema, model } from 'mongoose';
 import { REFUND_STATUS } from './refund.constants';
+import type { TRefundRequest } from './refund.interface';
 
-const refundSchema = new Schema(
+const refundSchema = new Schema<TRefundRequest>(
   {
     user_id: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    payment_id: { type: Schema.Types.ObjectId, ref: 'Payment', required: true },
     parcel_id: { type: Schema.Types.ObjectId, ref: 'Parcel', required: true },
 
     reason: { type: String, required: true },

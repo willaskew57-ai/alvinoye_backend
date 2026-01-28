@@ -11,6 +11,8 @@ import { Types } from 'mongoose';
 import QueryBuilder from '../../../../builders/query-builder';
 import { deleteFileFromS3 } from '../../../../aws/deleteFromS3';
 import { deleteLocalFile } from '../../../../utils/deleteFileHelper';
+import { Parcel } from '../parcel/parcel.model';
+import { PARCEL_STATUS } from '../parcel/parcel.interface';
 
 const createAdminIntoDB = async (payload: TUser) => {
   const isUserExists = await User.isUserExistsByEmail(payload.email);
@@ -131,7 +133,6 @@ const getMeFromDB = async (id: string) => {
   return result;
 };
 
-
 const updateMeIntoDB = async (id: string, payload: Partial<TUser>) => {
   // 1. Prevent users from updating sensitive fields
   const forbiddenFields: (keyof TUser)[] = [
@@ -180,12 +181,34 @@ const updateUserInDB = async (id: string, payload: Partial<TUser>) => {
 };
 
 const deleteUserFromDB = async (id: string) => {
+  // 1. Check if the user has any parcels with ONGOING status
+  // We check both user_id (sender) and accepted_by (driver)
+  const hasOngoingParcel = await Parcel.findOne({
+    $or: [{ user_id: id }, { accepted_by: id }],
+    status: PARCEL_STATUS.ONGOING,
+  });
+
+  if (hasOngoingParcel) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      'Cannot delete user. This account has an ongoing delivery in progress.'
+    );
+  }
+
+  // 2. If no ongoing parcels, proceed with soft delete
   const result = await User.findByIdAndUpdate(
     id,
-    { status: 'DELETED', deleted_date: new Date() },
+    {
+      status: 'DELETED',
+      deleted_date: new Date(),
+    },
     { new: true }
   );
-  if (!result) throw new AppError(httpStatus.NOT_FOUND, 'User not found!');
+
+  if (!result) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User not found!');
+  }
+
   return result;
 };
 
