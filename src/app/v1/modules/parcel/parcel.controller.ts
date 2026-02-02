@@ -115,13 +115,14 @@ const proposePrice = catchAsync(async (req, res) => {
 
 const acceptPrice = catchAsync(async (req, res) => {
   const { id } = req.params;
+  const user = req.user;
 
-  const result = await ParcelServices.requestForPriceInDB(id as string);
+  const result = await ParcelServices.acceptPriceProposalInDB(id as string, user);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: `Price proposal ${status.toLowerCase()} successfully`,
+    message: `Price proposal Accepted successfully`,
     data: result,
   });
 });

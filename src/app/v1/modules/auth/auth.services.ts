@@ -111,7 +111,7 @@ const loginServices = async (payload: ILoginUser) => {
   if (!isActive) {
     throw new AppError(
       httpStatus.FORBIDDEN,
-      'Your account is not active. Please contact support or wait for approval.'
+      'Your account is currently under review. Please wait for approval.'
     );
   }
 
@@ -131,6 +131,7 @@ const loginServices = async (payload: ILoginUser) => {
     email: user.email,
     role: user.role,
     status: user.status,
+    is_profile_completed: user.is_profile_completed,
   };
 
   // JWT Payload including the role
@@ -253,6 +254,7 @@ const resendOtp = async (payload: {
   // Send resend OTP email
   await EmailHelpers.sendOtpResendEmail(email, {
     user: user.full_name || 'User',
+    code: otp,
     expiresIn: configs.otp_expiry_minutes || 5,
   });
 

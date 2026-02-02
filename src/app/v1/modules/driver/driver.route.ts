@@ -86,7 +86,7 @@ router.get(
   DriverController.getAllDrivers
 );
 
-router.get('/get/:id', DriverController.getSingleDriver);
+router.get('/get-driver-info', auth(), DriverController.getSingleDriver);
 
 router.post(
   '/accept-parcel/:id',

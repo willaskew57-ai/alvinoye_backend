@@ -55,7 +55,6 @@ const updateDriverInfo = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-
 const getAllDrivers = catchAsync(async (req: Request, res: Response) => {
   const result = await DriverServices.getAllDriversFromDB(req.query);
   sendResponse(res, {
@@ -68,9 +67,9 @@ const getAllDrivers = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getSingleDriver = catchAsync(async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const driverId = id as string;
-  const result = await DriverServices.getSingleDriverFromDB(driverId);
+  const driver = req.user;
+
+  const result = await DriverServices.getSingleDriverFromDB(driver.user_id);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,

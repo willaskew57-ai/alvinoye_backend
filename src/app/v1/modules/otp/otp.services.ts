@@ -73,7 +73,17 @@ const verifyOtpFromDB = async (payload: {
   const otpRecord = await Otp.findOne(query);
 
   if (!otpRecord) {
-    throw new AppError(httpStatus.BAD_REQUEST, 'OTP expired or not found');
+    throw new AppError(httpStatus.BAD_REQUEST, 'OTP not found or already used');
+  }
+
+  if (purpose !== 'PARCEL' && otpRecord.expires_at) {
+    const currentTime = new Date();
+    if (currentTime > otpRecord.expires_at) {
+      throw new AppError(
+        httpStatus.BAD_REQUEST,
+        'OTP has expired. Please request a new one.'
+      );
+    }
   }
 
   // max attempts check

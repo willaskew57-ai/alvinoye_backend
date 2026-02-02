@@ -260,6 +260,7 @@ const proposePriceInDB = async (
       'You can only propose a price when the parcel is in WAITING status.'
     );
   }
+ 
 
   const isAdmin = role === 'ADMIN' || role === 'SUPER_ADMIN';
   const currentStatus = parcel.price_status;
@@ -327,17 +328,15 @@ const acceptPriceProposalInDB = async (
   requestId: string,
   user: { user_id: string; role: string }
 ) => {
-  const session = await mongoose.startSession();
-
   try {
-    session.startTransaction();
+    // 1. Find the Price Request
+    const priceRequest = await ParcelPriceRequest.findById(requestId);
 
-    const priceRequest =
-      await ParcelPriceRequest.findById(requestId).session(session);
-
-    if (!priceRequest)
+    if (!priceRequest) {
       throw new AppError(httpStatus.NOT_FOUND, 'Request not found!');
+    }
 
+    // 2. Check current status (Access via priceRequest object)
     if (priceRequest.status !== PRICE_REQUEST_STATUS.PENDING) {
       throw new AppError(
         httpStatus.BAD_REQUEST,
@@ -345,10 +344,11 @@ const acceptPriceProposalInDB = async (
       );
     }
 
+    // 3. Determine user role type
     const isAdmin = user.role === 'ADMIN' || user.role === 'SUPER_ADMIN';
     const userRoleType = isAdmin ? PROPOSED_BY.ADMIN : PROPOSED_BY.CUSTOMER;
 
-    // Check: Cannot respond to your own proposal
+    // 4. Check: Cannot respond to your own proposal
     if (priceRequest.proposed_by === userRoleType) {
       throw new AppError(
         httpStatus.FORBIDDEN,
@@ -356,34 +356,32 @@ const acceptPriceProposalInDB = async (
       );
     }
 
-    // Update Request
-    priceRequest.status = 'ACCEPTED';
+    // 5. Update Request - Use Constants to avoid "undefined" variable errors
+    priceRequest.status = PRICE_REQUEST_STATUS.ACCEPTED; 
     priceRequest.decided_at = new Date();
 
-    await priceRequest.save({ session });
+    // Save the price request changes
+    await priceRequest.save();
 
-    // Update Parcel
+    // 6. Update Associated Parcel
     const updatedParcel = await Parcel.findByIdAndUpdate(
       priceRequest.parcel_id,
       {
         final_price: priceRequest.proposed_price,
         price_status: PRICE_STATUS.ACCEPTED,
-        status: PARCEL_STATUS.PENDING,
+        status: PARCEL_STATUS.PENDING
       },
-      { session, new: true }
+      { new: true }
     );
 
     if (!updatedParcel) {
       throw new AppError(httpStatus.NOT_FOUND, 'Associated parcel not found!');
     }
 
-    await session.commitTransaction();
     return priceRequest;
   } catch (err: any) {
-    await session.abortTransaction();
+    // Re-throw the error so it can be handled by your global error handler
     throw err;
-  } finally {
-    await session.endSession();
   }
 };
 
@@ -392,14 +390,13 @@ const rejectPriceProposalInDB = async (
   requestId: string,
   user: { user_id: string; role: string }
 ) => {
-  const session = await mongoose.startSession();
+  // const session = await mongoose.startSession();
 
   try {
-    session.startTransaction();
+    // session.startTransaction();
 
     // 1. Find the proposal request
-    const priceRequest =
-      await ParcelPriceRequest.findById(requestId).session(session);
+    const priceRequest = await ParcelPriceRequest.findById(requestId);
 
     if (!priceRequest) {
       throw new AppError(httpStatus.NOT_FOUND, 'Request not found!');
@@ -428,7 +425,7 @@ const rejectPriceProposalInDB = async (
     priceRequest.status = 'REJECTED';
     priceRequest.decided_at = new Date();
 
-    await priceRequest.save({ session });
+    await priceRequest.save();
 
     // 5. Update Parcel Price Status
     // Note: We do NOT set final_price here because the proposal was rejected.
@@ -436,21 +433,22 @@ const rejectPriceProposalInDB = async (
       priceRequest.parcel_id,
       {
         price_status: PRICE_STATUS.REJECTED,
-      },
-      { session, new: true }
+        status: PARCEL_STATUS.REJECTED,
+      }
+      // { session, new: true }
     );
 
     if (!updatedParcel) {
       throw new AppError(httpStatus.NOT_FOUND, 'Associated parcel not found!');
     }
 
-    await session.commitTransaction();
+    // await session.commitTransaction();
     return priceRequest;
   } catch (err: any) {
-    await session.abortTransaction();
+    // await session.abortTransaction();
     throw err;
   } finally {
-    await session.endSession();
+    // await session.endSession();
   }
 };
 
@@ -466,6 +464,7 @@ const rejectAndCounterPriceInDB = async (
   }
 ) => {
   const currentRequest = await ParcelPriceRequest.findById(requestId);
+  const parcel = await Parcel.findById(payload.parcel_id);
 
   if (!currentRequest) {
     throw new AppError(httpStatus.NOT_FOUND, 'Price request not found!');
@@ -476,6 +475,10 @@ const rejectAndCounterPriceInDB = async (
       httpStatus.BAD_REQUEST,
       `This price request has already been ${currentRequest.status.toLowerCase()}`
     );
+  }
+
+  if (!parcel) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Parcel not found!');
   }
 
   currentRequest.status = PRICE_REQUEST_STATUS.REJECTED;

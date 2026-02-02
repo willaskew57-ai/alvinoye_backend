@@ -73,7 +73,7 @@ const updateDriverInfoInDB = async (
   payload: { driverInfo?: Partial<TDriver>; vehicle?: any }
 ) => {
   const { driverInfo, vehicle } = payload;
-  const session = await mongoose.startSession();
+  // const session = await mongoose.startSession();
 
   try {
     // session.startTransaction();
@@ -83,9 +83,7 @@ const updateDriverInfoInDB = async (
       if (driverInfo.license_image && existingDriver?.license_image) {
         deleteLocalFile(existingDriver.license_image);
       }
-      await Driver.findOneAndUpdate({ user_id: userId }, driverInfo, {
-        session,
-      });
+      await Driver.findOneAndUpdate({ user_id: userId }, driverInfo);
     }
 
     if (vehicle) {
@@ -115,18 +113,16 @@ const updateDriverInfoInDB = async (
       const vehicleData = { ...vehicle, vehicle_images: finalImages };
       delete vehicleData.existing_vehicle_images;
 
-      await Vehicle.findOneAndUpdate({ user_id: userId }, vehicleData, {
-        session,
-      });
+      await Vehicle.findOneAndUpdate({ user_id: userId }, vehicleData );
     }
 
     // await session.commitTransaction();
     return await Driver.findOne({ user_id: userId }).populate('vehicle');
   } catch (error) {
-    await session.abortTransaction();
+    // await session.abortTransaction();
     throw error;
   } finally {
-    await session.endSession();
+    // await session.endSession();
   }
 };
 
@@ -242,12 +238,12 @@ const acceptParcelFromDB = async (
   parcelId: string,
   driverIdFromToken: string
 ) => {
-  const session = await mongoose.startSession();
+  // const session = await mongoose.startSession();
 
   try {
-    session.startTransaction();
+    // session.startTransaction();
 
-    const parcel = await Parcel.findById(parcelId).session(session);
+    const parcel = await Parcel.findById(parcelId);
 
     if (!parcel) {
       throw new AppError(httpStatus.NOT_FOUND, 'Parcel not found');
@@ -264,9 +260,9 @@ const acceptParcelFromDB = async (
     parcel.accepted_by = new Types.ObjectId(driverIdFromToken);
     parcel.accepted_at = new Date();
 
-    await parcel.save({ session });
+    await parcel.save();
 
-    const parcelOwner = await User.findById(parcel.user_id).session(session);
+    const parcelOwner = await User.findById(parcel.user_id);
 
     if (!parcelOwner) {
       throw new AppError(httpStatus.NOT_FOUND, 'Parcel owner not found');
@@ -277,14 +273,16 @@ const acceptParcelFromDB = async (
       purpose: 'PARCEL',
     });
 
+    console.log(otp)
+
     await EmailHelpers.sendParcelOtpEmail({
       email: parcelOwner.email,
       name: parcelOwner.full_name,
       verificationCode: otp,
     });
 
-    await session.commitTransaction();
-    await session.endSession();
+    // await session.commitTransaction();
+    // await session.endSession();
 
     return {
       message: 'Parcel accepted successfully',
@@ -292,8 +290,8 @@ const acceptParcelFromDB = async (
       status: parcel.status,
     };
   } catch (error: any) {
-    await session.abortTransaction();
-    await session.endSession();
+    // await session.abortTransaction();
+    // await session.endSession();
 
     throw new AppError(
       httpStatus.BAD_REQUEST,

@@ -14,7 +14,7 @@ export const initSocket = (server: HttpServer) => {
   io.use(socketAuth());
 
   io.on('connection', (socket: any) => {
-    console.log('Socket connected:', socket.user?.user_id);
+    console.log('Socket connected:', socket.user);
 
     // just for testing
     socket.on('chat message', (msg: any) => {
