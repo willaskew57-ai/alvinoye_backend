@@ -107,13 +107,13 @@ const loginServices = async (payload: ILoginUser) => {
     );
   }
 
-  const isActive = await User.isUserActive(user);
-  if (!isActive) {
-    throw new AppError(
-      httpStatus.FORBIDDEN,
-      'Your account is currently under review. Please wait for approval.'
-    );
-  }
+  // const isActive = await User.isUserActive(user);
+  // if (!isActive) {
+  //   throw new AppError(
+  //     httpStatus.FORBIDDEN,
+  //     'Your account is currently under review. Please wait for approval.'
+  //   );
+  // }
 
   // Compare Password
   const isPasswordMatched = await User.compareUserPassword(

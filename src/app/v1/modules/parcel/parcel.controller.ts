@@ -3,11 +3,9 @@ import catchAsync from '../../../../utils/catch-async';
 import sendResponse from '../../../../utils/send-response';
 import { ParcelServices } from './parcel.service';
 
-// parcel.controller.ts
 const createParcel = catchAsync(async (req, res) => {
   const user_id = req.user.user_id;
 
-  // req.body now contains parcel_images as an array of URLs
   const result = await ParcelServices.createParcelIntoDB(user_id, req.body);
 
   sendResponse(res, {
@@ -19,7 +17,6 @@ const createParcel = catchAsync(async (req, res) => {
 });
 
 const getAllParcels = catchAsync(async (req, res) => {
-  console.log('get all  parcel params', req.query);
   const result = await ParcelServices.getAllParcelsFromDB(req.query, req.user);
 
   sendResponse(res, {
@@ -117,7 +114,10 @@ const acceptPrice = catchAsync(async (req, res) => {
   const { id } = req.params;
   const user = req.user;
 
-  const result = await ParcelServices.acceptPriceProposalInDB(id as string, user);
+  const result = await ParcelServices.acceptPriceProposalInDB(
+    id as string,
+    user
+  );
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -129,9 +129,12 @@ const acceptPrice = catchAsync(async (req, res) => {
 
 const rejectPrice = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const user = req.user; 
+  const user = req.user;
 
-  const result = await ParcelServices.rejectPriceProposalInDB(id as string, user);
+  const result = await ParcelServices.rejectPriceProposalInDB(
+    id as string,
+    user
+  );
 
   sendResponse(res, {
     statusCode: httpStatus.OK,

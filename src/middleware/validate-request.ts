@@ -1,15 +1,29 @@
-// import type { AnyZodObject } from 'zod/v3';
+import { type AnyZodObject, ZodError } from 'zod/v3';
+import type { Request, Response, NextFunction } from 'express';
+import { formatZodError } from '../utils/zodErrorFormatter';
 
-import type { AnyZodObject } from 'zod/v3';
+ const validateRequest =
+  (schema: AnyZodObject) =>
+  (req: Request, res: Response, next: NextFunction) => {
+    try {
+      schema.parse({
+        body: req.body,
+        query: req.query,
+        params: req.params,
+      });
 
-// ** import local files
-import catchAsync from '../utils/catch-async';
+      next();
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return res.status(400).json({
+          success: false,
+          message: 'Validation failed',
+          errors: formatZodError(error),
+        });
+      }
 
-const validateRequest = (schema: AnyZodObject) => {
-  return catchAsync(async (req, res, next) => {
-    await schema.parseAsync({ body: req.body, cookies: req.cookies });
-    next();
-  });
-};
+      next(error);
+    }
+  };
 
-export default validateRequest;
+  export default validateRequest;

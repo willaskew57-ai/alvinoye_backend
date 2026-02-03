@@ -12,6 +12,7 @@
     "@aws-sdk/s3-request-presigner": "^3.975.0",
     "@types/mongoose": "^5.11.96",
     "@types/node": "^25.0.3",
+    "axios": "^1.13.4",
     "bcrypt": "^6.0.0",
     "colors": "^1.4.0",
     "cookie-parser": "^1.4.7",

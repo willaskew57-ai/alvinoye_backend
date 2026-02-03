@@ -11,7 +11,6 @@ const driverInfoValidationSchema = z.object({
   user_id: z.string({ required_error: 'User ID is required' }).optional(),
   from: locationSchema,
   to: locationSchema,
-  stops: z.array(locationSchema).optional(),
   driver_license_number: z.string({
     required_error: 'License number is required',
   }),

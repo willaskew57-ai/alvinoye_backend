@@ -8,11 +8,13 @@ import type { TVehicle } from '../vehicle/vehicle.interface';
 import { Vehicle } from '../vehicle/vehicle.model';
 import User from '../user/user.model';
 import { Parcel } from '../parcel/parcel.model';
-import { PARCEL_STATUS } from '../parcel/parcel.interface';
+import { PARCEL_STATUS, PRICE_STATUS } from '../parcel/parcel.interface';
 import { OtpServices } from '../otp/otp.services';
 import Otp from '../otp/otp.model';
 import { EmailHelpers } from '../../../../utils/email-helper';
 import { deleteLocalFile } from '../../../../utils/deleteFileHelper';
+import configs from '../../../../config/env.config';
+import axios from 'axios';
 
 const addDriverInfoIntoDB = async (
   payload: { driverInfo: TDriver; vehicle: TVehicle },
@@ -113,7 +115,7 @@ const updateDriverInfoInDB = async (
       const vehicleData = { ...vehicle, vehicle_images: finalImages };
       delete vehicleData.existing_vehicle_images;
 
-      await Vehicle.findOneAndUpdate({ user_id: userId }, vehicleData );
+      await Vehicle.findOneAndUpdate({ user_id: userId }, vehicleData);
     }
 
     // await session.commitTransaction();
@@ -234,16 +236,124 @@ const getSingleDriverFromDB = async (id: string) => {
   return result;
 };
 
+const getAvailableParcelsFromDB = async (
+  userId: string,
+  query: Record<string, unknown>
+) => {
+  // 1. Extract Pagination values
+  const page = Number(query.page) || 1;
+  const limit = Number(query.limit) || 10;
+  const skip = (page - 1) * limit;
+
+  // 2. Get Driver Info and Vehicle Info
+  const driver = await Driver.findOne({ user_id: userId });
+  const vehicle = await Vehicle.findOne({ user_id: userId });
+
+  if (!driver || !vehicle) {
+    throw new AppError(
+      httpStatus.NOT_FOUND,
+      'Driver or Vehicle profile not found!'
+    );
+  }
+
+  // 3. Find Potential Parcels (Basic DB filter)
+  const potentialParcels = await Parcel.find({
+    status: PARCEL_STATUS.PENDING,
+    vehicle_type: vehicle.vehicle_type,
+    price_status: PRICE_STATUS.ACCEPTED,
+    accepted_by: null,
+  }).lean();
+
+  if (potentialParcels.length === 0) {
+    return {
+      meta: { total: 0, page, limit, totalPages: 0 },
+      data: [],
+    };
+  }
+
+  const apiKey = configs.google_maps_api_key;
+  const allMatchedParcels = [];
+
+  const driverOrigin = `${driver.from.latitude},${driver.from.longitude}`;
+  const driverDestination = `${driver.to.latitude},${driver.to.longitude}`;
+
+  // Get the driver's direct route distance baseline
+  let originalDistance = 0;
+  try {
+    const originalRouteRes = await axios.get(
+      `https://maps.googleapis.com/maps/api/directions/json?origin=${driverOrigin}&destination=${driverDestination}&key=${apiKey}`
+    );
+    if (originalRouteRes.data.status === 'OK') {
+      originalDistance = originalRouteRes.data.routes[0].legs[0].distance.value;
+    }
+  } catch (error) {
+    console.error('Failed to get baseline distance', error);
+  }
+
+  // 4. Filter parcels and calculate specific parcel distance
+  for (const parcel of potentialParcels) {
+    try {
+      const pickup = `${parcel.pickup_location.latitude},${parcel.pickup_location.longitude}`;
+      const handover = `${parcel.handover_location.latitude},${parcel.handover_location.longitude}`;
+
+      const googleUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${driverOrigin}&destination=${driverDestination}&waypoints=${pickup}|${handover}&key=${apiKey}`;
+
+      const response = await axios.get(googleUrl);
+
+      if (response.data.status === 'OK') {
+        const route = response.data.routes[0];
+        const legs = route.legs;
+
+        const totalDistanceWithParcel = legs.reduce(
+          (acc: number, leg: any) => acc + leg.distance.value,
+          0
+        );
+
+        const parcelDistanceText = legs[1].distance.text;
+        const detourKm = (totalDistanceWithParcel - originalDistance) / 1000;
+        const thresholdKm = 20;
+
+        if (detourKm <= thresholdKm) {
+          allMatchedParcels.push({
+            ...parcel,
+            distance_info: {
+              parcel_actual_distance: parcelDistanceText,
+            },
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error calculating route for parcel:', parcel._id);
+      continue;
+    }
+  }
+
+  // 5. Apply Manual Pagination to the filtered array
+  const total = allMatchedParcels.length;
+  const totalPages = Math.ceil(total / limit);
+  const paginatedData = allMatchedParcels.slice(skip, skip + limit);
+
+  return {
+    meta: {
+      total,
+      page,
+      limit,
+      totalPages,
+    },
+    data: paginatedData,
+  };
+};
+
 const acceptParcelFromDB = async (
   parcelId: string,
   driverIdFromToken: string
 ) => {
-  // const session = await mongoose.startSession();
+  const session = await mongoose.startSession();
+  session.startTransaction();
 
   try {
-    // session.startTransaction();
-
-    const parcel = await Parcel.findById(parcelId);
+    // 1. Find parcel within the session
+    const parcel = await Parcel.findById(parcelId).session(session);
 
     if (!parcel) {
       throw new AppError(httpStatus.NOT_FOUND, 'Parcel not found');
@@ -256,33 +366,39 @@ const acceptParcelFromDB = async (
       );
     }
 
+    // 2. Update parcel status
     parcel.status = PARCEL_STATUS.ONGOING;
     parcel.accepted_by = new Types.ObjectId(driverIdFromToken);
     parcel.accepted_at = new Date();
 
-    await parcel.save();
+    // Save with session
+    await parcel.save({ session });
 
-    const parcelOwner = await User.findById(parcel.user_id);
+    // 3. Find owner (session not strictly required for read-only, but keeps consistency)
+    const parcelOwner = await User.findById(parcel.user_id).session(session);
 
     if (!parcelOwner) {
       throw new AppError(httpStatus.NOT_FOUND, 'Parcel owner not found');
     }
 
+    // 4. Generate OTP (Ensure this function handles the session internally if it saves to DB)
     const otp = await OtpServices.generateAndSaveOtp({
       parcel_id: parcel._id,
       purpose: 'PARCEL',
     });
 
-    console.log(otp)
+    console.log(otp);
 
+    // 5. Send Email
+    // Note: Email sending is an external side-effect, usually done after transaction commits
     await EmailHelpers.sendParcelOtpEmail({
       email: parcelOwner.email,
       name: parcelOwner.full_name,
       verificationCode: otp,
     });
 
-    // await session.commitTransaction();
-    // await session.endSession();
+    // Commit the transaction
+    await session.commitTransaction();
 
     return {
       message: 'Parcel accepted successfully',
@@ -290,13 +406,16 @@ const acceptParcelFromDB = async (
       status: parcel.status,
     };
   } catch (error: any) {
-    // await session.abortTransaction();
-    // await session.endSession();
+    // If an error occurs, abort the transaction
+    await session.abortTransaction();
 
     throw new AppError(
       httpStatus.BAD_REQUEST,
       error.message || 'Failed to accept parcel'
     );
+  } finally {
+    // Always end the session
+    await session.endSession();
   }
 };
 
@@ -399,4 +518,5 @@ export const DriverServices = {
   acceptParcelFromDB,
   verifyParcelOtpFromDB,
   completeParcelFromDB,
+  getAvailableParcelsFromDB,
 };

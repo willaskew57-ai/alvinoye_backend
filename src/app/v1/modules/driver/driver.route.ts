@@ -22,7 +22,13 @@ router.post(
   ]),
   (req: Request, res: Response, next: NextFunction) => {
     if (req.body.data) {
-      req.body = JSON.parse(req.body.data);
+      try {
+        req.body = JSON.parse(req.body.data);
+      } catch (error) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid JSON in 'data' field" });
+      }
     }
     next();
   },
@@ -86,9 +92,15 @@ router.get(
   DriverController.getAllDrivers
 );
 
-router.get('/get-driver-info', auth(), DriverController.getSingleDriver);
+router.get('/get-driver-info', auth(USER_ROLE.DRIVER), DriverController.getSingleDriver);
 
-router.post(
+router.get(
+  '/available-for-driver',
+  auth(USER_ROLE.DRIVER),
+  DriverController.getAvailableParcelsForDriver
+);
+
+router.patch(
   '/accept-parcel/:id',
   auth(USER_ROLE.DRIVER),
   DriverController.acceptParcel
