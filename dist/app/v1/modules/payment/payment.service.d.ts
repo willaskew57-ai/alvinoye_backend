@@ -1,4 +1,4 @@
-import { Types } from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 import type { TUserPayload } from '../../../../interfaces';
 /**
  * 1️⃣ Create Stripe Checkout Session for a Parcel
@@ -15,7 +15,7 @@ export declare const refundPaymentService: (paymentId: string, reason?: "duplica
 /**
  * 4️⃣ Optional: Get Payment History for a User
  */
-export declare const getPaymentHistoryService: (userId: string) => Promise<(import("mongoose").Document<unknown, {}, import("./payment.interface").TPayment, {}, import("mongoose").DefaultSchemaOptions> & import("./payment.interface").TPayment & Required<{
+export declare const getPaymentHistoryService: (userId: string) => Promise<(mongoose.Document<unknown, {}, import("./payment.interface").TPayment, {}, mongoose.DefaultSchemaOptions> & import("./payment.interface").TPayment & Required<{
     _id: Types.ObjectId;
 }> & {
     __v: number;

@@ -18,8 +18,6 @@ export const auth = (...requiredRoles: TUserRole[]) => {
       throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized!');
     }
 
-    console.log(token, 'Register Token');
-
     //  Declare decoded as your custom TUserPayload type
     let decoded: TUserPayload;
 
@@ -33,7 +31,6 @@ export const auth = (...requiredRoles: TUserRole[]) => {
       throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized 2!!');
     }
 
-    console.log(decoded, 'jdhfj');
     //  Now destructuring works without extra casting
     const { user_id, role, iat } = decoded;
 

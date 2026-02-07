@@ -1,10 +1,12 @@
 import httpStatus from 'http-status';
 import stripe from '../../../../config/stripe';
-import { Types } from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 import AppError from '../../../../errors/app-error';
 import { Parcel } from '../parcel/parcel.model';
 import { Payment } from './payment.model';
 import { PAYMENT_STATUS } from './payment.constants';
+import { NotificationServices } from '../notification/notification.service';
+import { NOTIFICATION_TYPE } from '../notification/notification.constant';
 /**
  * 1️⃣ Create Stripe Checkout Session for a Parcel
  */
@@ -76,17 +78,50 @@ export const handleStripeWebhookService = async (event) => {
     const userId = session.metadata?.userId;
     if (!parcelId || !userId)
         return;
-    // Update payment record
-    const payment = await Payment.findOne({ transaction_id: session.id });
-    if (!payment)
-        return;
-    payment.status = PAYMENT_STATUS.SUCCESS;
-    await payment.save();
-    // Optional: update Parcel to mark that payment was completed
-    const parcel = await Parcel.findById(parcelId);
-    if (parcel) {
-        parcel.stripe_checkout_session_id = session.id; // session confirmed
-        await parcel.save();
+    const dbSession = await mongoose.startSession();
+    try {
+        dbSession.startTransaction();
+        // Update payment record
+        const payment = await Payment.findOne({ transaction_id: session.id }).session(dbSession);
+        if (!payment) {
+            await dbSession.abortTransaction();
+            return;
+        }
+        payment.status = PAYMENT_STATUS.SUCCESS;
+        await payment.save({ session: dbSession });
+        // Optional: update Parcel to mark that payment was completed
+        const parcel = await Parcel.findById(parcelId).session(dbSession);
+        if (parcel) {
+            parcel.stripe_checkout_session_id = session.id; // session confirmed
+            await parcel.save({ session: dbSession });
+        }
+        await dbSession.commitTransaction();
+        // Create notification for payment success
+        try {
+            if (userId && parcelId) {
+                await NotificationServices.createNotificationIntoDB({
+                    user_id: userId,
+                    type: NOTIFICATION_TYPE.PAYMENT_SUCCESS,
+                    title: 'Payment Successful',
+                    message: `Payment for parcel has been successful.`,
+                    parcel_id: parcelId,
+                    payment_id: payment._id,
+                    data: {
+                        amount: payment.transaction_amount,
+                    },
+                });
+            }
+        }
+        catch (error) {
+            console.error('Failed to create notification:', error);
+        }
+    }
+    catch (error) {
+        await dbSession.abortTransaction();
+        throw error;
+    }
+    finally {
+        await dbSession.endSession();
     }
 };
 /**

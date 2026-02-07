@@ -3,7 +3,6 @@ import { Schema, model } from 'mongoose';
 import { REFUND_STATUS } from './refund.constants';
 const refundSchema = new Schema({
     user_id: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    payment_id: { type: Schema.Types.ObjectId, ref: 'Payment', required: true },
     parcel_id: { type: Schema.Types.ObjectId, ref: 'Parcel', required: true },
     reason: { type: String, required: true },
     admin_note: { type: String, default: null },

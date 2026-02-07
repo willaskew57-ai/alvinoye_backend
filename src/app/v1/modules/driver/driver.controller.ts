@@ -82,6 +82,18 @@ const getSingleDriver = catchAsync(async (req: Request, res: Response) => {
 
 
 
+
+const getDriverById = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const result = await DriverServices.getSingleDriverFromDB(id as string);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Driver retrieved successfully!',
+    data: result,
+  });
+});
+
 // ** ------------- parcel related api ------------- ** //
 
 const getAvailableParcelsForDriver = catchAsync(async (req: Request, res: Response) => {
@@ -156,5 +168,6 @@ export const DriverController = {
   acceptParcel,
   verifyParcelOtp,
   completeParcel,
-  getAvailableParcelsForDriver
+  getAvailableParcelsForDriver,
+  getDriverById,
 };

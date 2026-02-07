@@ -40,7 +40,7 @@ const changeUserStatusInDB = async (
   targetId: string,
   payload: { status: TUserStatus },
   performerId: string,
-  performerRole: string // From req.user.role
+  performerRole: string
 ) => {
   const targetUser = await User.findById(targetId);
   if (!targetUser) {

@@ -19,7 +19,7 @@ export const auth = (...requiredRoles) => {
             decoded = jwt.verify(token, configs.jwt_access_token);
         }
         catch (err) {
-            throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized!!');
+            throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized 2!!');
         }
         //  Now destructuring works without extra casting
         const { user_id, role, iat } = decoded;
