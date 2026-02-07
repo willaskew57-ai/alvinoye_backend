@@ -17,6 +17,8 @@ import {
 import type { TUserPayload } from '../../../../interfaces';
 import { generateParcelId } from './parcel.utils';
 import { deleteLocalFile } from '../../../../utils/deleteFileHelper';
+import { NotificationServices } from '../notification/notification.service';
+import { NOTIFICATION_TYPE } from '../notification/notification.constant';
 
 // ** ----- create parcel -----
 // parcel.service.ts
@@ -30,6 +32,24 @@ const createParcelIntoDB = async (userId: string, payload: TParcel) => {
   };
 
   const result = await Parcel.create(parcelData);
+
+  // Create notification for parcel creation
+  try {
+    await NotificationServices.createNotificationIntoDB({
+      user_id: userId,
+      type: NOTIFICATION_TYPE.PARCEL_CREATED,
+      title: 'Parcel Created',
+      message: `Your parcel "${result.parcel_name}" has been created successfully.`,
+      parcel_id: result._id,
+      data: {
+        parcel_name: result.parcel_name,
+        parcel_id: result.parcel_id,
+      },
+    });
+  } catch (error) {
+    console.error('Failed to create notification:', error);
+  }
+
   return result;
 };
 
@@ -320,6 +340,50 @@ const proposePriceInDB = async (
     { new: true }
   );
 
+  // Create notification for price proposal/counter-offer
+  try {
+    // Determine notification type and recipient
+    let type: any = NOTIFICATION_TYPE.PRICE_PROPOSED;
+    if (newPriceStatus === PRICE_STATUS.COUNTERED || newPriceStatus === PRICE_STATUS.FINAL_OFFER) {
+      type = NOTIFICATION_TYPE.PRICE_COUNTERED;
+    }
+
+    // If Admin proposed, notify Customer (parcel owner)
+    // If Customer proposed, we might notify Admin (if there's a specific admin user or system notification)
+    // For now, let's assume we notify the "other party"
+    
+    // Only notify if there is a clear recipient. 
+    // If Admin proposed -> Notify Parcel Owner (Customer)
+    if (isAdmin) {
+       await NotificationServices.createNotificationIntoDB({
+        user_id: parcel.user_id, // Notify the customer
+        type: type,
+        title: type === NOTIFICATION_TYPE.PRICE_COUNTERED ? 'Price Counter Offer' : 'Price Proposed',
+        message: type === NOTIFICATION_TYPE.PRICE_COUNTERED 
+          ? `A counter offer of $${payload.proposed_price} has been made for your parcel "${parcel.parcel_name}".`
+          : `A price of $${payload.proposed_price} has been proposed for your parcel "${parcel.parcel_name}".`,
+        parcel_id: parcel._id,
+        price_request_id: priceRequest._id,
+        data: {
+          parcel_name: parcel.parcel_name,
+          price: payload.proposed_price,
+          is_final: isFinalOffer
+        },
+      });
+    } else {
+       // If Customer proposed -> Notify Admin
+       // Since there might be multiple admins, we might iterate or send to a general system channel
+       // For this implementation, we'll skip direct Admin notification unless there's a specific Admin ID linked
+       // Or we could broadcast to an admin room via socket directly, but here we create a DB notification for a "System" or "Super Admin"
+       
+       // Ideally you'd find a specific admin or have a system-wide notification mechanism
+       // omitted for Customer -> Admin to avoid spamming all admins or if no specific admin is assigned
+    }
+
+  } catch (error) {
+    console.error('Failed to create notification:', error);
+  }
+
   return priceRequest;
 };
 
@@ -328,9 +392,12 @@ const acceptPriceProposalInDB = async (
   requestId: string,
   user: { user_id: string; role: string }
 ) => {
+  const session = await mongoose.startSession();
+
   try {
+    session.startTransaction();
     // 1. Find the Price Request
-    const priceRequest = await ParcelPriceRequest.findById(requestId);
+    const priceRequest = await ParcelPriceRequest.findById(requestId).session(session);
 
     if (!priceRequest) {
       throw new AppError(httpStatus.NOT_FOUND, 'Request not found!');
@@ -361,7 +428,7 @@ const acceptPriceProposalInDB = async (
     priceRequest.decided_at = new Date();
 
     // Save the price request changes
-    await priceRequest.save();
+    await priceRequest.save({ session });
 
     // 6. Update Associated Parcel
     const updatedParcel = await Parcel.findByIdAndUpdate(
@@ -371,17 +438,43 @@ const acceptPriceProposalInDB = async (
         price_status: PRICE_STATUS.ACCEPTED,
         status: PARCEL_STATUS.PENDING
       },
-      { new: true }
+      { session, new: true }
     );
 
     if (!updatedParcel) {
       throw new AppError(httpStatus.NOT_FOUND, 'Associated parcel not found!');
     }
 
+    await session.commitTransaction();
+
+    // Create notification for price acceptance
+    try {
+      const notifyUserId = priceRequest.proposed_by === PROPOSED_BY.CUSTOMER 
+        ? updatedParcel.user_id 
+        : priceRequest.proposed_by;
+      
+      await NotificationServices.createNotificationIntoDB({
+        user_id: notifyUserId,
+        type: NOTIFICATION_TYPE.PRICE_ACCEPTED,
+        title: 'Price Accepted',
+        message: `The price of $${priceRequest.proposed_price} for parcel "${updatedParcel.parcel_name}" has been accepted.`,
+        parcel_id: updatedParcel._id,
+        price_request_id: priceRequest._id,
+        data: {
+          parcel_name: updatedParcel.parcel_name,
+          price: priceRequest.proposed_price,
+        },
+      });
+    } catch (error) {
+      console.error('Failed to create notification:', error);
+    }
+
     return priceRequest;
   } catch (err: any) {
-    // Re-throw the error so it can be handled by your global error handler
+    await session.abortTransaction();
     throw err;
+  } finally {
+    await session.endSession();
   }
 };
 
@@ -390,13 +483,13 @@ const rejectPriceProposalInDB = async (
   requestId: string,
   user: { user_id: string; role: string }
 ) => {
-  // const session = await mongoose.startSession();
+  const session = await mongoose.startSession();
 
   try {
-    // session.startTransaction();
+    session.startTransaction();
 
     // 1. Find the proposal request
-    const priceRequest = await ParcelPriceRequest.findById(requestId);
+    const priceRequest = await ParcelPriceRequest.findById(requestId).session(session);
 
     if (!priceRequest) {
       throw new AppError(httpStatus.NOT_FOUND, 'Request not found!');
@@ -425,7 +518,7 @@ const rejectPriceProposalInDB = async (
     priceRequest.status = 'REJECTED';
     priceRequest.decided_at = new Date();
 
-    await priceRequest.save();
+    await priceRequest.save({ session });
 
     // 5. Update Parcel Price Status
     // Note: We do NOT set final_price here because the proposal was rejected.
@@ -434,21 +527,21 @@ const rejectPriceProposalInDB = async (
       {
         price_status: PRICE_STATUS.REJECTED,
         status: PARCEL_STATUS.REJECTED,
-      }
-      // { session, new: true }
+      },
+      { session, new: true }
     );
 
     if (!updatedParcel) {
       throw new AppError(httpStatus.NOT_FOUND, 'Associated parcel not found!');
     }
 
-    // await session.commitTransaction();
+    await session.commitTransaction();
     return priceRequest;
   } catch (err: any) {
-    // await session.abortTransaction();
+    await session.abortTransaction();
     throw err;
   } finally {
-    // await session.endSession();
+    await session.endSession();
   }
 };
 

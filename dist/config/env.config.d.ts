@@ -22,6 +22,7 @@ declare const configs: {
     aws_region: string;
     aws_s3_bucket_name: string;
     cloudfront_url: string;
+    google_maps_api_key: string | undefined;
 };
 export default configs;
 //# sourceMappingURL=env.config.d.ts.map

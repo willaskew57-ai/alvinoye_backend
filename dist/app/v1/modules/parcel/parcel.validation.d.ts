@@ -41,8 +41,6 @@ export declare const createParcelValidationSchema: z.ZodObject<{
     }, "strip", z.ZodTypeAny, {
         date: string;
         size: string;
-        time: string;
-        priority: string;
         parcel_name: string;
         vehicle_type: string;
         weight: number;
@@ -56,6 +54,8 @@ export declare const createParcelValidationSchema: z.ZodObject<{
             latitude: number;
             longitude: number;
         };
+        priority: string;
+        time: string;
         receiver_name: string;
         receiver_phone: string;
         sender_remarks: string;
@@ -63,8 +63,6 @@ export declare const createParcelValidationSchema: z.ZodObject<{
     }, {
         date: string;
         size: string;
-        time: string;
-        priority: string;
         parcel_name: string;
         vehicle_type: string;
         weight: number;
@@ -78,6 +76,8 @@ export declare const createParcelValidationSchema: z.ZodObject<{
             latitude: number;
             longitude: number;
         };
+        priority: string;
+        time: string;
         receiver_name: string;
         receiver_phone: string;
         sender_remarks: string;
@@ -87,8 +87,6 @@ export declare const createParcelValidationSchema: z.ZodObject<{
     body: {
         date: string;
         size: string;
-        time: string;
-        priority: string;
         parcel_name: string;
         vehicle_type: string;
         weight: number;
@@ -102,6 +100,8 @@ export declare const createParcelValidationSchema: z.ZodObject<{
             latitude: number;
             longitude: number;
         };
+        priority: string;
+        time: string;
         receiver_name: string;
         receiver_phone: string;
         sender_remarks: string;
@@ -111,8 +111,6 @@ export declare const createParcelValidationSchema: z.ZodObject<{
     body: {
         date: string;
         size: string;
-        time: string;
-        priority: string;
         parcel_name: string;
         vehicle_type: string;
         weight: number;
@@ -126,6 +124,8 @@ export declare const createParcelValidationSchema: z.ZodObject<{
             latitude: number;
             longitude: number;
         };
+        priority: string;
+        time: string;
         receiver_name: string;
         receiver_phone: string;
         sender_remarks: string;
@@ -175,9 +175,6 @@ export declare const updateParcelValidationSchema: z.ZodObject<{
     }, "strip", z.ZodTypeAny, {
         date?: string | undefined;
         size?: string | undefined;
-        time?: string | undefined;
-        parcel_images?: string[] | undefined;
-        priority?: string | undefined;
         parcel_name?: string | undefined;
         vehicle_type?: string | undefined;
         weight?: number | undefined;
@@ -191,6 +188,9 @@ export declare const updateParcelValidationSchema: z.ZodObject<{
             latitude?: number | undefined;
             longitude?: number | undefined;
         } | undefined;
+        priority?: string | undefined;
+        time?: string | undefined;
+        parcel_images?: string[] | undefined;
         receiver_name?: string | undefined;
         receiver_phone?: string | undefined;
         sender_remarks?: string | undefined;
@@ -198,9 +198,6 @@ export declare const updateParcelValidationSchema: z.ZodObject<{
     }, {
         date?: string | undefined;
         size?: string | undefined;
-        time?: string | undefined;
-        parcel_images?: string[] | undefined;
-        priority?: string | undefined;
         parcel_name?: string | undefined;
         vehicle_type?: string | undefined;
         weight?: number | undefined;
@@ -214,6 +211,9 @@ export declare const updateParcelValidationSchema: z.ZodObject<{
             latitude?: number | undefined;
             longitude?: number | undefined;
         } | undefined;
+        priority?: string | undefined;
+        time?: string | undefined;
+        parcel_images?: string[] | undefined;
         receiver_name?: string | undefined;
         receiver_phone?: string | undefined;
         sender_remarks?: string | undefined;
@@ -223,9 +223,6 @@ export declare const updateParcelValidationSchema: z.ZodObject<{
     body: {
         date?: string | undefined;
         size?: string | undefined;
-        time?: string | undefined;
-        parcel_images?: string[] | undefined;
-        priority?: string | undefined;
         parcel_name?: string | undefined;
         vehicle_type?: string | undefined;
         weight?: number | undefined;
@@ -239,6 +236,9 @@ export declare const updateParcelValidationSchema: z.ZodObject<{
             latitude?: number | undefined;
             longitude?: number | undefined;
         } | undefined;
+        priority?: string | undefined;
+        time?: string | undefined;
+        parcel_images?: string[] | undefined;
         receiver_name?: string | undefined;
         receiver_phone?: string | undefined;
         sender_remarks?: string | undefined;
@@ -248,9 +248,6 @@ export declare const updateParcelValidationSchema: z.ZodObject<{
     body: {
         date?: string | undefined;
         size?: string | undefined;
-        time?: string | undefined;
-        parcel_images?: string[] | undefined;
-        priority?: string | undefined;
         parcel_name?: string | undefined;
         vehicle_type?: string | undefined;
         weight?: number | undefined;
@@ -264,6 +261,9 @@ export declare const updateParcelValidationSchema: z.ZodObject<{
             latitude?: number | undefined;
             longitude?: number | undefined;
         } | undefined;
+        priority?: string | undefined;
+        time?: string | undefined;
+        parcel_images?: string[] | undefined;
         receiver_name?: string | undefined;
         receiver_phone?: string | undefined;
         sender_remarks?: string | undefined;
@@ -313,8 +313,6 @@ export declare const ParcelValidations: {
         }, "strip", z.ZodTypeAny, {
             date: string;
             size: string;
-            time: string;
-            priority: string;
             parcel_name: string;
             vehicle_type: string;
             weight: number;
@@ -328,6 +326,8 @@ export declare const ParcelValidations: {
                 latitude: number;
                 longitude: number;
             };
+            priority: string;
+            time: string;
             receiver_name: string;
             receiver_phone: string;
             sender_remarks: string;
@@ -335,8 +335,6 @@ export declare const ParcelValidations: {
         }, {
             date: string;
             size: string;
-            time: string;
-            priority: string;
             parcel_name: string;
             vehicle_type: string;
             weight: number;
@@ -350,6 +348,8 @@ export declare const ParcelValidations: {
                 latitude: number;
                 longitude: number;
             };
+            priority: string;
+            time: string;
             receiver_name: string;
             receiver_phone: string;
             sender_remarks: string;
@@ -359,8 +359,6 @@ export declare const ParcelValidations: {
         body: {
             date: string;
             size: string;
-            time: string;
-            priority: string;
             parcel_name: string;
             vehicle_type: string;
             weight: number;
@@ -374,6 +372,8 @@ export declare const ParcelValidations: {
                 latitude: number;
                 longitude: number;
             };
+            priority: string;
+            time: string;
             receiver_name: string;
             receiver_phone: string;
             sender_remarks: string;
@@ -383,8 +383,6 @@ export declare const ParcelValidations: {
         body: {
             date: string;
             size: string;
-            time: string;
-            priority: string;
             parcel_name: string;
             vehicle_type: string;
             weight: number;
@@ -398,6 +396,8 @@ export declare const ParcelValidations: {
                 latitude: number;
                 longitude: number;
             };
+            priority: string;
+            time: string;
             receiver_name: string;
             receiver_phone: string;
             sender_remarks: string;
@@ -447,9 +447,6 @@ export declare const ParcelValidations: {
         }, "strip", z.ZodTypeAny, {
             date?: string | undefined;
             size?: string | undefined;
-            time?: string | undefined;
-            parcel_images?: string[] | undefined;
-            priority?: string | undefined;
             parcel_name?: string | undefined;
             vehicle_type?: string | undefined;
             weight?: number | undefined;
@@ -463,6 +460,9 @@ export declare const ParcelValidations: {
                 latitude?: number | undefined;
                 longitude?: number | undefined;
             } | undefined;
+            priority?: string | undefined;
+            time?: string | undefined;
+            parcel_images?: string[] | undefined;
             receiver_name?: string | undefined;
             receiver_phone?: string | undefined;
             sender_remarks?: string | undefined;
@@ -470,9 +470,6 @@ export declare const ParcelValidations: {
         }, {
             date?: string | undefined;
             size?: string | undefined;
-            time?: string | undefined;
-            parcel_images?: string[] | undefined;
-            priority?: string | undefined;
             parcel_name?: string | undefined;
             vehicle_type?: string | undefined;
             weight?: number | undefined;
@@ -486,6 +483,9 @@ export declare const ParcelValidations: {
                 latitude?: number | undefined;
                 longitude?: number | undefined;
             } | undefined;
+            priority?: string | undefined;
+            time?: string | undefined;
+            parcel_images?: string[] | undefined;
             receiver_name?: string | undefined;
             receiver_phone?: string | undefined;
             sender_remarks?: string | undefined;
@@ -495,9 +495,6 @@ export declare const ParcelValidations: {
         body: {
             date?: string | undefined;
             size?: string | undefined;
-            time?: string | undefined;
-            parcel_images?: string[] | undefined;
-            priority?: string | undefined;
             parcel_name?: string | undefined;
             vehicle_type?: string | undefined;
             weight?: number | undefined;
@@ -511,6 +508,9 @@ export declare const ParcelValidations: {
                 latitude?: number | undefined;
                 longitude?: number | undefined;
             } | undefined;
+            priority?: string | undefined;
+            time?: string | undefined;
+            parcel_images?: string[] | undefined;
             receiver_name?: string | undefined;
             receiver_phone?: string | undefined;
             sender_remarks?: string | undefined;
@@ -520,9 +520,6 @@ export declare const ParcelValidations: {
         body: {
             date?: string | undefined;
             size?: string | undefined;
-            time?: string | undefined;
-            parcel_images?: string[] | undefined;
-            priority?: string | undefined;
             parcel_name?: string | undefined;
             vehicle_type?: string | undefined;
             weight?: number | undefined;
@@ -536,6 +533,9 @@ export declare const ParcelValidations: {
                 latitude?: number | undefined;
                 longitude?: number | undefined;
             } | undefined;
+            priority?: string | undefined;
+            time?: string | undefined;
+            parcel_images?: string[] | undefined;
             receiver_name?: string | undefined;
             receiver_phone?: string | undefined;
             sender_remarks?: string | undefined;

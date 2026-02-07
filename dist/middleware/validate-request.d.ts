@@ -1,4 +1,5 @@
-import type { AnyZodObject } from 'zod/v3';
-declare const validateRequest: (schema: AnyZodObject) => (req: import("express").Request, res: import("express").Response, next: import("express").NextFunction) => void;
+import { type AnyZodObject } from 'zod/v3';
+import type { Request, Response, NextFunction } from 'express';
+declare const validateRequest: (schema: AnyZodObject) => (req: Request, res: Response, next: NextFunction) => Response<any, Record<string, any>> | undefined;
 export default validateRequest;
 //# sourceMappingURL=validate-request.d.ts.map

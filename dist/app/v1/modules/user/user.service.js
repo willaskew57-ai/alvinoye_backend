@@ -6,6 +6,8 @@ import { Types } from 'mongoose';
 import QueryBuilder from '../../../../builders/query-builder';
 import { deleteFileFromS3 } from '../../../../aws/deleteFromS3';
 import { deleteLocalFile } from '../../../../utils/deleteFileHelper';
+import { Parcel } from '../parcel/parcel.model';
+import { PARCEL_STATUS } from '../parcel/parcel.interface';
 const createAdminIntoDB = async (payload) => {
     const isUserExists = await User.isUserExistsByEmail(payload.email);
     if (isUserExists) {
@@ -22,8 +24,7 @@ const createAdminIntoDB = async (payload) => {
     return result;
 };
 // ** ------------- User Status update Service -------------
-const changeUserStatusInDB = async (targetId, payload, performerId, performerRole // From req.user.role
-) => {
+const changeUserStatusInDB = async (targetId, payload, performerId, performerRole) => {
     const targetUser = await User.findById(targetId);
     if (!targetUser) {
         throw new AppError(httpStatus.NOT_FOUND, 'User not found!');
@@ -125,9 +126,23 @@ const updateUserInDB = async (id, payload) => {
     return result;
 };
 const deleteUserFromDB = async (id) => {
-    const result = await User.findByIdAndUpdate(id, { status: 'DELETED', deleted_date: new Date() }, { new: true });
-    if (!result)
+    // 1. Check if the user has any parcels with ONGOING status
+    // We check both user_id (sender) and accepted_by (driver)
+    const hasOngoingParcel = await Parcel.findOne({
+        $or: [{ user_id: id }, { accepted_by: id }],
+        status: PARCEL_STATUS.ONGOING,
+    });
+    if (hasOngoingParcel) {
+        throw new AppError(httpStatus.BAD_REQUEST, 'Cannot delete user. This account has an ongoing delivery in progress.');
+    }
+    // 2. If no ongoing parcels, proceed with soft delete
+    const result = await User.findByIdAndUpdate(id, {
+        status: 'DELETED',
+        deleted_date: new Date(),
+    }, { new: true });
+    if (!result) {
         throw new AppError(httpStatus.NOT_FOUND, 'User not found!');
+    }
     return result;
 };
 export const UserServices = {

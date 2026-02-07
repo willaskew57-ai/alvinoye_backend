@@ -10,6 +10,10 @@ import { ChatRoutes } from '../modules/chat/chat.routes';
 import { ReviewRoutes } from '../modules/review/review.routes';
 import { PaymentRoute } from '../modules/payment/payment.route';
 import { CustomerRoutes } from '../modules/cusotmer/customer.route';
+import { DashboardRoute } from '../modules/dashboard/dashboard.route';
+import { RefundRoutes } from '../modules/refund/refund.route';
+import { NotificationRoutes } from '../modules/notification/notification.routes';
+import { TrackDriverRoutes } from '../modules/track-driver/track-driver.routes';
 const router = express.Router();
 const modulesRoute = [
     {
@@ -33,8 +37,12 @@ const modulesRoute = [
         route: ParcelRoutes,
     },
     {
-        path: '/payment',
-        route: PaymentRoute,
+        path: '/parcel',
+        route: ParcelRoutes,
+    },
+    {
+        path: '/refund',
+        route: RefundRoutes,
     },
     {
         path: '/chat',
@@ -47,6 +55,18 @@ const modulesRoute = [
     {
         path: '/settings',
         route: SettingsRoutes,
+    },
+    {
+        path: '/dashboard',
+        route: DashboardRoute,
+    },
+    {
+        path: '/notifications',
+        route: NotificationRoutes,
+    },
+    {
+        path: '/track-driver',
+        route: TrackDriverRoutes,
     },
 ];
 modulesRoute.forEach((route) => router.use(route.path, route.route));

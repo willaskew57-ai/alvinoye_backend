@@ -2,7 +2,6 @@ import { Types } from 'mongoose';
 import type { REFUND_STATUS } from './refund.constants';
 export interface TRefundRequest {
     user_id: Types.ObjectId;
-    payment_id: Types.ObjectId;
     parcel_id: Types.ObjectId;
     reason: string;
     admin_note?: string;

@@ -65,10 +65,13 @@ const loginServices = async (payload) => {
     if (!isVerified) {
         throw new AppError(httpStatus.UNAUTHORIZED, 'Your email is not verified. Please verify your OTP first.');
     }
-    const isActive = await User.isUserActive(user);
-    if (!isActive) {
-        throw new AppError(httpStatus.FORBIDDEN, 'Your account is not active. Please contact support or wait for approval.');
-    }
+    // const isActive = await User.isUserActive(user);
+    // if (!isActive) {
+    //   throw new AppError(
+    //     httpStatus.FORBIDDEN,
+    //     'Your account is currently under review. Please wait for approval.'
+    //   );
+    // }
     // Compare Password
     const isPasswordMatched = await User.compareUserPassword(payload.password, user.password);
     if (!isPasswordMatched) {
@@ -80,6 +83,7 @@ const loginServices = async (payload) => {
         email: user.email,
         role: user.role,
         status: user.status,
+        is_profile_completed: user.is_profile_completed,
     };
     // JWT Payload including the role
     const jwtPayload = {
@@ -151,6 +155,7 @@ const resendOtp = async (payload) => {
     // Send resend OTP email
     await EmailHelpers.sendOtpResendEmail(email, {
         user: user.full_name || 'User',
+        code: otp,
         expiresIn: configs.otp_expiry_minutes || 5,
     });
     return null;
