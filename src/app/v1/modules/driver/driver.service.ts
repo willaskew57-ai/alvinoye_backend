@@ -15,6 +15,8 @@ import { EmailHelpers } from '../../../../utils/email-helper';
 import { deleteLocalFile } from '../../../../utils/deleteFileHelper';
 import configs from '../../../../config/env.config';
 import axios from 'axios';
+import { NotificationServices } from '../notification/notification.service';
+import { NOTIFICATION_TYPE } from '../notification/notification.constant';
 
 const addDriverInfoIntoDB = async (
   payload: { driverInfo: TDriver; vehicle: TVehicle },
@@ -33,40 +35,48 @@ const addDriverInfoIntoDB = async (
     throw new AppError(httpStatus.CONFLICT, 'Driver profile already exists!');
   }
 
-  // 2. Create Driver
-  const driverData = { ...driverInfo, user_id: finalUserId };
-  const newDriver = await Driver.create(driverData); // Removed array wrapper []
+  const session = await mongoose.startSession();
 
   try {
+    session.startTransaction();
+
+    // 2. Create Driver
+    const driverData = { ...driverInfo, user_id: finalUserId };
+    const newDriver = await Driver.create([driverData], { session });
+
+
     // 3. Create Vehicle
     const vehicleData: TVehicle = {
       ...vehicle,
       user_id: finalUserId as any,
     };
-    const newVehicle = await Vehicle.create(vehicleData);
+    const newVehicle = await Vehicle.create([vehicleData], { session });
 
     // 4. Update User Status
     const updatedUser = await User.findByIdAndUpdate(
       finalUserId,
       { is_profile_completed: true, status: 'ACTIVE' },
-      { new: true }
+      { session, new: true }
     );
 
     if (!updatedUser) {
       throw new AppError(httpStatus.NOT_FOUND, 'User not found');
     }
 
+    await session.commitTransaction();
+
     return {
-      driver: newDriver,
-      vehicle: newVehicle,
+      driver: newDriver[0],
+      vehicle: newVehicle[0],
     };
   } catch (error: any) {
-    // Manually delete the driver if vehicle creation fails (Manual Rollback)
-    await Driver.findByIdAndDelete(newDriver._id);
+    await session.abortTransaction();
     throw new AppError(
       httpStatus.BAD_REQUEST,
       error.message || 'Registration failed'
     );
+  } finally {
+    await session.endSession();
   }
 };
 
@@ -75,17 +85,17 @@ const updateDriverInfoInDB = async (
   payload: { driverInfo?: Partial<TDriver>; vehicle?: any }
 ) => {
   const { driverInfo, vehicle } = payload;
-  // const session = await mongoose.startSession();
+  const session = await mongoose.startSession();
 
   try {
-    // session.startTransaction();
+    session.startTransaction();
 
     if (driverInfo) {
       const existingDriver = await Driver.findOne({ user_id: userId });
       if (driverInfo.license_image && existingDriver?.license_image) {
         deleteLocalFile(existingDriver.license_image);
       }
-      await Driver.findOneAndUpdate({ user_id: userId }, driverInfo);
+      await Driver.findOneAndUpdate({ user_id: userId }, driverInfo, { session });
     }
 
     if (vehicle) {
@@ -115,16 +125,16 @@ const updateDriverInfoInDB = async (
       const vehicleData = { ...vehicle, vehicle_images: finalImages };
       delete vehicleData.existing_vehicle_images;
 
-      await Vehicle.findOneAndUpdate({ user_id: userId }, vehicleData);
+      await Vehicle.findOneAndUpdate({ user_id: userId }, vehicleData, { session });
     }
 
-    // await session.commitTransaction();
+    await session.commitTransaction();
     return await Driver.findOne({ user_id: userId }).populate('vehicle');
   } catch (error) {
-    // await session.abortTransaction();
+    await session.abortTransaction();
     throw error;
   } finally {
-    // await session.endSession();
+    await session.endSession();
   }
 };
 
@@ -391,6 +401,8 @@ const acceptParcelFromDB = async (
 
     // 5. Send Email
     // Note: Email sending is an external side-effect, usually done after transaction commits
+    // 5. Send Email
+    // Note: Email sending is an external side-effect, usually done after transaction commits
     await EmailHelpers.sendParcelOtpEmail({
       email: parcelOwner.email,
       name: parcelOwner.full_name,
@@ -399,6 +411,24 @@ const acceptParcelFromDB = async (
 
     // Commit the transaction
     await session.commitTransaction();
+
+    // Create notification for parcel acceptance
+    try {
+      const driverUser = await User.findById(driverIdFromToken);
+      await NotificationServices.createNotificationIntoDB({
+        user_id: parcel.user_id,
+        type: NOTIFICATION_TYPE.PARCEL_ACCEPTED,
+        title: 'Parcel Accepted',
+        message: `Driver ${driverUser?.full_name || 'has'} accepted your parcel "${parcel.parcel_name}".`,
+        parcel_id: parcel._id,
+        data: {
+          parcel_name: parcel.parcel_name,
+          driver_id: driverIdFromToken,
+        },
+      });
+    } catch (error) {
+      console.error('Failed to create notification:', error);
+    }
 
     return {
       message: 'Parcel accepted successfully',
@@ -492,6 +522,23 @@ const completeParcelFromDB = async (parcel_id: string, driver_id: string) => {
     await parcel.save({ session });
 
     await session.commitTransaction();
+    
+    // Create notification for parcel completion
+    try {
+      await NotificationServices.createNotificationIntoDB({
+        user_id: parcel.user_id,
+        type: NOTIFICATION_TYPE.PARCEL_COMPLETED,
+        title: 'Parcel Delivered',
+        message: `Your parcel "${parcel.parcel_name}" has been delivered successfully!`,
+        parcel_id: parcel._id,
+        data: {
+          parcel_name: parcel.parcel_name,
+        },
+      });
+    } catch (error) {
+      console.error('Failed to create notification:', error);
+    }
+    
     await session.endSession();
 
     return {

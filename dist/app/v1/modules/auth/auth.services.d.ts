@@ -23,6 +23,7 @@ export declare const AuthServices: {
             email: string;
             role: "SUPER_ADMIN" | "ADMIN" | "CUSTOMER" | "DRIVER";
             status: "PENDING" | "ACTIVE" | "BLOCKED" | "REJECTED" | "DELETED";
+            is_profile_completed: boolean;
         };
     }>;
     verifyOtp: (payload: {

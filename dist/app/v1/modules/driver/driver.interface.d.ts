@@ -8,7 +8,6 @@ export type TDriver = {
     user_id: Types.ObjectId;
     from: TLocation;
     to: TLocation;
-    stops: TLocation[];
     driver_license_number: string;
     license_image: string;
     daily_commute_time: string;

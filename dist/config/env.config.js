@@ -29,7 +29,8 @@ const configs = {
     aws_secret_access_key: process.env.AWS_SECRET_ACCESS_KEY || '',
     aws_region: process.env.AWS_REGION || "",
     aws_s3_bucket_name: process.env.AWS_S3_BUCKET_NAME || '',
-    cloudfront_url: process.env.CLOUDFRONT_URL || ''
+    cloudfront_url: process.env.CLOUDFRONT_URL || '',
+    google_maps_api_key: process.env.GOOGLE_MAP_API_KEY
 };
 export default configs;
 //# sourceMappingURL=env.config.js.map

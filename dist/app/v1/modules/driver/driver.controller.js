@@ -6,15 +6,17 @@ import { getLocalFileUrl } from '../../../../utils/fileUploadHelper';
 const registerDriver = catchAsync(async (req, res) => {
     const user_id = req.user.user_id;
     const files = req.files;
-    // 1. Handle License Image
+    if (!req.body.driverInfo)
+        req.body.driverInfo = {};
+    if (!req.body.vehicle)
+        req.body.vehicle = {};
     if (files?.license_image?.[0]) {
         req.body.driverInfo.license_image = getLocalFileUrl(files.license_image[0].path);
     }
-    // 2. Handle Number Plate Image
     if (files?.number_plate_image?.[0]) {
         req.body.vehicle.number_plate_image = getLocalFileUrl(files.number_plate_image[0].path);
     }
-    // 3. Handle Multiple Vehicle Images
+    // 3. Handle Multiple Vehicle Images (Array)
     if (files?.vehicle_images) {
         req.body.vehicle.vehicle_images = files.vehicle_images.map((file) => getLocalFileUrl(file.path));
     }
@@ -48,9 +50,18 @@ const getAllDrivers = catchAsync(async (req, res) => {
     });
 });
 const getSingleDriver = catchAsync(async (req, res) => {
+    const driver = req.user;
+    const result = await DriverServices.getSingleDriverFromDB(driver.user_id);
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'Driver retrieved successfully!',
+        data: result,
+    });
+});
+const getDriverById = catchAsync(async (req, res) => {
     const { id } = req.params;
-    const driverId = id;
-    const result = await DriverServices.getSingleDriverFromDB(driverId);
+    const result = await DriverServices.getSingleDriverFromDB(id);
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
@@ -59,6 +70,16 @@ const getSingleDriver = catchAsync(async (req, res) => {
     });
 });
 // ** ------------- parcel related api ------------- ** //
+const getAvailableParcelsForDriver = catchAsync(async (req, res) => {
+    const user_id = req.user.user_id;
+    const result = await DriverServices.getAvailableParcelsFromDB(user_id, req.query);
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'Available parcels fetched successfully!',
+        data: result,
+    });
+});
 const acceptParcel = catchAsync(async (req, res) => {
     const driverId = req.user.user_id;
     const result = await DriverServices.acceptParcelFromDB(req.params.id, driverId);
@@ -104,5 +125,7 @@ export const DriverController = {
     acceptParcel,
     verifyParcelOtp,
     completeParcel,
+    getAvailableParcelsForDriver,
+    getDriverById,
 };
 //# sourceMappingURL=driver.controller.js.map

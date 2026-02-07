@@ -2,10 +2,8 @@ import httpStatus from 'http-status';
 import catchAsync from '../../../../utils/catch-async';
 import sendResponse from '../../../../utils/send-response';
 import { ParcelServices } from './parcel.service';
-// parcel.controller.ts
 const createParcel = catchAsync(async (req, res) => {
     const user_id = req.user.user_id;
-    // req.body now contains parcel_images as an array of URLs
     const result = await ParcelServices.createParcelIntoDB(user_id, req.body);
     sendResponse(res, {
         statusCode: httpStatus.CREATED,
@@ -15,7 +13,6 @@ const createParcel = catchAsync(async (req, res) => {
     });
 });
 const getAllParcels = catchAsync(async (req, res) => {
-    console.log('get all  parcel params', req.query);
     const result = await ParcelServices.getAllParcelsFromDB(req.query, req.user);
     sendResponse(res, {
         statusCode: httpStatus.OK,
@@ -88,11 +85,12 @@ const proposePrice = catchAsync(async (req, res) => {
 });
 const acceptPrice = catchAsync(async (req, res) => {
     const { id } = req.params;
-    const result = await ParcelServices.requestForPriceInDB(id);
+    const user = req.user;
+    const result = await ParcelServices.acceptPriceProposalInDB(id, user);
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
-        message: `Price proposal ${status.toLowerCase()} successfully`,
+        message: `Price proposal Accepted successfully`,
         data: result,
     });
 });

@@ -8,7 +8,6 @@ import { UserValidation } from './user.zod-validation';
 import validateRequest from '../../../../middleware/validate-request';
 import { auth } from '../../../../middleware/auth';
 import { USER_ROLE } from './user.interface';
-import { uploadFile } from '../../../../aws/multer-s3-uploader';
 import { upload } from '../../../../utils/fileUploadHelper';
 
 const router = express.Router();

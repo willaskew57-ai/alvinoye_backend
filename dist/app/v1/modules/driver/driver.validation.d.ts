@@ -30,19 +30,6 @@ export declare const DriverValidation: {
                     latitude: string;
                     longitude: string;
                 }>;
-                stops: z.ZodOptional<z.ZodArray<z.ZodObject<{
-                    address: z.ZodString;
-                    latitude: z.ZodString;
-                    longitude: z.ZodString;
-                }, "strip", z.ZodTypeAny, {
-                    address: string;
-                    latitude: string;
-                    longitude: string;
-                }, {
-                    address: string;
-                    latitude: string;
-                    longitude: string;
-                }>, "many">>;
                 driver_license_number: z.ZodString;
                 license_image: z.ZodOptional<z.ZodString>;
                 daily_commute_time: z.ZodString;
@@ -64,11 +51,6 @@ export declare const DriverValidation: {
                 max_parcel_weight: string;
                 user_id?: string | undefined;
                 license_image?: string | undefined;
-                stops?: {
-                    address: string;
-                    latitude: string;
-                    longitude: string;
-                }[] | undefined;
                 notes?: string | undefined;
             }, {
                 to: {
@@ -86,11 +68,6 @@ export declare const DriverValidation: {
                 max_parcel_weight: string;
                 user_id?: string | undefined;
                 license_image?: string | undefined;
-                stops?: {
-                    address: string;
-                    latitude: string;
-                    longitude: string;
-                }[] | undefined;
                 notes?: string | undefined;
             }>;
             vehicle: z.ZodObject<Omit<{
@@ -133,11 +110,6 @@ export declare const DriverValidation: {
                 max_parcel_weight: string;
                 user_id?: string | undefined;
                 license_image?: string | undefined;
-                stops?: {
-                    address: string;
-                    latitude: string;
-                    longitude: string;
-                }[] | undefined;
                 notes?: string | undefined;
             };
         }, {
@@ -163,11 +135,6 @@ export declare const DriverValidation: {
                 max_parcel_weight: string;
                 user_id?: string | undefined;
                 license_image?: string | undefined;
-                stops?: {
-                    address: string;
-                    latitude: string;
-                    longitude: string;
-                }[] | undefined;
                 notes?: string | undefined;
             };
         }>;
@@ -195,11 +162,6 @@ export declare const DriverValidation: {
                 max_parcel_weight: string;
                 user_id?: string | undefined;
                 license_image?: string | undefined;
-                stops?: {
-                    address: string;
-                    latitude: string;
-                    longitude: string;
-                }[] | undefined;
                 notes?: string | undefined;
             };
         };
@@ -227,11 +189,6 @@ export declare const DriverValidation: {
                 max_parcel_weight: string;
                 user_id?: string | undefined;
                 license_image?: string | undefined;
-                stops?: {
-                    address: string;
-                    latitude: string;
-                    longitude: string;
-                }[] | undefined;
                 notes?: string | undefined;
             };
         };
@@ -296,15 +253,15 @@ export declare const DriverValidation: {
                     latitude: string;
                     longitude: string;
                 } | undefined;
+                driver_license_number?: string | undefined;
+                daily_commute_time?: string | undefined;
+                max_parcel_weight?: string | undefined;
+                notes?: string | undefined;
                 stops?: {
                     address: string;
                     latitude: string;
                     longitude: string;
                 }[] | undefined;
-                driver_license_number?: string | undefined;
-                daily_commute_time?: string | undefined;
-                max_parcel_weight?: string | undefined;
-                notes?: string | undefined;
                 pickup_time?: string | undefined;
             }, {
                 to?: {
@@ -318,15 +275,15 @@ export declare const DriverValidation: {
                     latitude: string;
                     longitude: string;
                 } | undefined;
+                driver_license_number?: string | undefined;
+                daily_commute_time?: string | undefined;
+                max_parcel_weight?: string | undefined;
+                notes?: string | undefined;
                 stops?: {
                     address: string;
                     latitude: string;
                     longitude: string;
                 }[] | undefined;
-                driver_license_number?: string | undefined;
-                daily_commute_time?: string | undefined;
-                max_parcel_weight?: string | undefined;
-                notes?: string | undefined;
                 pickup_time?: string | undefined;
             }>>;
             vehicle: z.ZodOptional<z.ZodObject<{
@@ -336,23 +293,23 @@ export declare const DriverValidation: {
                 vehicle_images: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
                 existing_vehicle_images: z.ZodOptional<z.ZodArray<z.ZodString, "many">>;
             }, "strip", z.ZodTypeAny, {
+                vehicle_type?: string | undefined;
                 number_plate_image?: string | undefined;
                 vehicle_images?: string[] | undefined;
-                vehicle_type?: string | undefined;
                 vehicle_number?: string | undefined;
                 existing_vehicle_images?: string[] | undefined;
             }, {
+                vehicle_type?: string | undefined;
                 number_plate_image?: string | undefined;
                 vehicle_images?: string[] | undefined;
-                vehicle_type?: string | undefined;
                 vehicle_number?: string | undefined;
                 existing_vehicle_images?: string[] | undefined;
             }>>;
         }, "strip", z.ZodTypeAny, {
             vehicle?: {
+                vehicle_type?: string | undefined;
                 number_plate_image?: string | undefined;
                 vehicle_images?: string[] | undefined;
-                vehicle_type?: string | undefined;
                 vehicle_number?: string | undefined;
                 existing_vehicle_images?: string[] | undefined;
             } | undefined;
@@ -368,22 +325,22 @@ export declare const DriverValidation: {
                     latitude: string;
                     longitude: string;
                 } | undefined;
+                driver_license_number?: string | undefined;
+                daily_commute_time?: string | undefined;
+                max_parcel_weight?: string | undefined;
+                notes?: string | undefined;
                 stops?: {
                     address: string;
                     latitude: string;
                     longitude: string;
                 }[] | undefined;
-                driver_license_number?: string | undefined;
-                daily_commute_time?: string | undefined;
-                max_parcel_weight?: string | undefined;
-                notes?: string | undefined;
                 pickup_time?: string | undefined;
             } | undefined;
         }, {
             vehicle?: {
+                vehicle_type?: string | undefined;
                 number_plate_image?: string | undefined;
                 vehicle_images?: string[] | undefined;
-                vehicle_type?: string | undefined;
                 vehicle_number?: string | undefined;
                 existing_vehicle_images?: string[] | undefined;
             } | undefined;
@@ -399,24 +356,24 @@ export declare const DriverValidation: {
                     latitude: string;
                     longitude: string;
                 } | undefined;
+                driver_license_number?: string | undefined;
+                daily_commute_time?: string | undefined;
+                max_parcel_weight?: string | undefined;
+                notes?: string | undefined;
                 stops?: {
                     address: string;
                     latitude: string;
                     longitude: string;
                 }[] | undefined;
-                driver_license_number?: string | undefined;
-                daily_commute_time?: string | undefined;
-                max_parcel_weight?: string | undefined;
-                notes?: string | undefined;
                 pickup_time?: string | undefined;
             } | undefined;
         }>;
     }, "strip", z.ZodTypeAny, {
         body: {
             vehicle?: {
+                vehicle_type?: string | undefined;
                 number_plate_image?: string | undefined;
                 vehicle_images?: string[] | undefined;
-                vehicle_type?: string | undefined;
                 vehicle_number?: string | undefined;
                 existing_vehicle_images?: string[] | undefined;
             } | undefined;
@@ -432,24 +389,24 @@ export declare const DriverValidation: {
                     latitude: string;
                     longitude: string;
                 } | undefined;
+                driver_license_number?: string | undefined;
+                daily_commute_time?: string | undefined;
+                max_parcel_weight?: string | undefined;
+                notes?: string | undefined;
                 stops?: {
                     address: string;
                     latitude: string;
                     longitude: string;
                 }[] | undefined;
-                driver_license_number?: string | undefined;
-                daily_commute_time?: string | undefined;
-                max_parcel_weight?: string | undefined;
-                notes?: string | undefined;
                 pickup_time?: string | undefined;
             } | undefined;
         };
     }, {
         body: {
             vehicle?: {
+                vehicle_type?: string | undefined;
                 number_plate_image?: string | undefined;
                 vehicle_images?: string[] | undefined;
-                vehicle_type?: string | undefined;
                 vehicle_number?: string | undefined;
                 existing_vehicle_images?: string[] | undefined;
             } | undefined;
@@ -465,15 +422,15 @@ export declare const DriverValidation: {
                     latitude: string;
                     longitude: string;
                 } | undefined;
+                driver_license_number?: string | undefined;
+                daily_commute_time?: string | undefined;
+                max_parcel_weight?: string | undefined;
+                notes?: string | undefined;
                 stops?: {
                     address: string;
                     latitude: string;
                     longitude: string;
                 }[] | undefined;
-                driver_license_number?: string | undefined;
-                daily_commute_time?: string | undefined;
-                max_parcel_weight?: string | undefined;
-                notes?: string | undefined;
                 pickup_time?: string | undefined;
             } | undefined;
         };
@@ -483,21 +440,21 @@ export declare const DriverValidation: {
             parcel_id: z.ZodString;
             otp: z.ZodString;
         }, "strip", z.ZodTypeAny, {
-            otp: string;
             parcel_id: string;
+            otp: string;
         }, {
-            otp: string;
             parcel_id: string;
+            otp: string;
         }>;
     }, "strip", z.ZodTypeAny, {
         body: {
-            otp: string;
             parcel_id: string;
+            otp: string;
         };
     }, {
         body: {
-            otp: string;
             parcel_id: string;
+            otp: string;
         };
     }>;
 };
