@@ -4,7 +4,7 @@ const locationValidationSchema = z.object({
     latitude: z.number({ required_error: 'Latitude is required' }),
     longitude: z.number({ required_error: 'Longitude is required' }),
 });
-import { PARCEL_STATUS, PRICE_REQUEST_STATUS, PRICE_STATUS, } from './parcel.interface';
+import { PARCEL_STATUS, PRICE_STATUS } from './parcel.interface';
 // --- Reusable Enum Validations based on your Interface ---
 const ParcelStatusEnum = z.nativeEnum(PARCEL_STATUS);
 const PriceStatusEnum = z.nativeEnum(PRICE_STATUS);

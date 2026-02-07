@@ -4,7 +4,6 @@ import { UserValidation } from './user.zod-validation';
 import validateRequest from '../../../../middleware/validate-request';
 import { auth } from '../../../../middleware/auth';
 import { USER_ROLE } from './user.interface';
-import { uploadFile } from '../../../../aws/multer-s3-uploader';
 import { upload } from '../../../../utils/fileUploadHelper';
 const router = express.Router();
 // Only SUPER_ADMIN can create a user directly via this admin route
@@ -22,6 +21,6 @@ router.patch('/update-me', auth(USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN, USER_ROL
 }, validateRequest(UserValidation.updateUserValidationSchema), UserControllers.updateMe);
 router.get('/get-single/:id', auth(USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN, USER_ROLE.CUSTOMER, USER_ROLE.DRIVER), UserControllers.getSingleUser);
 router.patch('/update/:id', auth(USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN, USER_ROLE.CUSTOMER, USER_ROLE.DRIVER), validateRequest(UserValidation.updateUserValidationSchema), UserControllers.updateUser);
-router.delete('/delete/:id', auth(USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.CUSTOMER, USER_ROLE.DRIVER), UserControllers.deleteUser);
+router.patch('/delete/:id', auth(USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.CUSTOMER, USER_ROLE.DRIVER), UserControllers.deleteUser);
 export const UserRoutes = router;
 //# sourceMappingURL=user.route.js.map

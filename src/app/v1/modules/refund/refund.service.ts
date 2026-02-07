@@ -7,6 +7,8 @@ import { REFUND_STATUS } from './refund.constants';
 import { RefundRequest } from './refund.model';
 import AppError from '../../../../errors/app-error';
 import configs from '../../../../config/env.config';
+import { NotificationServices } from '../notification/notification.service';
+import { NOTIFICATION_TYPE } from '../notification/notification.constant';
 
 const createRefundRequest = async (
   userId: string,
@@ -79,6 +81,23 @@ const processRefundDecision = async (
       request.admin_note = payload.adminNote;
       await request.save({ session });
       await session.commitTransaction();
+
+      // Notify user about rejection
+      try {
+        await NotificationServices.createNotificationIntoDB({
+            user_id: request.user_id.toString(),
+            type: NOTIFICATION_TYPE.REFUND_REJECTED,
+            title: 'Refund Rejected',
+            message: `Your refund request for parcel has been rejected.`,
+            parcel_id: request.parcel_id,
+            data: {
+                reason: payload.adminNote
+            }
+        });
+      } catch (error) {
+        console.error('Failed to create notification:', error);
+      }
+
       return request;
     }
 
@@ -114,6 +133,23 @@ const processRefundDecision = async (
     );
 
     await session.commitTransaction();
+
+    // Notify user about approval
+    try {
+      await NotificationServices.createNotificationIntoDB({
+        user_id: request.user_id.toString(),
+        type: NOTIFICATION_TYPE.REFUND_APPROVED,
+        title: 'Refund Approved',
+        message: `Your refund request for parcel has been approved.`,
+        parcel_id: request.parcel_id,
+        data: {
+             admin_note: payload.adminNote
+        }
+      });
+    } catch (error) {
+      console.error('Failed to create notification:', error);
+    }
+
     return request;
   } catch (error) {
     await session.abortTransaction();

@@ -1,144 +1,97 @@
 import { Schema } from 'mongoose';
 import { REFUND_STATUS } from './refund.constants';
-export declare const RefundRequest: import("mongoose").Model<{
-    status: REFUND_STATUS;
-    user_id: import("mongoose").Types.ObjectId;
-    parcel_id: import("mongoose").Types.ObjectId;
-    reason: string;
-    payment_id: import("mongoose").Types.ObjectId;
-    refunded_at?: NativeDate | null;
-    admin_note?: string | null;
-    stripe_refund_id?: string | null;
-} & import("mongoose").DefaultTimestampProps, {}, {}, {
+import type { TRefundRequest } from './refund.interface';
+export declare const RefundRequest: import("mongoose").Model<TRefundRequest, {}, {}, {
     id: string;
-}, import("mongoose").Document<unknown, {}, {
-    status: REFUND_STATUS;
-    user_id: import("mongoose").Types.ObjectId;
-    parcel_id: import("mongoose").Types.ObjectId;
-    reason: string;
-    payment_id: import("mongoose").Types.ObjectId;
-    refunded_at?: NativeDate | null;
-    admin_note?: string | null;
-    stripe_refund_id?: string | null;
-} & import("mongoose").DefaultTimestampProps, {
+}, import("mongoose").Document<unknown, {}, TRefundRequest, {
     id: string;
-}, {
-    timestamps: true;
-}> & Omit<{
-    status: REFUND_STATUS;
-    user_id: import("mongoose").Types.ObjectId;
-    parcel_id: import("mongoose").Types.ObjectId;
-    reason: string;
-    payment_id: import("mongoose").Types.ObjectId;
-    refunded_at?: NativeDate | null;
-    admin_note?: string | null;
-    stripe_refund_id?: string | null;
-} & import("mongoose").DefaultTimestampProps & {
+}, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<TRefundRequest & {
     _id: import("mongoose").Types.ObjectId;
 } & {
     __v: number;
 }, "id"> & {
     id: string;
-}, Schema<any, import("mongoose").Model<any, any, any, any, any, any, any>, {}, {}, {}, {}, {
-    timestamps: true;
-}, {
-    status: REFUND_STATUS;
-    user_id: import("mongoose").Types.ObjectId;
-    parcel_id: import("mongoose").Types.ObjectId;
-    reason: string;
-    payment_id: import("mongoose").Types.ObjectId;
-    refunded_at?: NativeDate | null;
-    admin_note?: string | null;
-    stripe_refund_id?: string | null;
-} & import("mongoose").DefaultTimestampProps, import("mongoose").Document<unknown, {}, {
-    status: REFUND_STATUS;
-    user_id: import("mongoose").Types.ObjectId;
-    parcel_id: import("mongoose").Types.ObjectId;
-    reason: string;
-    payment_id: import("mongoose").Types.ObjectId;
-    refunded_at?: NativeDate | null;
-    admin_note?: string | null;
-    stripe_refund_id?: string | null;
-} & import("mongoose").DefaultTimestampProps, {
+}, Schema<TRefundRequest, import("mongoose").Model<TRefundRequest, any, any, any, (import("mongoose").Document<unknown, any, TRefundRequest, any, import("mongoose").DefaultSchemaOptions> & TRefundRequest & {
+    _id: import("mongoose").Types.ObjectId;
+} & {
+    __v: number;
+} & {
     id: string;
-}, import("mongoose").ResolveSchemaOptions<{
-    timestamps: true;
-}>> & Omit<{
-    status: REFUND_STATUS;
-    user_id: import("mongoose").Types.ObjectId;
-    parcel_id: import("mongoose").Types.ObjectId;
-    reason: string;
-    payment_id: import("mongoose").Types.ObjectId;
-    refunded_at?: NativeDate | null;
-    admin_note?: string | null;
-    stripe_refund_id?: string | null;
-} & import("mongoose").DefaultTimestampProps & {
+}) | (import("mongoose").Document<unknown, any, TRefundRequest, any, import("mongoose").DefaultSchemaOptions> & TRefundRequest & {
+    _id: import("mongoose").Types.ObjectId;
+} & {
+    __v: number;
+}), any, TRefundRequest>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, TRefundRequest, import("mongoose").Document<unknown, {}, TRefundRequest, {
+    id: string;
+}, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<TRefundRequest & {
     _id: import("mongoose").Types.ObjectId;
 } & {
     __v: number;
 }, "id"> & {
     id: string;
 }, {
-    [path: string]: import("mongoose").SchemaDefinitionProperty<undefined, any, any>;
-} | {
-    [x: string]: import("mongoose").SchemaDefinitionProperty<any, any, import("mongoose").Document<unknown, {}, {
-        status: REFUND_STATUS;
-        user_id: import("mongoose").Types.ObjectId;
-        parcel_id: import("mongoose").Types.ObjectId;
-        reason: string;
-        payment_id: import("mongoose").Types.ObjectId;
-        refunded_at?: NativeDate | null;
-        admin_note?: string | null;
-        stripe_refund_id?: string | null;
-    } & import("mongoose").DefaultTimestampProps, {
+    user_id?: import("mongoose").SchemaDefinitionProperty<import("mongoose").Types.ObjectId, TRefundRequest, import("mongoose").Document<unknown, {}, TRefundRequest, {
         id: string;
-    }, import("mongoose").ResolveSchemaOptions<{
-        timestamps: true;
-    }>> & Omit<{
-        status: REFUND_STATUS;
-        user_id: import("mongoose").Types.ObjectId;
-        parcel_id: import("mongoose").Types.ObjectId;
-        reason: string;
-        payment_id: import("mongoose").Types.ObjectId;
-        refunded_at?: NativeDate | null;
-        admin_note?: string | null;
-        stripe_refund_id?: string | null;
-    } & import("mongoose").DefaultTimestampProps & {
+    }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<TRefundRequest & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;
     }, "id"> & {
         id: string;
-    }> | undefined;
-}, {
-    status: REFUND_STATUS;
-    user_id: import("mongoose").Types.ObjectId;
-    parcel_id: import("mongoose").Types.ObjectId;
-    reason: string;
-    payment_id: import("mongoose").Types.ObjectId;
-    refunded_at?: NativeDate | null;
-    admin_note?: string | null;
-    stripe_refund_id?: string | null;
-    createdAt: NativeDate;
-    updatedAt: NativeDate;
-} & {
-    _id: import("mongoose").Types.ObjectId;
-} & {
-    __v: number;
-}>, {
-    status: REFUND_STATUS;
-    user_id: import("mongoose").Types.ObjectId;
-    parcel_id: import("mongoose").Types.ObjectId;
-    reason: string;
-    payment_id: import("mongoose").Types.ObjectId;
-    refunded_at?: NativeDate | null;
-    admin_note?: string | null;
-    stripe_refund_id?: string | null;
-    createdAt: NativeDate;
-    updatedAt: NativeDate;
-} & {
-    _id: import("mongoose").Types.ObjectId;
-} & {
-    __v: number;
-}>;
+    }>;
+    parcel_id?: import("mongoose").SchemaDefinitionProperty<import("mongoose").Types.ObjectId, TRefundRequest, import("mongoose").Document<unknown, {}, TRefundRequest, {
+        id: string;
+    }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<TRefundRequest & {
+        _id: import("mongoose").Types.ObjectId;
+    } & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }>;
+    reason?: import("mongoose").SchemaDefinitionProperty<string, TRefundRequest, import("mongoose").Document<unknown, {}, TRefundRequest, {
+        id: string;
+    }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<TRefundRequest & {
+        _id: import("mongoose").Types.ObjectId;
+    } & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }>;
+    admin_note?: import("mongoose").SchemaDefinitionProperty<string | undefined, TRefundRequest, import("mongoose").Document<unknown, {}, TRefundRequest, {
+        id: string;
+    }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<TRefundRequest & {
+        _id: import("mongoose").Types.ObjectId;
+    } & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }>;
+    status?: import("mongoose").SchemaDefinitionProperty<REFUND_STATUS, TRefundRequest, import("mongoose").Document<unknown, {}, TRefundRequest, {
+        id: string;
+    }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<TRefundRequest & {
+        _id: import("mongoose").Types.ObjectId;
+    } & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }>;
+    stripe_refund_id?: import("mongoose").SchemaDefinitionProperty<string | undefined, TRefundRequest, import("mongoose").Document<unknown, {}, TRefundRequest, {
+        id: string;
+    }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<TRefundRequest & {
+        _id: import("mongoose").Types.ObjectId;
+    } & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }>;
+    refunded_at?: import("mongoose").SchemaDefinitionProperty<Date | undefined, TRefundRequest, import("mongoose").Document<unknown, {}, TRefundRequest, {
+        id: string;
+    }, import("mongoose").ResolveSchemaOptions<import("mongoose").DefaultSchemaOptions>> & Omit<TRefundRequest & {
+        _id: import("mongoose").Types.ObjectId;
+    } & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }>;
+}, TRefundRequest>, TRefundRequest>;
 //# sourceMappingURL=refund.model.d.ts.map

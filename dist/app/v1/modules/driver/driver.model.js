@@ -1,10 +1,9 @@
 import { Schema, model } from 'mongoose';
-// Reusable sub-schema for location objects
 const LocationSchema = new Schema({
     address: { type: String, required: true },
     latitude: { type: Number, required: true },
     longitude: { type: Number, required: true },
-}, { _id: false }); // _id: false prevents Mongoose from creating sub-ids for every stop
+}, { _id: false });
 const DriverInfoSchema = new Schema({
     user_id: {
         type: Schema.Types.ObjectId,
@@ -16,9 +15,7 @@ const DriverInfoSchema = new Schema({
     to: LocationSchema,
     driver_license_number: { type: String, required: true, unique: true },
     license_image: { type: String },
-    stops: [LocationSchema],
     daily_commute_time: { type: String, required: true },
-    // available_for_delivery: { type: String, required: true },
     max_parcel_weight: { type: String, required: true },
     notes: { type: String },
 }, {

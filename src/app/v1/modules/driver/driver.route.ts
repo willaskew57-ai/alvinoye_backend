@@ -92,6 +92,18 @@ router.get(
   DriverController.getAllDrivers
 );
 
+
+router.get(
+  '/get/:id',
+  auth(
+    USER_ROLE.ADMIN,
+    USER_ROLE.SUPER_ADMIN,
+    USER_ROLE.DRIVER,
+    USER_ROLE.CUSTOMER
+  ),
+  DriverController.getDriverById
+);
+
 router.get('/get-driver-info', auth(USER_ROLE.DRIVER), DriverController.getSingleDriver);
 
 router.get(

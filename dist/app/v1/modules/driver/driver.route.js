@@ -12,7 +12,14 @@ router.post('/info', auth(USER_ROLE.DRIVER), upload.fields([
     { name: 'vehicle_images', maxCount: 5 },
 ]), (req, res, next) => {
     if (req.body.data) {
-        req.body = JSON.parse(req.body.data);
+        try {
+            req.body = JSON.parse(req.body.data);
+        }
+        catch (error) {
+            return res
+                .status(400)
+                .json({ success: false, message: "Invalid JSON in 'data' field" });
+        }
     }
     next();
 }, validateRequest(DriverValidation.createDriverWithVehicleValidationSchema), DriverController.registerDriver);
@@ -44,8 +51,10 @@ router.patch('/update-info', auth(USER_ROLE.DRIVER), upload.fields([
     next();
 }, validateRequest(DriverValidation.updateDriverWithVehicleValidationSchema), DriverController.updateDriverInfo);
 router.get('/get-all', auth(USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.DRIVER, USER_ROLE.CUSTOMER), DriverController.getAllDrivers);
-router.get('/get/:id', DriverController.getSingleDriver);
-router.post('/accept-parcel/:id', auth(USER_ROLE.DRIVER), DriverController.acceptParcel);
+router.get('/get/:id', auth(USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.DRIVER, USER_ROLE.CUSTOMER), DriverController.getDriverById);
+router.get('/get-driver-info', auth(USER_ROLE.DRIVER), DriverController.getSingleDriver);
+router.get('/available-for-driver', auth(USER_ROLE.DRIVER), DriverController.getAvailableParcelsForDriver);
+router.patch('/accept-parcel/:id', auth(USER_ROLE.DRIVER), DriverController.acceptParcel);
 router.post('/parcel/verify-otp', auth(USER_ROLE.DRIVER), validateRequest(DriverValidation.verifyParcelOtpValidationSchema), DriverController.verifyParcelOtp);
 router.patch('/parcel/:id/complete', auth(USER_ROLE.DRIVER), DriverController.completeParcel);
 export const DriverRoutes = router;

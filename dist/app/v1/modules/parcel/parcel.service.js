@@ -7,6 +7,8 @@ import { Parcel, ParcelPriceRequest } from './parcel.model';
 import { PARCEL_STATUS, PRICE_REQUEST_STATUS, PRICE_STATUS, PROPOSED_BY, } from './parcel.interface';
 import { generateParcelId } from './parcel.utils';
 import { deleteLocalFile } from '../../../../utils/deleteFileHelper';
+import { NotificationServices } from '../notification/notification.service';
+import { NOTIFICATION_TYPE } from '../notification/notification.constant';
 // ** ----- create parcel -----
 // parcel.service.ts
 const createParcelIntoDB = async (userId, payload) => {
@@ -18,6 +20,23 @@ const createParcelIntoDB = async (userId, payload) => {
         price_status: 'NOT_SET',
     };
     const result = await Parcel.create(parcelData);
+    // Create notification for parcel creation
+    try {
+        await NotificationServices.createNotificationIntoDB({
+            user_id: userId,
+            type: NOTIFICATION_TYPE.PARCEL_CREATED,
+            title: 'Parcel Created',
+            message: `Your parcel "${result.parcel_name}" has been created successfully.`,
+            parcel_id: result._id,
+            data: {
+                parcel_name: result.parcel_name,
+                parcel_id: result.parcel_id,
+            },
+        });
+    }
+    catch (error) {
+        console.error('Failed to create notification:', error);
+    }
     return result;
 };
 const getAllParcelsFromDB = async (query, user) => {
@@ -208,6 +227,47 @@ const proposePriceInDB = async (role, payload // This matches your createPriceRe
     });
     // 4. Update the Parcel price_status
     await Parcel.findByIdAndUpdate(payload.parcel_id, { price_status: newPriceStatus }, { new: true });
+    // Create notification for price proposal/counter-offer
+    try {
+        // Determine notification type and recipient
+        let type = NOTIFICATION_TYPE.PRICE_PROPOSED;
+        if (newPriceStatus === PRICE_STATUS.COUNTERED || newPriceStatus === PRICE_STATUS.FINAL_OFFER) {
+            type = NOTIFICATION_TYPE.PRICE_COUNTERED;
+        }
+        // If Admin proposed, notify Customer (parcel owner)
+        // If Customer proposed, we might notify Admin (if there's a specific admin user or system notification)
+        // For now, let's assume we notify the "other party"
+        // Only notify if there is a clear recipient. 
+        // If Admin proposed -> Notify Parcel Owner (Customer)
+        if (isAdmin) {
+            await NotificationServices.createNotificationIntoDB({
+                user_id: parcel.user_id, // Notify the customer
+                type: type,
+                title: type === NOTIFICATION_TYPE.PRICE_COUNTERED ? 'Price Counter Offer' : 'Price Proposed',
+                message: type === NOTIFICATION_TYPE.PRICE_COUNTERED
+                    ? `A counter offer of $${payload.proposed_price} has been made for your parcel "${parcel.parcel_name}".`
+                    : `A price of $${payload.proposed_price} has been proposed for your parcel "${parcel.parcel_name}".`,
+                parcel_id: parcel._id,
+                price_request_id: priceRequest._id,
+                data: {
+                    parcel_name: parcel.parcel_name,
+                    price: payload.proposed_price,
+                    is_final: isFinalOffer
+                },
+            });
+        }
+        else {
+            // If Customer proposed -> Notify Admin
+            // Since there might be multiple admins, we might iterate or send to a general system channel
+            // For this implementation, we'll skip direct Admin notification unless there's a specific Admin ID linked
+            // Or we could broadcast to an admin room via socket directly, but here we create a DB notification for a "System" or "Super Admin"
+            // Ideally you'd find a specific admin or have a system-wide notification mechanism
+            // omitted for Customer -> Admin to avoid spamming all admins or if no specific admin is assigned
+        }
+    }
+    catch (error) {
+        console.error('Failed to create notification:', error);
+    }
     return priceRequest;
 };
 // **  Accepting  price proposal
@@ -215,32 +275,58 @@ const acceptPriceProposalInDB = async (requestId, user) => {
     const session = await mongoose.startSession();
     try {
         session.startTransaction();
+        // 1. Find the Price Request
         const priceRequest = await ParcelPriceRequest.findById(requestId).session(session);
-        if (!priceRequest)
+        if (!priceRequest) {
             throw new AppError(httpStatus.NOT_FOUND, 'Request not found!');
+        }
+        // 2. Check current status (Access via priceRequest object)
         if (priceRequest.status !== PRICE_REQUEST_STATUS.PENDING) {
             throw new AppError(httpStatus.BAD_REQUEST, 'This proposal has already been decided!');
         }
+        // 3. Determine user role type
         const isAdmin = user.role === 'ADMIN' || user.role === 'SUPER_ADMIN';
         const userRoleType = isAdmin ? PROPOSED_BY.ADMIN : PROPOSED_BY.CUSTOMER;
-        // Check: Cannot respond to your own proposal
+        // 4. Check: Cannot respond to your own proposal
         if (priceRequest.proposed_by === userRoleType) {
             throw new AppError(httpStatus.FORBIDDEN, 'You cannot respond to your own proposal.');
         }
-        // Update Request
-        priceRequest.status = 'ACCEPTED';
+        // 5. Update Request - Use Constants to avoid "undefined" variable errors
+        priceRequest.status = PRICE_REQUEST_STATUS.ACCEPTED;
         priceRequest.decided_at = new Date();
+        // Save the price request changes
         await priceRequest.save({ session });
-        // Update Parcel
+        // 6. Update Associated Parcel
         const updatedParcel = await Parcel.findByIdAndUpdate(priceRequest.parcel_id, {
             final_price: priceRequest.proposed_price,
             price_status: PRICE_STATUS.ACCEPTED,
-            status: PARCEL_STATUS.PENDING,
+            status: PARCEL_STATUS.PENDING
         }, { session, new: true });
         if (!updatedParcel) {
             throw new AppError(httpStatus.NOT_FOUND, 'Associated parcel not found!');
         }
         await session.commitTransaction();
+        // Create notification for price acceptance
+        try {
+            const notifyUserId = priceRequest.proposed_by === PROPOSED_BY.CUSTOMER
+                ? updatedParcel.user_id
+                : priceRequest.proposed_by;
+            await NotificationServices.createNotificationIntoDB({
+                user_id: notifyUserId,
+                type: NOTIFICATION_TYPE.PRICE_ACCEPTED,
+                title: 'Price Accepted',
+                message: `The price of $${priceRequest.proposed_price} for parcel "${updatedParcel.parcel_name}" has been accepted.`,
+                parcel_id: updatedParcel._id,
+                price_request_id: priceRequest._id,
+                data: {
+                    parcel_name: updatedParcel.parcel_name,
+                    price: priceRequest.proposed_price,
+                },
+            });
+        }
+        catch (error) {
+            console.error('Failed to create notification:', error);
+        }
         return priceRequest;
     }
     catch (err) {
@@ -279,6 +365,7 @@ const rejectPriceProposalInDB = async (requestId, user) => {
         // Note: We do NOT set final_price here because the proposal was rejected.
         const updatedParcel = await Parcel.findByIdAndUpdate(priceRequest.parcel_id, {
             price_status: PRICE_STATUS.REJECTED,
+            status: PARCEL_STATUS.REJECTED,
         }, { session, new: true });
         if (!updatedParcel) {
             throw new AppError(httpStatus.NOT_FOUND, 'Associated parcel not found!');
@@ -299,11 +386,15 @@ const rejectPriceProposalInDB = async (requestId, user) => {
  */
 const rejectAndCounterPriceInDB = async (requestId, payload) => {
     const currentRequest = await ParcelPriceRequest.findById(requestId);
+    const parcel = await Parcel.findById(payload.parcel_id);
     if (!currentRequest) {
         throw new AppError(httpStatus.NOT_FOUND, 'Price request not found!');
     }
     if (currentRequest.status !== PRICE_REQUEST_STATUS.PENDING) {
         throw new AppError(httpStatus.BAD_REQUEST, `This price request has already been ${currentRequest.status.toLowerCase()}`);
+    }
+    if (!parcel) {
+        throw new AppError(httpStatus.NOT_FOUND, 'Parcel not found!');
     }
     currentRequest.status = PRICE_REQUEST_STATUS.REJECTED;
     currentRequest.rejection_reason = payload.rejection_reason;
