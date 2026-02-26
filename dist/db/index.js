@@ -9,10 +9,15 @@ export const connectDB = async () => {
     try {
         const dbUri = configs.database_url;
         // Listen to connection events
-        mongoose.connection.on('connected', () => {
-            dbStatus.isConnected = true;
-            dbStatus.connectionState = 'connected';
-            console.log('✅ MongoDB Connected Successfully');
+        // mongoose.connection.on('connected', () => {
+        //   dbStatus.isConnected = true;
+        //   dbStatus.connectionState = 'connected';
+        //   console.log('✅ MongoDB Connected Successfully');
+        // });
+        await mongoose.connect(dbUri, {
+            serverSelectionTimeoutMS: 30000, // 30 seconds timeout
+            socketTimeoutMS: 45000,
+            family: 4, // Force IPv4 (fixes ::1 issues)
         });
         mongoose.connection.on('connecting', () => {
             dbStatus.isConnected = false;

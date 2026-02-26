@@ -4,6 +4,7 @@ import { ChatService } from './chat.service';
 import { USER_ROLES } from './chat.interface';
 import catchAsync from '../../../../utils/catch-async';
 import sendResponse from '../../../../utils/send-response';
+import { getLocalFileUrl } from '../../../../utils/fileUploadHelper';
 
 const initiateChat = catchAsync(async (req: Request, res: Response) => {
   const result = await ChatService.initiateChat(
@@ -36,15 +37,27 @@ const initiateP2PChat = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const sendMessage = catchAsync(async (req: Request, res: Response) => {
+export const sendMessage = catchAsync(async (req: Request, res: Response) => {
+  // 1. Process attachments
+  let attachmentUrls: string[] = [];
+  if (req.files && Array.isArray(req.files)) {
+    attachmentUrls = (req.files as Express.Multer.File[]).map((file) =>
+      getLocalFileUrl(file.path)
+    );
+  }
+
+  // 2. Call service
   const result = await ChatService.sendMessage(
     req.user.user_id,
-    req.user.role as USER_ROLES,
-    req.body
+    req.user.role,
+    {
+      ...req.body,
+      attachments: attachmentUrls,
+    }
   );
 
   sendResponse(res, {
-    statusCode: httpStatus.CREATED,
+    statusCode: 201,
     success: true,
     message: 'Message sent!',
     data: result,

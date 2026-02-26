@@ -1,3 +1,4 @@
+import { Schema } from 'mongoose';
 import { z } from 'zod/v3';
 
 const initiateChatValidationSchema = z.object({
@@ -15,10 +16,9 @@ const sendMessageValidationSchema = z.object({
     chat_id: z.string({
       required_error: 'Chat ID is required',
     }),
-    content: z.string({
-      required_error: 'Message content is required',
-    }).min(1, 'Message cannot be empty'),
-    attachments: z.array(z.string().url()).optional(),
+    // CHANGE THIS: .optional()
+    content: z.string().optional(), 
+    attachments: z.array(z.string()).optional(),
   }),
 });
 

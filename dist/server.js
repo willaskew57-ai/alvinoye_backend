@@ -9,7 +9,7 @@ import { initSocket } from './socket';
 let server;
 async function main() {
     try {
-        connectDB();
+        await connectDB(); // ✅ Add await
         console.log(colors.blue(`Database is Connected Successfully!!!`).bold);
         server = app.listen(configs.port, () => {
             console.log(colors.green(`The Server is running on ${configs.port}`).bold);

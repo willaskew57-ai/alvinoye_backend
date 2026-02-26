@@ -12,7 +12,7 @@ let server: Server;
 
 async function main() {
   try {
-    connectDB();
+    await connectDB();  // ✅ Add await
     console.log(colors.blue(`Database is Connected Successfully!!!`).bold);
     server = app.listen(configs.port, () => {
       console.log(
@@ -26,11 +26,11 @@ async function main() {
     console.log(err);
   }
 }
-
 main();
 
 // handle unhandledRejection for asynchronous error:
-process.on('unhandledRejection', (reason, promise) => {
+process.on('unhandledRejection', (reason, 
+  promise) => {
   console.log(reason, promise);
   console.log(colors.red(`Server detected UnHandledRejection 😡`));
   if (server) {

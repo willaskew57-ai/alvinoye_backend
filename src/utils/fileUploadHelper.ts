@@ -5,8 +5,10 @@ import fs from 'fs';
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     let uploadPath = 'uploads/';
-
-    if (file.fieldname === 'profile_image') {
+    
+    if (file.fieldname === 'attachments') {
+      uploadPath += 'chat_attachments';
+    } else if (file.fieldname === 'profile_image') {
       uploadPath += 'profile_images';
     } else if (file.fieldname === 'license_image') {
       uploadPath += 'license_images';

@@ -50,89 +50,49 @@ const initiateChat = async (
   return chat;
 };
 
-const sendMessage = async (
+export const sendMessage = async (
   senderId: string,
-  senderRole: USER_ROLES,
-  payload: { chat_id: string; content: string; attachments?: string[] }
+  senderRole: string,
+  payload: { chat_id: string; content?: string; attachments?: string[] }
 ) => {
   const { chat_id, content, attachments } = payload;
 
-  // 1. Find the chat session
   const chat = await Chat.findById(chat_id);
-  if (!chat) throw new AppError(httpStatus.NOT_FOUND, 'Chat session not found');
+  if (!chat) throw new Error('Chat session not found');
 
-  const isAdmin =
-    senderRole === USER_ROLES.ADMIN || senderRole === USER_ROLES.SUPER_ADMIN;
-
-  // 2. Validate if the sender is allowed to send messages here
-  const isParticipant = chat.participants.some(
-    (id) => id.toString() === senderId.toString()
-  );
-
-  if (!isParticipant) {
-    if (!isAdmin) {
-      throw new AppError(
-        httpStatus.FORBIDDEN,
-        'You are not authorized to send messages to this chat'
-      );
-    }
-
-    // If an Admin sends a message but isn't a participant yet, add them (Support joining)
-    await Chat.findByIdAndUpdate(chat_id, {
-      $addToSet: { participants: new Types.ObjectId(senderId) },
-    });
-  }
-
-  // 3. Create the new message
+  // Create message - content defaults to empty string if not provided
   let message = await Message.create({
-    chat_id: new Types.ObjectId(chat_id),
-    sender_id: new Types.ObjectId(senderId),
-    sender_role: senderRole,
-    content,
-    attachments: attachments || [],
-  });
-
-  // 4. Populate sender details for the UI (instantly shows name/image)
-  // Ensure these match your User model fields: full_name and profile_picture
+  chat_id: new Types.ObjectId(chat_id),
+  sender_id: new Types.ObjectId(senderId),
+  sender_role: senderRole,
+  content: content || '', // Ensure this is at least an empty string
+  attachments: attachments || [],
+});
   message = await message.populate('sender_id', 'full_name profile_picture');
 
-  // 5. Update the Chat session with the latest message info for sidebars
+  // Update last message text for the sidebar
+  const lastMsgText = content || (attachments?.length ? 'Sent an attachment' : '');
+
   const updatedChat = await Chat.findByIdAndUpdate(
     chat_id,
-    {
-      last_message: content,
-      last_message_at: new Date(),
+    { 
+      last_message: lastMsgText, 
+      last_message_at: new Date() 
     },
     { new: true }
   );
 
-  // 6. Socket.io Real-time logic
+  // Socket.io emission logic...
   const io = getIO();
   if (io) {
-    console.log('Emitting message to chat room:', chat_id);
-
-    // A. Notify the active chat window (Message bubbles)
-    io.to(chat_id.toString()).emit('new_message', message);
-
-    // B. Update Sidebars for all participants instantly
-    // We emit to each participant's personal room (named after their userId)
-    chat.participants.forEach((participantId) => {
-      io.to(participantId.toString()).emit('update_chat_list', {
-        chat_id: chat_id,
-        sender_id: senderId,
-        last_message: content,
+    io.to(chat_id).emit('new_message', message);
+    chat.participants.forEach((id) => {
+      io.to(id.toString()).emit('update_chat_list', {
+        chat_id,
+        last_message: lastMsgText,
         last_message_at: updatedChat?.last_message_at,
       });
     });
-
-    // C. Special Notification for Admin Support Room
-    if (!isAdmin) {
-      io.to('admin_support_room').emit('support_notification', {
-        chat_id,
-        sender_name: (message.sender_id as any)?.full_name || 'User',
-        content,
-      });
-    }
   }
 
   return message;

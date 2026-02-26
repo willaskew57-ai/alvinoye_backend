@@ -1,9 +1,10 @@
-import { Router } from 'express';
+import { Router, type NextFunction, type Request, type Response } from 'express';
 import { ChatController } from './chat.controller';
 import { auth } from '../../../../middleware/auth';
 import validateRequest from '../../../../middleware/validate-request';
 import { ChatValidation } from './chat.validation';
 import { USER_ROLES } from './chat.interface';
+import { upload } from '../../../../utils/fileUploadHelper';
 
 const router = Router();
 
@@ -57,10 +58,14 @@ router.get(
 router.post(
   '/send',
   auth(),
-  validateRequest(ChatValidation.sendMessageValidationSchema),
+  upload.array('attachments', 5), 
+  (req: Request, res: Response, next: NextFunction) => {
+    // If files are sent, field values often end up in req.body.data
+    if (req.body.data) req.body = JSON.parse(req.body.data);
+    next();
+  },
   ChatController.sendMessage
 );
-
 /**
  * @route PATCH /api/v1/chat/mark-as-read/:id
  * @desc Mark all unread messages in a chat as read

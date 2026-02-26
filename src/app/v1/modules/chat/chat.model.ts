@@ -24,25 +24,26 @@ const chatSchema = new Schema<TChat>(
   },
 );
 
-const messageSchema = new Schema<TMessage>(
+const messageSchema = new Schema(
   {
     chat_id: { type: Schema.Types.ObjectId, ref: 'Chat', required: true },
     sender_id: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    sender_role: {
-      type: String,
-      enum: Object.values(USER_ROLES),
-      required: true,
+    sender_role: { type: String, required: true },
+    
+    // CHANGE THIS: 
+    // Remove 'required: true' and add 'default: ""'
+    content: { 
+      type: String, 
+      required: false, // Explicitly set to false
+      default: ""      // This ensures it saves an empty string instead of null
     },
-    content: { type: String, required: true },
-    attachments: [{ type: String }],
-    is_read: { type: Boolean, default: false },
+    
+    attachments: { 
+      type: [String], 
+      default: [] 
+    },
   },
-  {
-    timestamps: {
-      createdAt: 'created_at',
-      updatedAt: 'updated_at',
-    }
-  },
+  { timestamps: true }
 );
 
 const messageReadSchema = new Schema<TMessageRead>(

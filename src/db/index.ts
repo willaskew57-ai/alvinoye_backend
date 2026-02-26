@@ -15,6 +15,9 @@ export const connectDB = async () => {
   try {
     const dbUri = configs.database_url;
 
+    // Set mongoose options before connecting
+    mongoose.set('strictQuery', false);
+
     // Listen to connection events
     mongoose.connection.on('connected', () => {
       dbStatus.isConnected = true;
@@ -38,9 +41,44 @@ export const connectDB = async () => {
       console.error('❌ MongoDB Error:', err);
     });
 
-    await mongoose.connect(dbUri!);
+    // Add connection options
+    await mongoose.connect(dbUri!, {
+      serverSelectionTimeoutMS: 10000, // Increase timeout to 10 seconds
+      socketTimeoutMS: 45000,
+      family: 4, // Force IPv4, helps with DNS issues
+    });
+    
   } catch (err) {
     console.error('💥 Database connection error:', err);
+    
+    // Try alternative connection method if DNS fails
+    if ((err as any).code === 'ETIMEOUT') {
+      console.log('🔄 Attempting fallback connection...');
+      await attemptFallbackConnection();
+    } else {
+      process.exit(1);
+    }
+  }
+};
+
+// Fallback connection function
+const attemptFallbackConnection = async () => {
+  try {
+    // Get the standard connection string from MongoDB Atlas
+    // This should be the mongodb:// version, not mongodb+srv://
+    const fallbackUri = configs.database_url?.replace('mongodb+srv://', 'mongodb://');
+    
+    if (!fallbackUri) {
+      throw new Error('No fallback URI available');
+    }
+
+    console.log('🔄 Using fallback connection method...');
+    await mongoose.connect(fallbackUri, {
+      serverSelectionTimeoutMS: 10000,
+      socketTimeoutMS: 45000,
+    });
+  } catch (fallbackErr) {
+    console.error('💥 Fallback connection also failed:', fallbackErr);
     process.exit(1);
   }
 };
@@ -49,7 +87,7 @@ export const connectDB = async () => {
 export const getDBStatus = () => {
   return {
     isConnected: dbStatus.isConnected,
-    state: mongoose.connection.readyState, // 0=disconnected, 1=connected, 2=connecting
+    state: mongoose.connection.readyState,
     stateLabel: ['disconnected', 'connected', 'connecting', 'disconnecting'][
       mongoose.connection.readyState
     ],
