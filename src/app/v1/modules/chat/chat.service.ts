@@ -17,6 +17,7 @@ const initiateChat = async (
       participants: userId,
       is_support_chat: true,
     });
+
     if (!chat) {
       chat = await Chat.create({
         participants: [new Types.ObjectId(userId)],
@@ -145,22 +146,16 @@ const getMyChats = async (
   const meta = await chatQuery.countTotal();
 
   // 5. Add Unread Count for each chat
-  const data = await Promise.all(
-    chats.map(async (chat) => {
-      const unreadCount = await Message.countDocuments({
-        chat_id: chat._id,
-        is_read: false,
-        sender_id: { $ne: userId },
-      });
+  const modifiedData = chats.map((chat: any) => {
+    return {
+      ...chat,
+      participants: chat.participants.filter(
+        (participant: any) => participant._id.toString() !== userId
+      ),
+    };
+  });
 
-      return {
-        ...chat,
-        unread_count: unreadCount,
-      };
-    })
-  );
-
-  return { meta, data };
+  return { meta, modifiedData };
 };
 
 const getMessages = async (
@@ -258,6 +253,7 @@ const getMessages = async (
     data: messages,
   };
 };
+
 const markAsRead = async (chatId: string, userId: string) => {
   await Message.updateMany(
     { chat_id: chatId, sender_id: { $ne: userId }, is_read: false },
