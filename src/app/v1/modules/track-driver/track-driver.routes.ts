@@ -2,6 +2,8 @@ import express from 'express';
 import { auth } from '../../../../middleware/auth';
 import { TrackDriverControllers } from './track-driver.controller';
 import { USER_ROLE } from '../user/user.interface';
+import { TrackDriverValidation } from './track-driver.validation';
+import validateRequest from '../../../../middleware/validate-request';
 
 const router = express.Router();
 
@@ -13,6 +15,7 @@ const router = express.Router();
 router.post(
   '/update-location',
   auth(USER_ROLE.DRIVER),
+   validateRequest(TrackDriverValidation.updateLocationValidationSchema),
   TrackDriverControllers.updateLocation
 );
 
@@ -35,6 +38,7 @@ router.post(
 router.get(
   '/nearby',
   auth(USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.CUSTOMER),
+  validateRequest(TrackDriverValidation.getNearbyDriversQuerySchema),
   TrackDriverControllers.getNearbyDrivers
 );
 
@@ -67,7 +71,12 @@ router.get(
  */
 router.get(
   '/:driverId',
-  auth(USER_ROLE.CUSTOMER, USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.DRIVER),
+  auth(
+    USER_ROLE.CUSTOMER,
+    USER_ROLE.ADMIN,
+    USER_ROLE.SUPER_ADMIN,
+    USER_ROLE.DRIVER
+  ),
   TrackDriverControllers.getDriverLocation
 );
 
