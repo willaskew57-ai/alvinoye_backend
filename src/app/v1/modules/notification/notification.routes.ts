@@ -11,7 +11,7 @@ const router = express.Router();
  * @access Private - All authenticated users
  */
 router.get(
-  '/',
+  '/get-all',
   auth(USER_ROLE.SUPER_ADMIN, USER_ROLE.ADMIN, USER_ROLE.CUSTOMER, USER_ROLE.DRIVER),
   NotificationControllers.getUserNotifications
 );

@@ -1,0 +1,109 @@
+import httpStatus from 'http-status';
+import catchAsync from '../../../../utils/catch-async';
+import sendResponse from '../../../../utils/send-response';
+import { UserServices } from './user.service';
+import { getLocalFileUrl } from '../../../../utils/fileUploadHelper';
+const createAdmin = catchAsync(async (req, res) => {
+    const result = await UserServices.createAdminIntoDB(req.body);
+    sendResponse(res, {
+        statusCode: httpStatus.CREATED,
+        success: true,
+        message: 'User created successfully',
+        data: result,
+    });
+});
+const changeStatus = catchAsync(async (req, res) => {
+    const { id } = req.params;
+    const userId = id;
+    const { status } = req.body;
+    const performerId = req.user.user_id;
+    const performerRole = req.user.role;
+    const result = await UserServices.changeUserStatusInDB(userId, { status }, performerId, performerRole);
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'User status updated successfully',
+        data: result,
+    });
+});
+const getMe = catchAsync(async (req, res) => {
+    const { user_id } = req.user;
+    console.log({ user: req.user });
+    const result = await UserServices.getMeFromDB(user_id);
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'User profile retrieved successfully',
+        data: result,
+    });
+});
+const updateMe = catchAsync(async (req, res) => {
+    // Use Express.Multer.File type instead of TCustomFile for local uploads
+    const files = req.files;
+    console.log(files, 'profile image file');
+    if (files?.profile_image && files.profile_image.length > 0) {
+        const file = files.profile_image[0];
+        // file.path contains the local directory (e.g., "uploads/profile_images/filename.jpg")
+        // We transform this into a full URL
+        req.body.profile_picture = getLocalFileUrl(file.path);
+    }
+    const { user_id } = req.user;
+    const result = await UserServices.updateMeIntoDB(user_id, req.body);
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: 'Profile updated successfully',
+        data: result,
+    });
+});
+const getAllUser = catchAsync(async (req, res) => {
+    console.log('query', req.query);
+    const result = await UserServices.getAllUsersFromDB(req.query);
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'Users retrieved successfully',
+        data: result,
+    });
+});
+const getSingleUser = catchAsync(async (req, res) => {
+    const id = req.params.id;
+    const result = await UserServices.getSingleUserFromDB(id);
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'User retrieved successfully',
+        data: result,
+    });
+});
+const updateUser = catchAsync(async (req, res) => {
+    const id = req.params.id;
+    const result = await UserServices.updateUserInDB(id, req.body);
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'User updated successfully',
+        data: result,
+    });
+});
+const deleteUser = catchAsync(async (req, res) => {
+    const id = req.params.id;
+    await UserServices.deleteUserFromDB(id);
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'User deleted successfully',
+        data: null,
+    });
+});
+export const UserControllers = {
+    createAdmin,
+    changeStatus,
+    getMe,
+    updateMe,
+    getAllUser,
+    getSingleUser,
+    updateUser,
+    deleteUser,
+};
+//# sourceMappingURL=user.controller.js.map

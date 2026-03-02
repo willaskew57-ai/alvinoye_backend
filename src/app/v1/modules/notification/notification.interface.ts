@@ -5,7 +5,6 @@ import {
   NOTIFICATION_PRIORITY,
 } from './notification.constant';
 
-// Derived Types
 export type TNotificationType =
   (typeof NOTIFICATION_TYPE)[keyof typeof NOTIFICATION_TYPE];
 export type TNotificationStatus =
@@ -21,18 +20,15 @@ export interface TNotification extends Document {
   message: string;
   status: TNotificationStatus;
   priority: TNotificationPriority;
-  
-  // Related References
+
   parcel_id?: Types.ObjectId;
   price_request_id?: Types.ObjectId;
   payment_id?: Types.ObjectId;
   chat_id?: Types.ObjectId;
-  
-  // Metadata
+
   action_url?: string;
   data?: Record<string, any>;
-  
-  // Timestamps
+
   read_at?: Date;
   created_at?: Date;
   updated_at?: Date;

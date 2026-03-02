@@ -12,19 +12,15 @@ import { getLocalFileUrl, upload } from '../../../../utils/fileUploadHelper';
 
 const router = express.Router();
 
-// parcel.route.ts
-
 router.post(
   '/create',
   auth(USER_ROLE.CUSTOMER),
-  upload.fields([{ name: 'parcel_images', maxCount: 5 }]), // Allow up to 5 images
+  upload.fields([{ name: 'parcel_images', maxCount: 5 }]),
   (req: Request, res: Response, next: NextFunction) => {
-    // 1. Parse JSON data
     if (req.body.data) {
       req.body = JSON.parse(req.body.data);
     }
 
-    // 2. Map file paths to local URLs
     const files = req.files as {
       [fieldname: string]: Express.Multer.File[] | undefined;
     };
@@ -45,12 +41,10 @@ router.patch(
   auth(USER_ROLE.CUSTOMER),
   upload.fields([{ name: 'parcel_images', maxCount: 5 }]),
   (req: Request, res: Response, next: NextFunction) => {
-    // Parse JSON string from form-data
     if (req.body.data) {
       req.body = JSON.parse(req.body.data);
     }
 
-    // Convert newly uploaded files to local URLs
     const files = req.files as {
       [fieldname: string]: Express.Multer.File[] | undefined;
     };

@@ -4,7 +4,7 @@ import { SettingsService } from './settings.service';
 import catchAsync from '../../../../utils/catch-async';
 import sendResponse from '../../../../utils/send-response';
 
-// ** ------------------ Faq controller
+// ** -------------- Faq controller --------------
 const createFaq = catchAsync(async (req: Request, res: Response) => {
   const result = await SettingsService.createFaqInDB(req.body);
 
@@ -125,7 +125,7 @@ const getSinglePrivacy = catchAsync(async (req: Request, res: Response) => {
 });
 
 const updatePrivacy = catchAsync(async (req: Request, res: Response) => {
-  const { id } = req.params; // Extract ID from params for the specific update
+  const { id } = req.params;
   const result = await SettingsService.updatePrivacyInDB(
     id as string,
     req.body
@@ -152,7 +152,7 @@ export const SettingsController = {
   getSingleTerms,
   updateTerms,
 
-  // Privacy (Fixed naming and logic)
+  // Privacy
   createPrivacy,
   getSinglePrivacy,
   updatePrivacy,

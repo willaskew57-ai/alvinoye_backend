@@ -24,14 +24,12 @@ const createReview = async (
   }
 
   if (parcel.user_id.toString() !== customerId) {
-    // Security: Ensure this customer owns the parcel
     throw new AppError(
       httpStatus.FORBIDDEN,
       'You can only review your own delivered parcels'
     );
   }
 
-  // Ensure the parcel was accepted by a driver
   if (!parcel.accepted_by) {
     throw new AppError(
       httpStatus.BAD_REQUEST,
@@ -39,7 +37,6 @@ const createReview = async (
     );
   }
 
-  // Create the review
   const result = await Review.create({
     parcel_id: new Types.ObjectId(payload.parcel_id),
     customer_id: new Types.ObjectId(customerId),
@@ -94,7 +91,6 @@ const getDriverReviewsFromDB = async (
     .skip(skip)
     .limit(limit);
 
-  //Calculate Average Rating and Total Count using Aggregation
   const stats = await Review.aggregate([
     {
       $match: { driver_id: new Types.ObjectId(driverId) },
@@ -108,7 +104,6 @@ const getDriverReviewsFromDB = async (
     },
   ]);
 
-  // Extract stats or set defaults
   const average_rating =
     stats.length > 0 ? Number(stats[0].averageRating.toFixed(1)) : 0;
   const total = stats.length > 0 ? stats[0].totalReviews : 0;
@@ -128,8 +123,52 @@ const getDriverReviewsFromDB = async (
   };
 };
 
+const getCustomerReviewsFromDB = async (
+  customerId: string,
+  query: Record<string, unknown>
+) => {
+  const page = Number(query.page) || 1;
+  const limit = Number(query.limit) || 10;
+  const skip = (page - 1) * limit;
+
+  const filter: any = { customer_id: new Types.ObjectId(customerId) };
+
+  if (query.searchTerm) {
+    const searchTerm = query.searchTerm as string;
+    const matchingDrivers = await User.find({
+      full_name: { $regex: searchTerm, $options: 'i' },
+    } as any).select('_id');
+
+    const driverIds = matchingDrivers.map((driver) => driver._id);
+    filter.driver_id = { $in: driverIds };
+  }
+
+  const result = await Review.find(filter)
+    .populate('driver_id', 'full_name profile_picture')
+    .populate('parcel_id', 'pickup_address dropoff_address status') // Add or remove parcel fields as needed
+    .sort('-created_at')
+    .skip(skip)
+    .limit(limit);
+
+  const total = await Review.countDocuments(filter);
+  const totalPages = Math.ceil(total / limit);
+
+  const meta = {
+    total,
+    page,
+    limit,
+    totalPages,
+  };
+
+  return {
+    meta,
+    result,
+  };
+};
+
 export const ReviewService = {
   createReview,
   getSingleReviewFromDB,
   getDriverReviewsFromDB,
+  getCustomerReviewsFromDB,
 };

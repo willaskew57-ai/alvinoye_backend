@@ -10,7 +10,7 @@ const router = Router();
 
 /**
  * @route POST /api/v1/chat/initiate
- * @desc Customers/Drivers initiate a support chat with Admin
+ * @desc Customers/Drivers initiate a support chat with Admin (As of now not needed but can be used for future support chat)
  */
 router.post(
   '/initiate-support',
@@ -47,7 +47,7 @@ router.get(
  */
 router.get(
   '/messages/:id',
-  auth(), // All authenticated roles can access their relevant messages
+  auth(),
   ChatController.getMessages
 );
 
@@ -72,7 +72,7 @@ router.post(
  */
 router.patch(
   '/mark-as-read/:id',
-  auth(), // Any logged in participant can mark their received messages as read
+  auth(), 
   ChatController.markAsRead
 );
 

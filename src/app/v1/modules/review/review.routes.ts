@@ -15,6 +15,8 @@ router.post(
 );
 router.get('/get/:id', auth(), ReviewController.getSingleReview);
 
-router.get('/get', auth(USER_ROLE.DRIVER), ReviewController.getDriverReviews);
+router.get('/get-driver-review', auth(USER_ROLE.DRIVER), ReviewController.getDriverReviews);
+
+router.get('/get-customer-review', auth(USER_ROLE.CUSTOMER), ReviewController.getCustomerReviews);
 
 export const ReviewRoutes = router;

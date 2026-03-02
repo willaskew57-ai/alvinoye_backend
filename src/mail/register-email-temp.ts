@@ -1,16 +1,12 @@
-// 1. Define the interface for the signup data
 interface ISignUpData {
   user: string;
   activationCode: string;
   activationCodeExpire: string | number;
 }
 
-/**
- * Generates the HTML for the Registration Welcome Email.
- */
 export const registerEmailTemp = (data: ISignUpData): string => {
-  // Fallback for image to avoid undefined in src attribute
-  const logoUrl = process.env.EMAIL_TEMP_IMAGE || 'https://via.placeholder.com/150';
+  const logoUrl =
+    process.env.EMAIL_TEMP_IMAGE || 'https://via.placeholder.com/150';
 
   return `
   <html>

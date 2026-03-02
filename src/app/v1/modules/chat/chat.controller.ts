@@ -26,7 +26,7 @@ const initiateP2PChat = catchAsync(async (req: Request, res: Response) => {
   const result = await ChatService.initiateChat(
     req.user.user_id,
     req.user.role as USER_ROLES,
-    recipientId // Passing the recipientId for P2P
+    recipientId 
   );
 
   sendResponse(res, {
@@ -38,7 +38,6 @@ const initiateP2PChat = catchAsync(async (req: Request, res: Response) => {
 });
 
 export const sendMessage = catchAsync(async (req: Request, res: Response) => {
-  // 1. Process attachments
   let attachmentUrls: string[] = [];
   if (req.files && Array.isArray(req.files)) {
     attachmentUrls = (req.files as Express.Multer.File[]).map((file) =>
@@ -46,7 +45,6 @@ export const sendMessage = catchAsync(async (req: Request, res: Response) => {
     );
   }
 
-  // 2. Call service
   const result = await ChatService.sendMessage(
     req.user.user_id,
     req.user.role,
@@ -82,7 +80,7 @@ const getMyChats = catchAsync(async (req: Request, res: Response) => {
 const getMessages = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
 
-  // Pass req.query to enable pagination (e.g., ?page=1&limit=20)
+  
   const result = await ChatService.getMessages(
     id as string,
     req.user.user_id,
@@ -100,7 +98,7 @@ const getMessages = catchAsync(async (req: Request, res: Response) => {
 });
 
 const markAsRead = catchAsync(async (req: Request, res: Response) => {
-  const { id } = req.params; // This is the chatId
+  const { id } = req.params; 
   const userId = req.user.user_id;
 
   const result = await ChatService.markAsRead(id as string, userId);

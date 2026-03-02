@@ -28,7 +28,7 @@ const initiateChat = async (
     return chat;
   }
 
-  const recipient = await User.findById(recipientId); // Ensure User model is imported
+  const recipient = await User.findById(recipientId); 
   if (!recipient)
     throw new AppError(httpStatus.NOT_FOUND, 'Recipient not found');
 
@@ -61,29 +61,28 @@ export const sendMessage = async (
   const chat = await Chat.findById(chat_id);
   if (!chat) throw new Error('Chat session not found');
 
-  // Create message - content defaults to empty string if not provided
   let message = await Message.create({
-  chat_id: new Types.ObjectId(chat_id),
-  sender_id: new Types.ObjectId(senderId),
-  sender_role: senderRole,
-  content: content || '', // Ensure this is at least an empty string
-  attachments: attachments || [],
-});
+    chat_id: new Types.ObjectId(chat_id),
+    sender_id: new Types.ObjectId(senderId),
+    sender_role: senderRole,
+    content: content || '', 
+    attachments: attachments || [],
+  });
   message = await message.populate('sender_id', 'full_name profile_picture');
 
   // Update last message text for the sidebar
-  const lastMsgText = content || (attachments?.length ? 'Sent an attachment' : '');
+  const lastMsgText =
+    content || (attachments?.length ? 'Sent an attachment' : '');
 
   const updatedChat = await Chat.findByIdAndUpdate(
     chat_id,
-    { 
-      last_message: lastMsgText, 
-      last_message_at: new Date() 
+    {
+      last_message: lastMsgText,
+      last_message_at: new Date(),
     },
     { new: true }
   );
 
-  // Socket.io emission logic...
   const io = getIO();
   if (io) {
     io.to(chat_id).emit('new_message', message);
@@ -107,12 +106,10 @@ const getMyChats = async (
   const isAdmin =
     userRole === USER_ROLES.ADMIN || userRole === USER_ROLES.SUPER_ADMIN;
 
-  // 1. Base Filter based on role
   let queryFilter: any = isAdmin
     ? { is_support_chat: true }
     : { participants: userId };
 
-  // 2. Handle Search (Search by participant name/email)
   if (query.searchTerm) {
     const matchingUsers = await User.find({
       $or: [
@@ -129,7 +126,6 @@ const getMyChats = async (
     };
   }
 
-  // 3. Initialize QueryBuilder
   const chatQuery = new QueryBuilder(
     Chat.find(queryFilter).populate(
       'participants',
@@ -141,11 +137,9 @@ const getMyChats = async (
     .sort()
     .paginate();
 
-  // 4. Execute Query
   const chats = await chatQuery.modelQuery.lean();
   const meta = await chatQuery.countTotal();
 
-  // 5. Add Unread Count for each chat
   const modifiedData = chats.map((chat: any) => {
     return {
       ...chat,
@@ -164,12 +158,10 @@ const getMessages = async (
   userRole: USER_ROLES,
   query: Record<string, unknown>
 ) => {
-  // 1. Validate Chat ID format
   if (!Types.ObjectId.isValid(chatId)) {
     throw new AppError(httpStatus.BAD_REQUEST, 'Invalid Chat ID');
   }
 
-  // 2. Permission Check: Verify chat existence and participant authorization
   const chat = await Chat.findById(chatId);
   if (!chat) {
     throw new AppError(httpStatus.NOT_FOUND, 'Chat session not found');
@@ -181,7 +173,6 @@ const getMessages = async (
     (id) => id.toString() === currentUserId
   );
 
-  // Allow if participant OR (Admin and it's a support chat)
   if (!isParticipant && !(isAdmin && chat.is_support_chat)) {
     throw new AppError(
       httpStatus.FORBIDDEN,
@@ -189,8 +180,6 @@ const getMessages = async (
     );
   }
 
-  // 3. Build Paginated Query
-  // Note: We sort by -created_at so Page 1 returns the LATEST messages
   const messageQuery = new QueryBuilder(
     Message.find({ chat_id: chatId }).populate(
       'sender_id',
@@ -198,17 +187,13 @@ const getMessages = async (
     ),
     query
   )
-    .sort() // Defaults to -created_at
+    .sort()
     .paginate();
-
-  // 4. Fetch Data with Lean (for plain objects) and Cast to our Populated Type
 
   const messages =
     (await messageQuery.modelQuery.lean()) as unknown as TPopulatedMessage[];
   const meta = await messageQuery.countTotal();
 
-  // 5. Handle Read Receipts
-  // Find messages received by the current user that haven't been read yet
   const unreadMessages = messages.filter(
     (msg) => msg.sender_id._id.toString() !== currentUserId && !msg.is_read
   );
@@ -216,13 +201,11 @@ const getMessages = async (
   if (unreadMessages.length > 0) {
     const unreadIds = unreadMessages.map((msg) => msg._id);
 
-    // Update Message status in Database
     await Message.updateMany(
       { _id: { $in: unreadIds } },
       { $set: { is_read: true } }
     );
 
-    // Create tracking records in MessageRead collection
     const readRecords = unreadIds.map((msgId) => ({
       message_id: msgId,
       user_id: new Types.ObjectId(currentUserId),
@@ -230,7 +213,6 @@ const getMessages = async (
     }));
     await MessageRead.insertMany(readRecords);
 
-    // Notify the chat room via Socket.io
     const io = getIO();
     if (io) {
       io.to(chatId).emit('messages_read', {
@@ -240,14 +222,11 @@ const getMessages = async (
       });
     }
 
-    // Update local objects in the array so the current API response reflects the read status
     unreadMessages.forEach((msg) => {
       msg.is_read = true;
     });
   }
 
-  // Returns data in [Newest -> Oldest] order based on pagination
-  // Frontend should .reverse() the final combined list to display chronologically
   return {
     meta,
     data: messages,

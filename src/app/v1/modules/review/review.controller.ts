@@ -47,8 +47,28 @@ const getDriverReviews = catchAsync(async (req: Request, res: Response) => {
   
 });
 
+const getCustomerReviews = catchAsync(async (req: Request, res: Response) => {
+  const { user_id } = req.user;
+  const customerId = user_id as string;
+
+  const { meta, result } = await ReviewService.getCustomerReviewsFromDB(
+    customerId,
+    req.query
+  );
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Customer reviews retrieved successfully!',
+    meta: meta,
+    data: result,
+  });
+});
+
+
 export const ReviewController = {
   createReview,
   getSingleReview,
   getDriverReviews,
+  getCustomerReviews
 };
