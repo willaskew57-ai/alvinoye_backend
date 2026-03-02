@@ -1,10 +1,6 @@
-import httpStatus from 'http-status';
-import AppError from '../../../../errors/app-error';
 import { User } from '../user/user.model';
 import { USER_ROLE, USER_STATUS } from '../user/user.interface';
 import QueryBuilder from '../../../../builders/query-builder';
-import { Parcel } from '../parcel/parcel.model';
-import { PARCEL_STATUS } from '../parcel/parcel.interface';
 
 const getAllUsersFromDB = async (query: Record<string, unknown>) => {
   const userSearchableFields = ['full_name', 'email'];
@@ -30,8 +26,6 @@ const getAllUsersFromDB = async (query: Record<string, unknown>) => {
     data,
   };
 };
-
-
 
 export const CustomerServices = {
   getAllUsersFromDB,

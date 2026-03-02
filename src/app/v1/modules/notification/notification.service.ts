@@ -14,9 +14,7 @@ import {
 import { generateNotificationMessage } from './notification.template';
 import { getIO } from '../../../../socket';
 
-/**
- * Create a new notification
- */
+
 const createNotificationIntoDB = async (
   payload: ICreateNotification
 ): Promise<TNotification> => {
@@ -50,9 +48,7 @@ const createNotificationIntoDB = async (
   return notification;
 };
 
-/**
- * Get all notifications for a user
- */
+
 const getUserNotificationsFromDB = async (
   userId: string,
   query: Record<string, unknown>
@@ -76,9 +72,7 @@ const getUserNotificationsFromDB = async (
   return { meta, data };
 };
 
-/**
- * Get unread notification count
- */
+
 const getUnreadCountFromDB = async (userId: string): Promise<number> => {
   const count = await Notification.countDocuments({
     user_id: userId,
@@ -88,9 +82,7 @@ const getUnreadCountFromDB = async (userId: string): Promise<number> => {
   return count;
 };
 
-/**
- * Mark notification as read
- */
+
 const markAsReadInDB = async (
   notificationId: string,
   userId: string
@@ -111,9 +103,7 @@ const markAsReadInDB = async (
   return notification;
 };
 
-/**
- * Mark all notifications as read for a user
- */
+
 const markAllAsReadInDB = async (userId: string) => {
   const result = await Notification.updateMany(
     { user_id: userId, status: NOTIFICATION_STATUS.UNREAD },
@@ -126,9 +116,7 @@ const markAllAsReadInDB = async (userId: string) => {
   return result;
 };
 
-/**
- * Delete a notification
- */
+
 const deleteNotificationFromDB = async (
   notificationId: string,
   userId: string
@@ -143,17 +131,12 @@ const deleteNotificationFromDB = async (
   }
 };
 
-/**
- * Delete all notifications for a user
- */
 const deleteAllNotificationsFromDB = async (userId: string) => {
   const result = await Notification.deleteMany({ user_id: userId });
   return result;
 };
 
-/**
- * Get single notification
- */
+
 const getSingleNotificationFromDB = async (
   notificationId: string,
   userId: string

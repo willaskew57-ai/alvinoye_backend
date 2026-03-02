@@ -12,7 +12,7 @@ let server: Server;
 
 async function main() {
   try {
-    await connectDB();  // ✅ Add await
+    await connectDB();
     console.log(colors.blue(`Database is Connected Successfully!!!`).bold);
     server = app.listen(configs.port, () => {
       console.log(
@@ -20,7 +20,6 @@ async function main() {
       );
     });
 
-    // 🔥 initialize socket after server starts
     initSocket(server);
   } catch (err) {
     console.log(err);
@@ -28,9 +27,7 @@ async function main() {
 }
 main();
 
-// handle unhandledRejection for asynchronous error:
-process.on('unhandledRejection', (reason, 
-  promise) => {
+process.on('unhandledRejection', (reason, promise) => {
   console.log(reason, promise);
   console.log(colors.red(`Server detected UnHandledRejection 😡`));
   if (server) {
@@ -42,7 +39,6 @@ process.on('unhandledRejection', (reason,
   process.exit(1);
 });
 
-// handle unCaughtException Error :
 process.on('uncaughtException', () => {
   console.log(colors.red(`Server detected unCaughtException 😡`));
   process.exit(1);

@@ -29,7 +29,6 @@ const addDriverInfoIntoDB = async (
     throw new AppError(httpStatus.BAD_REQUEST, 'User ID is required!');
   }
 
-  // 1. Check if Driver already exists
   const isDriverExists = await Driver.findOne({ user_id: finalUserId });
   if (isDriverExists) {
     throw new AppError(httpStatus.CONFLICT, 'Driver profile already exists!');
@@ -40,19 +39,15 @@ const addDriverInfoIntoDB = async (
   try {
     session.startTransaction();
 
-    // 2. Create Driver
     const driverData = { ...driverInfo, user_id: finalUserId };
     const newDriver = await Driver.create([driverData], { session });
 
-
-    // 3. Create Vehicle
     const vehicleData: TVehicle = {
       ...vehicle,
       user_id: finalUserId as any,
     };
     const newVehicle = await Vehicle.create([vehicleData], { session });
 
-    // 4. Update User Status
     const updatedUser = await User.findByIdAndUpdate(
       finalUserId,
       { is_profile_completed: true, status: 'ACTIVE' },
@@ -95,7 +90,9 @@ const updateDriverInfoInDB = async (
       if (driverInfo.license_image && existingDriver?.license_image) {
         deleteLocalFile(existingDriver.license_image);
       }
-      await Driver.findOneAndUpdate({ user_id: userId }, driverInfo, { session });
+      await Driver.findOneAndUpdate({ user_id: userId }, driverInfo, {
+        session,
+      });
     }
 
     if (vehicle) {
@@ -104,7 +101,6 @@ const updateDriverInfoInDB = async (
 
       let finalImages = existingVehicle.vehicle_images || [];
 
-      // Logic to delete images removed by user
       if (vehicle.existing_vehicle_images) {
         const toDelete = existingVehicle.vehicle_images.filter(
           (img: string) => !vehicle.existing_vehicle_images.includes(img)
@@ -113,7 +109,6 @@ const updateDriverInfoInDB = async (
         finalImages = vehicle.existing_vehicle_images;
       }
 
-      // Add new uploaded images
       if (vehicle.vehicle_images) {
         finalImages = [...finalImages, ...vehicle.vehicle_images];
       }
@@ -125,7 +120,9 @@ const updateDriverInfoInDB = async (
       const vehicleData = { ...vehicle, vehicle_images: finalImages };
       delete vehicleData.existing_vehicle_images;
 
-      await Vehicle.findOneAndUpdate({ user_id: userId }, vehicleData, { session });
+      await Vehicle.findOneAndUpdate({ user_id: userId }, vehicleData, {
+        session,
+      });
     }
 
     await session.commitTransaction();
@@ -236,8 +233,8 @@ const getAllDriversFromDB = async (query: Record<string, unknown>) => {
 
 const getSingleDriverFromDB = async (id: string) => {
   const result = await User.findOne({ _id: id, role: 'DRIVER' })
-    .populate('driver_info') // This matches the key in your JSON
-    .populate('vehicle'); // This matches the key in your JSON
+    .populate('driver_info')
+    .populate('vehicle');
 
   if (!result) {
     throw new AppError(httpStatus.NOT_FOUND, 'Driver not found!');
@@ -250,12 +247,10 @@ const getAvailableParcelsFromDB = async (
   userId: string,
   query: Record<string, unknown>
 ) => {
-  // 1. Extract Pagination values
   const page = Number(query.page) || 1;
   const limit = Number(query.limit) || 10;
   const skip = (page - 1) * limit;
 
-  // 2. Get Driver Info and Vehicle Info
   const driver = await Driver.findOne({ user_id: userId });
   const vehicle = await Vehicle.findOne({ user_id: userId });
 
@@ -266,7 +261,6 @@ const getAvailableParcelsFromDB = async (
     );
   }
 
-  // 3. Find Potential Parcels (Basic DB filter)
   const potentialParcels = await Parcel.find({
     status: PARCEL_STATUS.PENDING,
     vehicle_type: vehicle.vehicle_type,
@@ -287,7 +281,6 @@ const getAvailableParcelsFromDB = async (
   const driverOrigin = `${driver.from.latitude},${driver.from.longitude}`;
   const driverDestination = `${driver.to.latitude},${driver.to.longitude}`;
 
-  // Get the driver's direct route distance baseline
   let originalDistance = 0;
   try {
     const originalRouteRes = await axios.get(
@@ -300,7 +293,6 @@ const getAvailableParcelsFromDB = async (
     console.error('Failed to get baseline distance', error);
   }
 
-  // 4. Filter parcels and calculate specific parcel distance
   for (const parcel of potentialParcels) {
     try {
       const pickup = `${parcel.pickup_location.latitude},${parcel.pickup_location.longitude}`;
@@ -338,7 +330,6 @@ const getAvailableParcelsFromDB = async (
     }
   }
 
-  // 5. Apply Manual Pagination to the filtered array
   const total = allMatchedParcels.length;
   const totalPages = Math.ceil(total / limit);
   const paginatedData = allMatchedParcels.slice(skip, skip + limit);
@@ -362,7 +353,6 @@ const acceptParcelFromDB = async (
   session.startTransaction();
 
   try {
-    // 1. Find parcel within the session
     const parcel = await Parcel.findById(parcelId).session(session);
 
     if (!parcel) {
@@ -376,22 +366,18 @@ const acceptParcelFromDB = async (
       );
     }
 
-    // 2. Update parcel status
     parcel.status = PARCEL_STATUS.ONGOING;
     parcel.accepted_by = new Types.ObjectId(driverIdFromToken);
     parcel.accepted_at = new Date();
 
-    // Save with session
     await parcel.save({ session });
 
-    // 3. Find owner (session not strictly required for read-only, but keeps consistency)
     const parcelOwner = await User.findById(parcel.user_id).session(session);
 
     if (!parcelOwner) {
       throw new AppError(httpStatus.NOT_FOUND, 'Parcel owner not found');
     }
 
-    // 4. Generate OTP (Ensure this function handles the session internally if it saves to DB)
     const otp = await OtpServices.generateAndSaveOtp({
       parcel_id: parcel._id,
       purpose: 'PARCEL',
@@ -399,20 +385,14 @@ const acceptParcelFromDB = async (
 
     console.log(otp);
 
-    // 5. Send Email
-    // Note: Email sending is an external side-effect, usually done after transaction commits
-    // 5. Send Email
-    // Note: Email sending is an external side-effect, usually done after transaction commits
     await EmailHelpers.sendParcelOtpEmail({
       email: parcelOwner.email,
       name: parcelOwner.full_name,
       verificationCode: otp,
     });
 
-    // Commit the transaction
     await session.commitTransaction();
 
-    // Create notification for parcel acceptance
     try {
       const driverUser = await User.findById(driverIdFromToken);
       await NotificationServices.createNotificationIntoDB({
@@ -436,7 +416,6 @@ const acceptParcelFromDB = async (
       status: parcel.status,
     };
   } catch (error: any) {
-    // If an error occurs, abort the transaction
     await session.abortTransaction();
 
     throw new AppError(
@@ -444,7 +423,6 @@ const acceptParcelFromDB = async (
       error.message || 'Failed to accept parcel'
     );
   } finally {
-    // Always end the session
     await session.endSession();
   }
 };
@@ -468,7 +446,6 @@ const verifyParcelOtpFromDB = async (payload: {
     );
   }
 
-  // Verify OTP (no expiry for parcel)
   await OtpServices.verifyOtpFromDB({
     parcel_id: parcel._id.toString(),
     inputOtp: otp,
@@ -522,8 +499,7 @@ const completeParcelFromDB = async (parcel_id: string, driver_id: string) => {
     await parcel.save({ session });
 
     await session.commitTransaction();
-    
-    // Create notification for parcel completion
+
     try {
       await NotificationServices.createNotificationIntoDB({
         user_id: parcel.user_id,
@@ -538,7 +514,7 @@ const completeParcelFromDB = async (parcel_id: string, driver_id: string) => {
     } catch (error) {
       console.error('Failed to create notification:', error);
     }
-    
+
     await session.endSession();
 
     return {

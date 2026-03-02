@@ -8,9 +8,6 @@ import type {
 } from './track-driver.interface';
 import { getIO } from '../../../../socket';
 
-/**
- * Update driver's current location
- */
 const updateDriverLocationInDB = async (
   payload: IUpdateLocation
 ): Promise<TDriverLocation> => {
@@ -26,7 +23,6 @@ const updateDriverLocationInDB = async (
     last_updated: new Date(),
   };
 
-  // Upsert: Update if exists, create if not
   const location = await DriverLocation.findOneAndUpdate(
     { driver_id: payload.driver_id },
     locationData,
@@ -37,16 +33,13 @@ const updateDriverLocationInDB = async (
     }
   ).populate('driver_id', 'full_name phone_number profile_image');
 
-  // Emit location update via Socket.IO
   try {
     const io = getIO();
-    
-    // Emit to driver's room
+
     io.to(`driver_${payload.driver_id}`).emit('location_updated', {
       location: location.toJSON(),
     });
 
-    // If tracking a parcel, emit to parcel room
     if (payload.parcel_id) {
       io.to(`parcel_${payload.parcel_id}`).emit('driver_location', {
         driver_id: payload.driver_id,
@@ -63,15 +56,11 @@ const updateDriverLocationInDB = async (
     console.error('Failed to emit location update via socket:', error);
   }
 
-  // Save to history
   await saveLocationHistory(payload);
 
   return location;
 };
 
-/**
- * Get driver's current location
- */
 const getDriverLocationFromDB = async (
   driverId: string
 ): Promise<TDriverLocation | null> => {
@@ -84,9 +73,6 @@ const getDriverLocationFromDB = async (
   return location;
 };
 
-/**
- * Get location history for a driver
- */
 const getLocationHistoryFromDB = async (
   driverId: string,
   limit: number = 50
@@ -98,18 +84,17 @@ const getLocationHistoryFromDB = async (
     .limit(limit)
     .select('latitude longitude created_at speed heading');
 
-  return history.map((loc): ILocationHistory => ({
-    latitude: loc.latitude,
-    longitude: loc.longitude,
-    timestamp: loc.created_at!,
-    speed: loc.speed ?? undefined,
-    heading: loc.heading ?? undefined,
-  }));
+  return history.map(
+    (loc): ILocationHistory => ({
+      latitude: loc.latitude,
+      longitude: loc.longitude,
+      timestamp: loc.created_at!,
+      speed: loc.speed ?? undefined,
+      heading: loc.heading ?? undefined,
+    })
+  );
 };
 
-/**
- * Get location for a specific parcel's driver
- */
 const getParcelDriverLocationFromDB = async (
   parcelId: string
 ): Promise<TDriverLocation | null> => {
@@ -131,9 +116,6 @@ const getParcelDriverLocationFromDB = async (
   return location;
 };
 
-/**
- * Mark driver as offline
- */
 const markDriverOfflineInDB = async (
   driverId: string
 ): Promise<TDriverLocation | null> => {
@@ -146,7 +128,6 @@ const markDriverOfflineInDB = async (
     { new: true }
   );
 
-  // Emit offline status via Socket.IO
   try {
     const io = getIO();
     io.to(`driver_${driverId}`).emit('driver_offline', {
@@ -160,15 +141,11 @@ const markDriverOfflineInDB = async (
   return location;
 };
 
-/**
- * Get all online drivers within a radius (in kilometers)
- */
 const getNearbyDriversFromDB = async (
   latitude: number,
   longitude: number,
   radiusKm: number = 10
 ): Promise<TDriverLocation[]> => {
-  // Convert km to radians (Earth radius ≈ 6371 km)
   const radiusRad = radiusKm / 6371;
 
   const drivers = await DriverLocation.find({
@@ -188,9 +165,6 @@ const getNearbyDriversFromDB = async (
   return drivers;
 };
 
-/**
- * Save location to history (for analytics/route replay)
- */
 const saveLocationHistory = async (payload: IUpdateLocation) => {
   try {
     const historyData: any = {
@@ -203,11 +177,11 @@ const saveLocationHistory = async (payload: IUpdateLocation) => {
       is_online: true,
       last_updated: new Date(),
     };
-    
+
     if (payload.parcel_id) {
       historyData.parcel_id = payload.parcel_id;
     }
-    
+
     await DriverLocation.create(historyData);
   } catch (error) {
     console.error('Failed to save location history:', error);

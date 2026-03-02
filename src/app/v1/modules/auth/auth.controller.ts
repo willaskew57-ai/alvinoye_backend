@@ -123,14 +123,14 @@ const getRefreshToken = catchAsync(async (req, res) => {
 
 // forget password controller:
 const forgetPassword = catchAsync(async (req, res) => {
-  const email = req.body.email; // We use email now
+  const email = req.body.email; 
   const result = await AuthServices.forgetPassword(email);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
     message: 'OTP sent to your email. Please verify to reset your password.',
-    data: result, // result contains resetToken and otp
+    data: result, 
   });
 });
 

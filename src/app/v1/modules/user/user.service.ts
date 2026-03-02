@@ -9,7 +9,6 @@ import {
 } from './user.interface';
 import { Types } from 'mongoose';
 import QueryBuilder from '../../../../builders/query-builder';
-import { deleteFileFromS3 } from '../../../../aws/deleteFromS3';
 import { deleteLocalFile } from '../../../../utils/deleteFileHelper';
 import { Parcel } from '../parcel/parcel.model';
 import { PARCEL_STATUS } from '../parcel/parcel.interface';
@@ -134,7 +133,6 @@ const getMeFromDB = async (id: string) => {
 };
 
 const updateMeIntoDB = async (id: string, payload: Partial<TUser>) => {
-  // 1. Prevent users from updating sensitive fields
   const forbiddenFields: (keyof TUser)[] = [
     'role',
     'status',
@@ -148,17 +146,14 @@ const updateMeIntoDB = async (id: string, payload: Partial<TUser>) => {
     }
   });
 
-  // 2. Handle local file deletion if a new profile picture is provided
   if (payload.profile_picture) {
     const existingUser = await User.findById(id);
 
-    // If user exists and already has a picture, delete the old one from local storage
     if (existingUser && existingUser.profile_picture) {
       deleteLocalFile(existingUser.profile_picture);
     }
   }
 
-  // 3. Update the database
   const result = await User.findByIdAndUpdate(id, payload, {
     new: true,
     runValidators: true,
@@ -181,8 +176,6 @@ const updateUserInDB = async (id: string, payload: Partial<TUser>) => {
 };
 
 const deleteUserFromDB = async (id: string) => {
-  // 1. Check if the user has any parcels with ONGOING status
-  // We check both user_id (sender) and accepted_by (driver)
   const hasOngoingParcel = await Parcel.findOne({
     $or: [{ user_id: id }, { accepted_by: id }],
     status: PARCEL_STATUS.ONGOING,
@@ -195,7 +188,6 @@ const deleteUserFromDB = async (id: string) => {
     );
   }
 
-  // 2. If no ongoing parcels, proceed with soft delete
   const result = await User.findByIdAndUpdate(
     id,
     {

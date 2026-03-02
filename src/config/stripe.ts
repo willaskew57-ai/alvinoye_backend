@@ -2,7 +2,7 @@ import Stripe from 'stripe';
 import config from './env.config';
 
 const stripe = new Stripe(config.stripe_secret_key as string, {
-  apiVersion: '2026-01-28.clover',
+  apiVersion: '2026-02-25.clover',
 });
 
 export default stripe;

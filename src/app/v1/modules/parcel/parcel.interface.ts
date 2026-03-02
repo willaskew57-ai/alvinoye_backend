@@ -7,7 +7,6 @@ export interface TLocation {
   longitude: number;
 }
 
-// Enums as Constants
 export const PARCEL_STATUS = {
   INITIAL: 'INITIAL',
   WAITING: 'WAITING',

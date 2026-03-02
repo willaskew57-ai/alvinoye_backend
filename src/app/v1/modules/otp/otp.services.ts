@@ -6,9 +6,6 @@ import AppError from '../../../../errors/app-error';
 
 type TOtpPurpose = 'REGISTER' | 'RESET_PASSWORD' | 'PARCEL';
 
-/**
- * Creates and stores an OTP
- */
 const generateAndSaveOtp = async (payload: {
   user_id?: Types.ObjectId;
   parcel_id?: Types.ObjectId;
@@ -24,7 +21,6 @@ const generateAndSaveOtp = async (payload: {
     purpose,
   };
 
-  // assign conditionally
   if (user_id) otpData.user = user_id;
   if (parcel_id) otpData.parcel = parcel_id;
 
@@ -32,7 +28,6 @@ const generateAndSaveOtp = async (payload: {
     otpData.expires_at = new Date(Date.now() + 5 * 60 * 1000);
   }
 
-  // delete previous unused OTPs
   await Otp.deleteMany({
     purpose,
     is_used: false,
@@ -45,9 +40,6 @@ const generateAndSaveOtp = async (payload: {
   return rawOtp;
 };
 
-/**
- * Verifies OTP
- */
 const verifyOtpFromDB = async (payload: {
   user_id?: string;
   parcel_id?: string;
@@ -65,7 +57,6 @@ const verifyOtpFromDB = async (payload: {
     ...(parcel_id && { parcel: parcel_id }),
   };
 
-  // expiry check only for non-parcel OTP
   if (purpose !== 'PARCEL') {
     query.expires_at = { $gt: new Date() };
   }
@@ -86,7 +77,6 @@ const verifyOtpFromDB = async (payload: {
     }
   }
 
-  // max attempts check
   if (otpRecord.attempts >= 5) {
     throw new AppError(httpStatus.FORBIDDEN, 'Too many failed attempts');
   }
@@ -98,7 +88,6 @@ const verifyOtpFromDB = async (payload: {
     throw new AppError(httpStatus.BAD_REQUEST, 'Invalid OTP');
   }
 
-  // mark used
   otpRecord.is_used = true;
   await otpRecord.save();
 

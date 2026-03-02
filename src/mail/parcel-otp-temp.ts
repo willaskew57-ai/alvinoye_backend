@@ -1,15 +1,11 @@
-// 1. Define the interface for the reset password data
 interface IParcelOtpData {
   name: string;
   verificationCode: string;
 }
 
-/**
- * Generates the HTML for the Password Reset Email.
- */
 export const parcelOtpEmailTemp = (data: IParcelOtpData): string => {
-  // Fallback for image to avoid undefined in src attribute
-  const logoUrl = process.env.EMAIL_TEMP_IMAGE || 'https://via.placeholder.com/150';
+  const logoUrl =
+    process.env.EMAIL_TEMP_IMAGE || 'https://via.placeholder.com/150';
 
   return `
   <html>
