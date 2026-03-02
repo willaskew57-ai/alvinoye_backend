@@ -9,21 +9,17 @@ export interface TDriverLocation extends Document {
   _id: Types.ObjectId;
   driver_id: Types.ObjectId;
   parcel_id?: Types.ObjectId;
-  
-  // Current location
+
   latitude: number;
   longitude: number;
-  
-  // Additional location data
-  heading?: number; // Direction in degrees (0-360)
-  speed?: number; // Speed in km/h
-  accuracy?: number; // Accuracy in meters
-  
-  // Status
+
+  heading?: number;
+  speed?: number;
+  accuracy?: number;
+
   is_online: boolean;
   last_updated: Date;
-  
-  // Timestamps
+
   created_at?: Date;
   updated_at?: Date;
 }

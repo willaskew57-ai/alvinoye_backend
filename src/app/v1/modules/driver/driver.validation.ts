@@ -20,7 +20,6 @@ const driverInfoValidationSchema = z.object({
   notes: z.string().optional(),
 });
 
-// Combined Validation for Creation
 const createDriverWithVehicleValidationSchema = z.object({
   body: z.object({
     driverInfo: driverInfoValidationSchema,
@@ -30,7 +29,6 @@ const createDriverWithVehicleValidationSchema = z.object({
   }),
 });
 
-// driver.validation.ts
 const updateDriverWithVehicleValidationSchema = z.object({
   body: z.object({
     driverInfo: z

@@ -18,11 +18,9 @@ export const auth = (...requiredRoles: TUserRole[]) => {
       throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized!');
     }
 
-    //  Declare decoded as your custom TUserPayload type
     let decoded: TUserPayload;
 
     try {
-      // Cast directly to TUserPayload here
       decoded = jwt.verify(
         token,
         configs.jwt_access_token as string
@@ -31,27 +29,22 @@ export const auth = (...requiredRoles: TUserRole[]) => {
       throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized 2!!');
     }
 
-    //  Now destructuring works without extra casting
     const { user_id, role, iat } = decoded;
 
-    // check isUserExists:
     const user = await User.isUserExistsById(user_id);
 
     if (!user) {
       throw new AppError(httpStatus.NOT_FOUND, 'Your Account Is Not Exists!!!');
     }
 
-    // check is user deleted:
     if (await User.isUserDeleted(user)) {
       throw new AppError(httpStatus.NOT_FOUND, 'You are Deleted!!!');
     }
 
-    // check is user blocked:
     if (await User.isUserBlocked(user)) {
       throw new AppError(httpStatus.BAD_REQUEST, 'You are Blocked!!!');
     }
 
-    // is JWT issued before password changed?:
     if (
       user.password_changed_at &&
       User.isJWTIssuedBeforePasswordChanged(
@@ -65,12 +58,11 @@ export const auth = (...requiredRoles: TUserRole[]) => {
       );
     }
 
-    //  Checking role compatibility works because 'role' is now TUserRole
     if (requiredRoles.length > 0 && !requiredRoles.includes(role)) {
+      console.log('User role:', role);
       throw new AppError(httpStatus.UNAUTHORIZED, 'You are not Authorized !!!');
     }
 
-    //  This assignment now works perfectly because types match exactly
     req.user = decoded;
 
     next();

@@ -1,0 +1,38 @@
+// ** imports packages
+import { Server } from 'http';
+import colors from 'colors';
+// ** import local files
+import app from './app';
+import configs from './config/env.config';
+import { connectDB } from './db';
+import { initSocket } from './socket';
+let server;
+async function main() {
+    try {
+        await connectDB();
+        console.log(colors.blue(`Database is Connected Successfully!!!`).bold);
+        server = app.listen(configs.port, () => {
+            console.log(colors.green(`The Server is running on ${configs.port}`).bold);
+        });
+        initSocket(server);
+    }
+    catch (err) {
+        console.log(err);
+    }
+}
+main();
+process.on('unhandledRejection', (reason, promise) => {
+    console.log(reason, promise);
+    console.log(colors.red(`Server detected UnHandledRejection 😡`));
+    if (server) {
+        server.close(() => {
+            process.exit(1);
+        });
+    }
+    process.exit(1);
+});
+process.on('uncaughtException', () => {
+    console.log(colors.red(`Server detected unCaughtException 😡`));
+    process.exit(1);
+});
+//# sourceMappingURL=server.js.map

@@ -33,9 +33,7 @@ interface IParcelOtpEmailData {
 
 // ** --- Helper Functions ---
 
-/**
- * Sends a resend-OTP email
- */
+
 const sendOtpResendEmail = async (
   email: string,
   data: IOTPData
@@ -55,9 +53,6 @@ const sendOtpResendEmail = async (
   }
 };
 
-/**
- * Sends a welcome/activation email after sign up
- */
 const sendRegisterEmail = async (
   email: string,
   data: ISignUpData
@@ -77,9 +72,6 @@ const sendRegisterEmail = async (
   }
 };
 
-/**
- * Sends a password reset verification code email
- */
 const sendResetPasswordEmail = async (
   email: string,
   data: IResetPassData

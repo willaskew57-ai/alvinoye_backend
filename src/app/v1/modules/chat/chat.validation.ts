@@ -1,8 +1,7 @@
-import { Schema } from 'mongoose';
 import { z } from 'zod/v3';
 
 const initiateChatValidationSchema = z.object({
-  body: z.object({}), // Since support chat is auto-initiated based on req.user, body is empty
+  body: z.object({}),
 });
 
 const initiateP2PChatValidationSchema = z.object({
@@ -16,8 +15,7 @@ const sendMessageValidationSchema = z.object({
     chat_id: z.string({
       required_error: 'Chat ID is required',
     }),
-    // CHANGE THIS: .optional()
-    content: z.string().optional(), 
+    content: z.string().optional(),
     attachments: z.array(z.string()).optional(),
   }),
 });

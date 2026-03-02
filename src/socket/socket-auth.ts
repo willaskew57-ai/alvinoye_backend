@@ -13,7 +13,6 @@ export const socketAuth =
   (...requiredRoles: TUserRole[]) =>
   async (socket: any, next: any) => {
     try {
-      // 🔑 token from socket handshake
       const token =
         socket.handshake.auth?.token ||
         socket.handshake.headers?.authorization?.split(' ')[1];
@@ -24,7 +23,6 @@ export const socketAuth =
         );
       }
 
-      // verify token
       const decoded = jwt.verify(
         token,
         configs.jwt_access_token as string
@@ -32,7 +30,6 @@ export const socketAuth =
 
       const { user_id, role, iat } = decoded;
 
-      // check isUserExists
       const user = await User.isUserExistsById(user_id);
       if (!user) {
         return next(
@@ -40,17 +37,14 @@ export const socketAuth =
         );
       }
 
-      // check deleted
       if (await User.isUserDeleted(user)) {
         return next(new AppError(httpStatus.NOT_FOUND, 'You are Deleted!!!'));
       }
 
-      // check blocked
       if (await User.isUserBlocked(user)) {
         return next(new AppError(httpStatus.BAD_REQUEST, 'You are Blocked!!!'));
       }
 
-      // password change check
       if (
         user.password_changed_at &&
         User.isJWTIssuedBeforePasswordChanged(
@@ -66,14 +60,12 @@ export const socketAuth =
         );
       }
 
-      // role check
       if (requiredRoles.length > 0 && !requiredRoles.includes(role)) {
         return next(
           new AppError(httpStatus.UNAUTHORIZED, 'You are not Authorized !!!')
         );
       }
 
-      // ✅ attach user to socket
       socket.user = decoded;
 
       next();

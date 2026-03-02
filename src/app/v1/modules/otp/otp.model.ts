@@ -52,9 +52,7 @@ const OtpSchema = new Schema<TOtp>(
   }
 );
 
-/**
- * TTL index ONLY applies when expires_at exists
- */
+
 OtpSchema.index(
   { expires_at: 1 },
   {

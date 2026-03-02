@@ -1,7 +1,6 @@
 import mongoose from 'mongoose';
 import configs from '../config/env.config';
 
-// Global DB status object for health checks
 export const dbStatus = {
   isConnected: false,
   connectionState: 'disconnected' as
@@ -15,10 +14,8 @@ export const connectDB = async () => {
   try {
     const dbUri = configs.database_url;
 
-    // Set mongoose options before connecting
     mongoose.set('strictQuery', false);
 
-    // Listen to connection events
     mongoose.connection.on('connected', () => {
       dbStatus.isConnected = true;
       dbStatus.connectionState = 'connected';
@@ -41,17 +38,14 @@ export const connectDB = async () => {
       console.error('❌ MongoDB Error:', err);
     });
 
-    // Add connection options
     await mongoose.connect(dbUri!, {
-      serverSelectionTimeoutMS: 10000, // Increase timeout to 10 seconds
+      serverSelectionTimeoutMS: 10000,
       socketTimeoutMS: 45000,
-      family: 4, // Force IPv4, helps with DNS issues
+      family: 4,
     });
-    
   } catch (err) {
     console.error('💥 Database connection error:', err);
-    
-    // Try alternative connection method if DNS fails
+
     if ((err as any).code === 'ETIMEOUT') {
       console.log('🔄 Attempting fallback connection...');
       await attemptFallbackConnection();
@@ -61,13 +55,13 @@ export const connectDB = async () => {
   }
 };
 
-// Fallback connection function
 const attemptFallbackConnection = async () => {
   try {
-    // Get the standard connection string from MongoDB Atlas
-    // This should be the mongodb:// version, not mongodb+srv://
-    const fallbackUri = configs.database_url?.replace('mongodb+srv://', 'mongodb://');
-    
+    const fallbackUri = configs.database_url?.replace(
+      'mongodb+srv://',
+      'mongodb://'
+    );
+
     if (!fallbackUri) {
       throw new Error('No fallback URI available');
     }
@@ -83,7 +77,6 @@ const attemptFallbackConnection = async () => {
   }
 };
 
-// Export connection status checker
 export const getDBStatus = () => {
   return {
     isConnected: dbStatus.isConnected,

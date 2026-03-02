@@ -4,9 +4,7 @@ import type {
   ICreateNotification,
 } from './notification.interface';
 
-/**
- * Get notification title based on type
- */
+
 export const getNotificationTitle = (type: TNotificationType): string => {
   const titles: Record<TNotificationType, string> = {
     [NOTIFICATION_TYPE.PARCEL_CREATED]: 'Parcel Created',
@@ -32,9 +30,6 @@ export const getNotificationTitle = (type: TNotificationType): string => {
   return titles[type] || 'Notification';
 };
 
-/**
- * Generate action URL based on notification type
- */
 export const generateActionUrl = (
   type: TNotificationType,
   data: Partial<ICreateNotification>

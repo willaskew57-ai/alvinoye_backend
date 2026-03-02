@@ -13,8 +13,6 @@ import handleDuplicateError from '../errors/handle-duplicate-error';
 import AppError from '../errors/app-error';
 
 const globalErrorHandler: ErrorRequestHandler = async (err, req, res, next) => {
-  // default setting here:
-  // console.log(err);
   let statusCode: number = httpStatus.INTERNAL_SERVER_ERROR;
   let message: string = 'Something Went Wrong!!!';
 
@@ -26,7 +24,6 @@ const globalErrorHandler: ErrorRequestHandler = async (err, req, res, next) => {
   ];
 
   if (err instanceof ZodError) {
-    // call zod error handler func:
     const simplifiedError = handleZodError(err);
 
     statusCode = simplifiedError.statusCode;

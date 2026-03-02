@@ -58,7 +58,6 @@ const getSingleParcel = catchAsync(async (req, res) => {
 const updateParcel = catchAsync(async (req, res) => {
   const { id } = req.params;
 
-  // req.body now contains synced image arrays and parsed numbers
   const result = await ParcelServices.updateParcelInDB(id as string, req.body);
 
   sendResponse(res, {
@@ -144,11 +143,8 @@ const rejectPrice = catchAsync(async (req, res) => {
   });
 });
 
-/**
- * Controller: Handles the "Reject reason" + "Suggested price" popup from Customer
- */
 const rejectAndCounter = catchAsync(async (req, res) => {
-  const { id } = req.params; // Request ID of the Admin offer
+  const { id } = req.params; 
   const result = await ParcelServices.rejectAndCounterPriceInDB(
     id as string,
     req.body
@@ -162,9 +158,7 @@ const rejectAndCounter = catchAsync(async (req, res) => {
   });
 });
 
-/**
- * Controller: Admin rejects customer price and sends final "Take it or leave it" price
- */
+
 const adminFinalOffer = catchAsync(async (req, res) => {
   const { id } = req.params;
   const result = await ParcelServices.adminRejectAndFinalOfferInDB(

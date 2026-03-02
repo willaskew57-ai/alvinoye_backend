@@ -1,5 +1,4 @@
 import { Parcel } from './../app/v1/modules/parcel/parcel.model';
-// 1. Define the shape of the data object
 interface IOTPData {
   user: string;
   code?: string;
@@ -8,13 +7,10 @@ interface IOTPData {
   activationCodeExpire?: string | number;
 }
 
-// 2. Add types to the function and export it
 export const otpResendTemp = (data: IOTPData): string => {
-  // Fallback for image to avoid undefined in src attribute
   const logoUrl =
     process.env.EMAIL_TEMP_IMAGE || 'https://via.placeholder.com/150';
 
-  // Logical fallbacks for the variables
   const displayCode = data.code ?? data.activationCode ?? '000000';
   const displayExpiry = data.expiresIn ?? data.activationCodeExpire ?? '5';
 

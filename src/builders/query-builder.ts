@@ -1,16 +1,14 @@
-import {  Query } from "mongoose";
+import { Query } from 'mongoose';
 
 class QueryBuilder<T> {
   public modelQuery: Query<T[], T>;
   public query: Record<string, unknown>;
 
-  // create a constructor to assign modelQuery and query:
   constructor(modelQuery: Query<T[], T>, query: Record<string, unknown>) {
     this.modelQuery = modelQuery;
     this.query = query;
   }
 
-  // create a search  method:
   search(searchFields: string[]) {
     const searchTerm: string = (this.query.searchTerm as string) || '';
     this.modelQuery = this.modelQuery.find({
@@ -24,25 +22,18 @@ class QueryBuilder<T> {
     return this;
   }
 
-  // create a filter method:
-
   filter() {
-    // copy the query:
     const queryObject = { ...this.query };
 
-    // excluding fields array:
     const excludeFields = ['searchTerm', 'sort', 'limit', 'page', 'fields'];
 
-    //exclude now :
     excludeFields.forEach((el: string) => delete queryObject[el]);
 
-    //filter now :
     this.modelQuery = this.modelQuery.find(queryObject as any);
 
     return this;
   }
 
-  // create as sort function :
   sort() {
     const sort = this.query.sort
       ? (this?.query?.sort as string)?.split(',')?.join(' ')
@@ -53,8 +44,6 @@ class QueryBuilder<T> {
     return this;
   }
 
-  // paginate method:
-
   paginate() {
     const limit = Number(this.query.limit) || 10;
     const page = Number(this.query.page) || 1;
@@ -64,7 +53,6 @@ class QueryBuilder<T> {
     return this;
   }
 
-  // select fields method :
   fields() {
     const fields =
       (this?.query?.fields as string)?.split(',')?.join(' ') || '-__v';
@@ -76,7 +64,6 @@ class QueryBuilder<T> {
   //  ** Count Total :
   async countTotal() {
     const filter = this.modelQuery.getFilter();
-    // console.log(filter);
     const total = await this.modelQuery.model.countDocuments(filter);
 
     //  ** page :

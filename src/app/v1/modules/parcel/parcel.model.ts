@@ -74,16 +74,12 @@ const parcelSchema = new Schema<TParcel>(
   }
 );
 
-/**
- * Virtual Populate: Links all price history to this Parcel
- */
 parcelSchema.virtual('price_requests', {
   ref: 'ParcelPriceRequest',
   localField: '_id',
   foreignField: 'parcel_id',
 });
 
-// Define a virtual field 'review'
 parcelSchema.virtual('review', {
   ref: 'Review',
   localField: '_id',
@@ -116,7 +112,7 @@ const priceRequestSchema = new Schema<TParcelPriceRequest>(
     message: { type: String },
     is_final_offer: {
       type: Boolean,
-      default: false, // Set to true when Admin rejects counter and gives last price
+      default: false,
     },
     status: {
       type: String,
