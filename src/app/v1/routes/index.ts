@@ -14,7 +14,6 @@ import { CustomerRoutes } from '../modules/cusotmer/customer.route';
 import { DashboardRoute } from '../modules/dashboard/dashboard.route';
 import { RefundRoutes } from '../modules/refund/refund.route';
 import { NotificationRoutes } from '../modules/notification/notification.routes';
-import { TrackDriverRoutes } from '../modules/track-driver/track-driver.routes';
 
 const router = express.Router();
 
@@ -71,10 +70,6 @@ const modulesRoute: TModuleRoutes[] = [
   {
     path: '/notifications',
     route: NotificationRoutes,
-  },
-  {
-    path: '/track-driver',
-    route: TrackDriverRoutes,
   },
 ];
 
