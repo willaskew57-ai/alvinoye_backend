@@ -12,6 +12,7 @@ import { PARCEL_STATUS, PRICE_STATUS } from '../parcel/parcel.interface';
 import { OtpServices } from '../otp/otp.services';
 import Otp from '../otp/otp.model';
 import { EmailHelpers } from '../../../../utils/email-helper';
+import { sendSms } from '../../../../utils/send-sms';
 import { deleteLocalFile } from '../../../../utils/deleteFileHelper';
 import configs from '../../../../config/env.config';
 import axios from 'axios';
@@ -393,6 +394,19 @@ const acceptParcelFromDB = async (
 
     await session.commitTransaction();
 
+    // Send SMS to receiver with parcel OTP (after transaction commits)
+    if (parcel.receiver_phone) {
+      const smsMessage = `Your parcel "${parcel.parcel_name}" has been picked up. Your verification OTP is: ${otp}. Please share this OTP with the driver for delivery confirmation.`;
+      try {
+        const smsResult = await sendSms(parcel.receiver_phone, smsMessage);
+        if (!smsResult.success) {
+          console.error('Failed to send SMS to receiver:', smsResult.error);
+        }
+      } catch (smsError) {
+        console.error('Error sending SMS to receiver:', smsError);
+      }
+    }
+
     try {
       const driverUser = await User.findById(driverIdFromToken);
       await NotificationServices.createNotificationIntoDB({
@@ -432,33 +446,6 @@ const verifyParcelOtpFromDB = async (payload: {
   otp: string;
 }) => {
   const { parcel_id, otp } = payload;
-
-  const parcel = await Parcel.findById(parcel_id);
-
-  if (!parcel) {
-    throw new AppError(httpStatus.NOT_FOUND, 'Parcel not found');
-  }
-
-  if (parcel.status !== PARCEL_STATUS.ONGOING) {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      'Parcel is not in ONGOING state'
-    );
-  }
-
-  await OtpServices.verifyOtpFromDB({
-    parcel_id: parcel._id.toString(),
-    inputOtp: otp,
-    purpose: 'PARCEL',
-  });
-
-  return {
-    message: 'Parcel OTP verified successfully',
-    parcel_id: parcel._id,
-  };
-};
-
-const completeParcelFromDB = async (parcel_id: string, driver_id: string) => {
   const session = await mongoose.startSession();
 
   try {
@@ -473,65 +460,131 @@ const completeParcelFromDB = async (parcel_id: string, driver_id: string) => {
     if (parcel.status !== PARCEL_STATUS.ONGOING) {
       throw new AppError(
         httpStatus.BAD_REQUEST,
-        'Only ongoing parcels can be completed'
+        'Parcel is not in ONGOING state'
       );
     }
 
-    if (parcel.accepted_by?.toString() !== driver_id) {
-      throw new AppError(
-        httpStatus.FORBIDDEN,
-        'You are not authorized to complete this parcel'
-      );
-    }
-
-    const otpUsed = await Otp.findOne({
-      parcel: parcel._id,
+    await OtpServices.verifyOtpFromDB({
+      parcel_id: parcel._id.toString(),
+      inputOtp: otp,
       purpose: 'PARCEL',
-      is_used: true,
-    }).session(session);
+    });
 
-    if (!otpUsed) {
-      throw new AppError(httpStatus.BAD_REQUEST, 'Parcel OTP not verified yet');
-    }
-
+    // Complete the parcel automatically after OTP verification
     parcel.status = PARCEL_STATUS.COMPLETED;
     parcel.completed_at = new Date();
     await parcel.save({ session });
 
     await session.commitTransaction();
 
+    // Send notification after parcel is completed
     try {
+      const driverUser = await User.findById(parcel.accepted_by);
       await NotificationServices.createNotificationIntoDB({
         user_id: parcel.user_id,
         type: NOTIFICATION_TYPE.PARCEL_COMPLETED,
         title: 'Parcel Delivered',
-        message: `Your parcel "${parcel.parcel_name}" has been delivered successfully!`,
+        message: `Your parcel "${parcel.parcel_name}" has been delivered successfully by ${driverUser?.full_name || 'the driver'}.`,
         parcel_id: parcel._id,
         data: {
           parcel_name: parcel.parcel_name,
+          driver_id: parcel.accepted_by?.toString(),
         },
       });
     } catch (error) {
       console.error('Failed to create notification:', error);
     }
 
-    await session.endSession();
-
     return {
-      message: 'Parcel completed successfully',
+      message: 'Parcel OTP verified and completed successfully',
       parcel_id: parcel._id,
       status: parcel.status,
     };
   } catch (error: any) {
     await session.abortTransaction();
-    await session.endSession();
-
     throw new AppError(
       httpStatus.BAD_REQUEST,
-      error.message || 'Failed to complete parcel'
+      error.message || 'Failed to verify OTP'
     );
+  } finally {
+    await session.endSession();
   }
 };
+
+// const completeParcelFromDB = async (parcel_id: string, driver_id: string) => {
+//   const session = await mongoose.startSession();
+
+//   try {
+//     session.startTransaction();
+
+//     const parcel = await Parcel.findById(parcel_id).session(session);
+
+//     if (!parcel) {
+//       throw new AppError(httpStatus.NOT_FOUND, 'Parcel not found');
+//     }
+
+//     if (parcel.status !== PARCEL_STATUS.ONGOING) {
+//       throw new AppError(
+//         httpStatus.BAD_REQUEST,
+//         'Only ongoing parcels can be completed'
+//       );
+//     }
+
+//     if (parcel.accepted_by?.toString() !== driver_id) {
+//       throw new AppError(
+//         httpStatus.FORBIDDEN,
+//         'You are not authorized to complete this parcel'
+//       );
+//     }
+
+//     const otpUsed = await Otp.findOne({
+//       parcel: parcel._id,
+//       purpose: 'PARCEL',
+//       is_used: true,
+//     }).session(session);
+
+//     if (!otpUsed) {
+//       throw new AppError(httpStatus.BAD_REQUEST, 'Parcel OTP not verified yet');
+//     }
+
+//     parcel.status = PARCEL_STATUS.COMPLETED;
+//     parcel.completed_at = new Date();
+//     await parcel.save({ session });
+
+//     await session.commitTransaction();
+
+//     try {
+//       await NotificationServices.createNotificationIntoDB({
+//         user_id: parcel.user_id,
+//         type: NOTIFICATION_TYPE.PARCEL_COMPLETED,
+//         title: 'Parcel Delivered',
+//         message: `Your parcel "${parcel.parcel_name}" has been delivered successfully!`,
+//         parcel_id: parcel._id,
+//         data: {
+//           parcel_name: parcel.parcel_name,
+//         },
+//       });
+//     } catch (error) {
+//       console.error('Failed to create notification:', error);
+//     }
+
+//     await session.endSession();
+
+//     return {
+//       message: 'Parcel completed successfully',
+//       parcel_id: parcel._id,
+//       status: parcel.status,
+//     };
+//   } catch (error: any) {
+//     await session.abortTransaction();
+//     await session.endSession();
+
+//     throw new AppError(
+//       httpStatus.BAD_REQUEST,
+//       error.message || 'Failed to complete parcel'
+//     );
+//   }
+// };
 
 export const DriverServices = {
   addDriverInfoIntoDB,
@@ -540,6 +593,5 @@ export const DriverServices = {
   getSingleDriverFromDB,
   acceptParcelFromDB,
   verifyParcelOtpFromDB,
-  completeParcelFromDB,
   getAvailableParcelsFromDB,
 };

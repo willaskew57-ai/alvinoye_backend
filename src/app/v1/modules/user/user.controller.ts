@@ -40,8 +40,6 @@ const changeStatus = catchAsync(async (req, res) => {
 const getMe = catchAsync(async (req, res) => {
   const { user_id } = req.user;
 
-  console.log({ user: req.user });
-
   const result = await UserServices.getMeFromDB(user_id);
 
   sendResponse(res, {
@@ -80,7 +78,6 @@ const updateMe = catchAsync(async (req, res) => {
 });
 
 const getAllUser = catchAsync(async (req, res) => {
-  console.log('query', req.query);
 
   const result = await UserServices.getAllUsersFromDB(req.query);
   sendResponse(res, {

@@ -58,6 +58,7 @@ export const sendMessage = async (
 ) => {
   const { chat_id, content, attachments } = payload;
 
+
   const chat = await Chat.findById(chat_id);
   if (!chat) throw new Error('Chat session not found');
 
