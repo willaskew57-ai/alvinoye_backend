@@ -59,7 +59,6 @@ export const auth = (...requiredRoles: TUserRole[]) => {
     }
 
     if (requiredRoles.length > 0 && !requiredRoles.includes(role)) {
-      console.log('User role:', role);
       throw new AppError(httpStatus.UNAUTHORIZED, 'You are not Authorized !!!');
     }
 

@@ -33,6 +33,11 @@ const configs = {
   // Stripe
   stripe_secret_key: process.env.STRIPE_SECRET_KEY || '',
 
+  // Twilio
+  twilio_account_sid: process.env.TWILIO_ACCOUNT_SID || '',
+  twilio_auth_token: process.env.TWILIO_AUTH_TOKEN || '',
+  twilio_phone_number: process.env.TWILIO_PHONE_NUMBER || '',
+
   // S3 Configuration (lowercase)
   aws_access_key_id: process.env.AWS_ACCESS_KEY_ID || '',
   aws_secret_access_key: process.env.AWS_SECRET_ACCESS_KEY || '',
@@ -41,5 +46,5 @@ const configs = {
   cloudfront_url: process.env.CLOUDFRONT_URL || '',
   google_maps_api_key: process.env.GOOGLE_MAP_API_KEY,
 };
-log('Loaded configuration:', configs);
+// log('Loaded configuration:', configs);
 export default configs;

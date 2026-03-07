@@ -92,7 +92,6 @@ router.get(
   DriverController.getAllDrivers
 );
 
-
 router.get(
   '/get/:id',
   auth(
@@ -104,7 +103,11 @@ router.get(
   DriverController.getDriverById
 );
 
-router.get('/get-driver-info', auth(USER_ROLE.DRIVER), DriverController.getSingleDriver);
+router.get(
+  '/get-driver-info',
+  auth(USER_ROLE.DRIVER),
+  DriverController.getSingleDriver
+);
 
 router.get(
   '/available-for-driver',
@@ -123,12 +126,6 @@ router.post(
   auth(USER_ROLE.DRIVER),
   validateRequest(DriverValidation.verifyParcelOtpValidationSchema),
   DriverController.verifyParcelOtp
-);
-
-router.patch(
-  '/parcel/:id/complete',
-  auth(USER_ROLE.DRIVER),
-  DriverController.completeParcel
 );
 
 export const DriverRoutes = router;

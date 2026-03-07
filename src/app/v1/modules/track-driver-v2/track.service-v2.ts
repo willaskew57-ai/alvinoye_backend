@@ -22,23 +22,23 @@ const updateDriverLocationInDB = async (
     last_updated: new Date(),
   };
 
-  // 1. Update or Create Driver Location in DB
+  
   const location = await DriverLocation.findOneAndUpdate(
     { driver_id: payload.driver_id },
     locationData,
     { new: true, upsert: true, runValidators: true }
   ).populate('driver_id', 'full_name phone_number profile_image');
 
-  // 2. Broadcast via Socket
+  
   try {
     const io = getIO();
 
-    // Notify the driver's own room (for multi-device sync)
+    
     io.to(`driver_${payload.driver_id}`).emit('location_updated', {
       location: location.toJSON(),
     });
 
-    // Notify the Customer tracking the specific parcel
+    
     if (payload.parcel_id) {
       io.to(`parcel_${payload.parcel_id}`).emit('driver_location_update', {
         driver_id: payload.driver_id,
@@ -54,7 +54,7 @@ const updateDriverLocationInDB = async (
     console.error('Failed to emit location update via socket:', error);
   }
 
-  // 3. Save to History (Optional helper)
+ 
   await saveLocationHistory(payload);
 
   return location;
