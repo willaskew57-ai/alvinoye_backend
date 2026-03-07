@@ -80,9 +80,6 @@ const getSingleDriver = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-
-
-
 const getDriverById = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   const result = await DriverServices.getSingleDriverFromDB(id as string);
@@ -96,18 +93,23 @@ const getDriverById = catchAsync(async (req: Request, res: Response) => {
 
 // ** ------------- parcel related api ------------- ** //
 
-const getAvailableParcelsForDriver = catchAsync(async (req: Request, res: Response) => {
-  const user_id = req.user.user_id;
+const getAvailableParcelsForDriver = catchAsync(
+  async (req: Request, res: Response) => {
+    const user_id = req.user.user_id;
 
-  const result = await DriverServices.getAvailableParcelsFromDB(user_id, req.query);
+    const result = await DriverServices.getAvailableParcelsFromDB(
+      user_id,
+      req.query
+    );
 
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: 'Available parcels fetched successfully!',
-    data: result,
-  });
-});
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: 'Available parcels fetched successfully!',
+      data: result,
+    });
+  }
+);
 
 const acceptParcel = catchAsync(async (req, res) => {
   const driverId = req.user.user_id;
@@ -140,26 +142,6 @@ const verifyParcelOtp = catchAsync(async (req, res) => {
   });
 });
 
-/**
- * Complete Parcel (after OTP verification)
- */
-const completeParcel = catchAsync(async (req, res) => {
-  const { id } = req.params;
-  const driver_id = req.user.user_id;
-
-  const result = await DriverServices.completeParcelFromDB(
-    id as string,
-    driver_id
-  );
-
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: 'Parcel completed successfully',
-    data: result,
-  });
-});
-
 export const DriverController = {
   registerDriver,
   updateDriverInfo,
@@ -167,7 +149,6 @@ export const DriverController = {
   getSingleDriver,
   acceptParcel,
   verifyParcelOtp,
-  completeParcel,
   getAvailableParcelsForDriver,
   getDriverById,
 };
