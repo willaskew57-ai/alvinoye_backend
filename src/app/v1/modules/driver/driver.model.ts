@@ -49,3 +49,10 @@ DriverInfoSchema.virtual('vehicle', {
 });
 
 export const Driver = model<TDriver>('DriverInfo', DriverInfoSchema);
+
+// Drop stale 'user_data_1' index if it exists (legacy index cleanup)
+Driver.collection.dropIndex('user_data_1').catch((err) => {
+  if (err?.codeName !== 'IndexNotFound') {
+    console.warn('Could not drop stale index user_data_1:', err?.message);
+  }
+});

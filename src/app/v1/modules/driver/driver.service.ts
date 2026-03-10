@@ -255,11 +255,11 @@ const getAvailableParcelsFromDB = async (
   const driver = await Driver.findOne({ user_id: userId });
   const vehicle = await Vehicle.findOne({ user_id: userId });
 
-  if (!driver || !vehicle) {
-    throw new AppError(
-      httpStatus.NOT_FOUND,
-      'Driver or Vehicle profile not found!'
-    );
+  if (!driver) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Driver profile not found!');
+  }
+  if (!vehicle) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Vehicle profile not found!');
   }
 
   const potentialParcels = await Parcel.find({
