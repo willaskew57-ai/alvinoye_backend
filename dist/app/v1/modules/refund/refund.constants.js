@@ -1,0 +1,8 @@
+export var REFUND_STATUS;
+(function (REFUND_STATUS) {
+    REFUND_STATUS["PENDING"] = "PENDING";
+    REFUND_STATUS["APPROVED"] = "APPROVED";
+    REFUND_STATUS["REJECTED"] = "REJECTED";
+    REFUND_STATUS["REFUNDED"] = "REFUNDED";
+})(REFUND_STATUS || (REFUND_STATUS = {}));
+//# sourceMappingURL=refund.constants.js.map

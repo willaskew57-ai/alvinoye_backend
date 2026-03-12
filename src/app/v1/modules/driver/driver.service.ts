@@ -244,6 +244,25 @@ const getSingleDriverFromDB = async (id: string) => {
   return result;
 };
 
+// Haversine formula to calculate distance in km between two coordinates
+const haversineDistanceKm = (
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number
+): number => {
+  const R = 6371; // Earth radius in km
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+};
+
 const getAvailableParcelsFromDB = async (
   userId: string,
   query: Record<string, unknown>
@@ -276,58 +295,114 @@ const getAvailableParcelsFromDB = async (
     };
   }
 
+  // Geographic pre-filter using Haversine distance:
+  // parcel pickup must be within 50 km of driver's from-location
+  // parcel handover must be within 50 km of driver's to-location
+  const PICKUP_RADIUS_KM = 50;
+  const HANDOVER_RADIUS_KM = 50;
+
+  const geoPrefilteredParcels = potentialParcels.filter((parcel) => {
+    const pickupDist = haversineDistanceKm(
+      driver.from.latitude,
+      driver.from.longitude,
+      parcel.pickup_location.latitude,
+      parcel.pickup_location.longitude
+    );
+    const handoverDist = haversineDistanceKm(
+      driver.to.latitude,
+      driver.to.longitude,
+      parcel.handover_location.latitude,
+      parcel.handover_location.longitude
+    );
+    return pickupDist <= PICKUP_RADIUS_KM && handoverDist <= HANDOVER_RADIUS_KM;
+  });
+
+  if (geoPrefilteredParcels.length === 0) {
+    return {
+      meta: { total: 0, page, limit, totalPages: 0 },
+      data: [],
+    };
+  }
+
   const apiKey = configs.google_maps_api_key;
   const allMatchedParcels = [];
 
   const driverOrigin = `${driver.from.latitude},${driver.from.longitude}`;
   const driverDestination = `${driver.to.latitude},${driver.to.longitude}`;
 
+  // Get baseline driver route distance
   let originalDistance = 0;
+  let baselineAvailable = false;
   try {
     const originalRouteRes = await axios.get(
       `https://maps.googleapis.com/maps/api/directions/json?origin=${driverOrigin}&destination=${driverDestination}&key=${apiKey}`
     );
     if (originalRouteRes.data.status === 'OK') {
       originalDistance = originalRouteRes.data.routes[0].legs[0].distance.value;
+      baselineAvailable = true;
     }
   } catch (error) {
     console.error('Failed to get baseline distance', error);
   }
 
-  for (const parcel of potentialParcels) {
+  const DETOUR_THRESHOLD_KM = 20;
+
+  for (const parcel of geoPrefilteredParcels) {
     try {
       const pickup = `${parcel.pickup_location.latitude},${parcel.pickup_location.longitude}`;
       const handover = `${parcel.handover_location.latitude},${parcel.handover_location.longitude}`;
+
+      // If Google Maps API key is unavailable or baseline failed, rely on geo pre-filter alone
+      if (!apiKey || !baselineAvailable) {
+        const pickupDist = haversineDistanceKm(
+          driver.from.latitude,
+          driver.from.longitude,
+          parcel.pickup_location.latitude,
+          parcel.pickup_location.longitude
+        );
+        allMatchedParcels.push({
+          ...parcel,
+          distance_info: {
+            parcel_actual_distance: `~${pickupDist.toFixed(1)} km from your start`,
+          },
+        });
+        continue;
+      }
 
       const googleUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${driverOrigin}&destination=${driverDestination}&waypoints=${pickup}|${handover}&key=${apiKey}`;
 
       const response = await axios.get(googleUrl);
 
       if (response.data.status === 'OK') {
-        const route = response.data.routes[0];
-        const legs = route.legs;
-
+        const legs = response.data.routes[0].legs;
+        // legs[0]: driverOrigin → pickup
+        // legs[1]: pickup → handover
+        // legs[2]: handover → driverDestination
         const totalDistanceWithParcel = legs.reduce(
           (acc: number, leg: any) => acc + leg.distance.value,
           0
         );
 
-        const parcelDistanceText = legs[1].distance.text;
+        const parcelDistanceText = legs[1]?.distance?.text ?? '';
         const detourKm = (totalDistanceWithParcel - originalDistance) / 1000;
-        const thresholdKm = 20;
 
-        if (detourKm <= thresholdKm) {
+        if (detourKm <= DETOUR_THRESHOLD_KM) {
           allMatchedParcels.push({
             ...parcel,
             distance_info: {
               parcel_actual_distance: parcelDistanceText,
+              detour_km: Math.round(detourKm * 10) / 10,
             },
           });
         }
       }
     } catch (error) {
       console.error('Error calculating route for parcel:', parcel._id);
-      continue;
+      // On API error, fall back to including geo-pre-filtered parcel
+      allMatchedParcels.push({
+        ...parcel,
+        distance_info: { parcel_actual_distance: 'N/A' },
+      });
     }
   }
 
@@ -336,12 +411,7 @@ const getAvailableParcelsFromDB = async (
   const paginatedData = allMatchedParcels.slice(skip, skip + limit);
 
   return {
-    meta: {
-      total,
-      page,
-      limit,
-      totalPages,
-    },
+    meta: { total, page, limit, totalPages },
     data: paginatedData,
   };
 };

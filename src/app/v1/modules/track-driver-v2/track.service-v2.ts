@@ -57,6 +57,9 @@ const updateDriverLocationInDB = async (
  
   await saveLocationHistory(payload);
 
+
+  console.log(location, "Updated Location")
+
   return location;
 };
 
@@ -80,6 +83,8 @@ const getParcelDriverLocationFromDB = async (
       'No active driver found for this parcel'
     );
   }
+
+  console.log(location, "location")
 
   return location;
 };

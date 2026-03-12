@@ -2,7 +2,7 @@ import httpStatus from 'http-status';
 import catchAsync from '../../../../utils/catch-async';
 import sendResponse from '../../../../utils/send-response';
 import { UserServices } from './user.service';
-import { getLocalFileUrl } from '../../../../utils/fileUploadHelper';
+import { getCloudFrontUrl } from '../../../../aws/multer-s3-uploader';
 
 const createAdmin = catchAsync(async (req, res) => {
   const result = await UserServices.createAdminIntoDB(req.body);
@@ -61,9 +61,9 @@ const updateMe = catchAsync(async (req, res) => {
   if (files?.profile_image && files.profile_image.length > 0) {
     const file = files.profile_image[0];
 
-    // file.path contains the local directory (e.g., "uploads/profile_images/filename.jpg")
-    // We transform this into a full URL
-    req.body.profile_picture = getLocalFileUrl((file as any).path);
+    // file.key contains the S3 key (e.g., "uploads/profile_images/filename.jpg")
+    // We transform this into a CloudFront URL
+    req.body.profile_picture = getCloudFrontUrl((file as any).key);
   }
 
   const { user_id } = req.user;
@@ -78,7 +78,6 @@ const updateMe = catchAsync(async (req, res) => {
 });
 
 const getAllUser = catchAsync(async (req, res) => {
-
   const result = await UserServices.getAllUsersFromDB(req.query);
   sendResponse(res, {
     statusCode: httpStatus.OK,
