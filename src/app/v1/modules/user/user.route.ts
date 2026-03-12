@@ -8,7 +8,7 @@ import { UserValidation } from './user.zod-validation';
 import validateRequest from '../../../../middleware/validate-request';
 import { auth } from '../../../../middleware/auth';
 import { USER_ROLE } from './user.interface';
-import { upload } from '../../../../utils/fileUploadHelper';
+import { uploadFile } from '../../../../aws/multer-s3-uploader';
 
 const router = express.Router();
 
@@ -59,7 +59,7 @@ router.patch(
     USER_ROLE.CUSTOMER,
     USER_ROLE.DRIVER
   ),
-  upload.fields([{ name: 'profile_image', maxCount: 1 }]), // Use multer fields
+  uploadFile(), // Use AWS S3 uploader
   (req: Request, res: Response, next: NextFunction) => {
     if (req.body.data) {
       req.body = JSON.parse(req.body.data);

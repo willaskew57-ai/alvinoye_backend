@@ -22,26 +22,19 @@ const s3 = new S3Client({
  */
 export const uploadFile = () => {
   const fileFilter = (req: Request, file: any, cb: any) => {
-    const allowedFieldnames = [
-      'image',
+    const allowedFieldNames = [
+      'attachments',
       'profile_image',
-      'league_image',
-      'category_image',
-      'team_logo',
-      'team_bg_image',
-      'player_image',
-      'player_bg_image',
-      'reward_image',
-      'video',
-      'thumbnail',
-      'chat_images',
-      'chat_videos',
+      'license_image',
+      'number_plate_image',
+      'vehicle_images',
+      'parcel_images',
     ];
-console.log("we get the file", file)
+    console.log('we get the file', file);
     if (file.fieldname === undefined) {
       // Allow requests without any files
       cb(null, true);
-    } else if (allowedFieldnames.includes(file.fieldname)) {
+    } else if (allowedFieldNames.includes(file.fieldname)) {
       if (
         file.mimetype === 'image/jpeg' ||
         file.mimetype === 'image/png' ||
@@ -77,28 +70,18 @@ console.log("we get the file", file)
       let uploadPath = '';
 
       // Maintain the same folder structure as before
-      if (file.fieldname === 'profile_image') {
-        uploadPath = 'uploads/images/profile';
-      } else if (file.fieldname === 'category_image') {
-        uploadPath = 'uploads/images/category';
-      } else if (file.fieldname === 'video') {
-        uploadPath = 'uploads/videos';
-      } else if (file.fieldname === 'chat_images') {
-        uploadPath = 'uploads/images/chat_image';
-      } else if (file.fieldname === 'chat_videos') {
-        uploadPath = 'uploads/videos/chat_videos';
-      } else if (file.fieldname === 'team_logo') {
-        uploadPath = 'uploads/images/team_logo';
-      } else if (file.fieldname === 'team_bg_image') {
-        uploadPath = 'uploads/images/team_bg_image';
-      } else if (file.fieldname === 'player_image') {
-        uploadPath = 'uploads/images/player_image';
-      } else if (file.fieldname === 'player_bg_image') {
-        uploadPath = 'uploads/images/player_bg_image';
-      } else if (file.fieldname === 'reward_image') {
-        uploadPath = 'uploads/images/reward_image';
-      } else if (file.fieldname === 'thumbnail') {
-        uploadPath = 'uploads/images/thumbnail';
+      if (file.fieldname === 'attachments') {
+        uploadPath = 'uploads/chat_attachments';
+      } else if (file.fieldname === 'profile_image') {
+        uploadPath = 'uploads/profile_images';
+      } else if (file.fieldname === 'license_image') {
+        uploadPath = 'uploads/license_images';
+      } else if (file.fieldname === 'number_plate_image') {
+        uploadPath = 'uploads/number_plate_images';
+      } else if (file.fieldname === 'vehicle_images') {
+        uploadPath = 'uploads/vehicle_images';
+      } else if (file.fieldname === 'parcel_images') {
+        uploadPath = 'uploads/parcel_images';
       } else {
         uploadPath = 'uploads';
       }
@@ -124,23 +107,15 @@ console.log("we get the file", file)
       fileSize: 50 * 1024 * 1024, // 50MB limit, adjust as needed
     },
   }).fields([
-    { name: 'image', maxCount: 1 },
+    { name: 'attachments', maxCount: 10 },
     { name: 'profile_image', maxCount: 1 },
-    { name: 'category_image', maxCount: 1 },
-    { name: 'sub_category_image', maxCount: 1 },
-    { name: 'league_image', maxCount: 5 },
-    { name: 'team_logo', maxCount: 1 },
-    { name: 'team_bg_image', maxCount: 1 },
-    { name: 'player_image', maxCount: 1 },
-    { name: 'player_bg_image', maxCount: 1 },
-    { name: 'reward_image', maxCount: 1 },
-    { name: 'thumbnail', maxCount: 3 },
-    { name: 'video', maxCount: 5 },
-    { name: 'chat_videos', maxCount: 2 },
-    { name: 'chat_images', maxCount: 7 },
+    { name: 'license_image', maxCount: 1 },
+    { name: 'number_plate_image', maxCount: 1 },
+    { name: 'vehicle_images', maxCount: 5 },
+    { name: 'parcel_images', maxCount: 10 },
   ]);
 
-  console.log(upload, "uploaded log")
+  console.log(upload, 'uploaded log');
 
   return upload;
 };
@@ -148,5 +123,3 @@ console.log("we get the file", file)
 export const getCloudFrontUrl = (s3FilePath: string): string => {
   return `${configs.cloudfront_url}/${s3FilePath}`;
 };
-
-

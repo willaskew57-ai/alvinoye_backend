@@ -1,0 +1,1 @@
+{"version":3,"file":"handle-validation-error.d.ts","sourceRoot":"","sources":["../../src/errors/handle-validation-error.ts"],"names":[],"mappings":"AAAA,OAAO,QAAQ,MAAM,UAAU,CAAC;AAChC,OAAO,KAAK,EAAiB,kBAAkB,EAAE,MAAM,sBAAsB,CAAC;AAG9E,QAAA,MAAM,qBAAqB,GACzB,KAAK,QAAQ,CAAC,KAAK,CAAC,eAAe,KAClC,kBAiBF,CAAC;AAEF,eAAe,qBAAqB,CAAC"}
