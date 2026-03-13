@@ -20,9 +20,18 @@ const app: Application = express();
 // ** parsers :
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors({ origin: ['http://localhost:3000', 'http://13.63.95.203:3000'], credentials: true }));
+app.use(
+  cors({
+    origin: ['http://localhost:3000', 'http://13.63.95.203:3000'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+  })
+);
 
-// For local file 
+app.options("*", cors());
+
+// For local file
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // test route:
