@@ -1,5 +1,9 @@
-import mongoose from 'mongoose';
-import httpStatus from 'http-status';
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const http_status_1 = __importDefault(require("http-status"));
 const handleCastError = (err) => {
     const errorSources = [
         {
@@ -8,10 +12,10 @@ const handleCastError = (err) => {
         },
     ];
     return {
-        statusCode: httpStatus.BAD_REQUEST,
+        statusCode: http_status_1.default.BAD_REQUEST,
         message: 'Invalid ID',
         errorSources,
     };
 };
-export default handleCastError;
+exports.default = handleCastError;
 //# sourceMappingURL=handle-cast-error.js.map

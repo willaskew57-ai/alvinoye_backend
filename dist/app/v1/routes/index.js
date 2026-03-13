@@ -1,69 +1,73 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
 // ** imports packages
-import express, { Router } from 'express';
+const express_1 = __importDefault(require("express"));
 // ** import module routes
-import { UserRoutes } from '../modules/user/user.route';
-import { AuthRoutes } from '../modules/auth/auth.route';
-import { DriverRoutes } from '../modules/driver/driver.route';
-import { ParcelRoutes } from '../modules/parcel/parcel.route';
-import { SettingsRoutes } from '../modules/setting/settings.routes';
-import { ChatRoutes } from '../modules/chat/chat.routes';
-import { ReviewRoutes } from '../modules/review/review.routes';
-import { PaymentRoute } from '../modules/payment/payment.route';
-import { CustomerRoutes } from '../modules/cusotmer/customer.route';
-import { DashboardRoute } from '../modules/dashboard/dashboard.route';
-import { RefundRoutes } from '../modules/refund/refund.route';
-import { NotificationRoutes } from '../modules/notification/notification.routes';
-const router = express.Router();
+const user_route_1 = require("../modules/user/user.route");
+const auth_route_1 = require("../modules/auth/auth.route");
+const driver_route_1 = require("../modules/driver/driver.route");
+const parcel_route_1 = require("../modules/parcel/parcel.route");
+const settings_routes_1 = require("../modules/setting/settings.routes");
+const chat_routes_1 = require("../modules/chat/chat.routes");
+const review_routes_1 = require("../modules/review/review.routes");
+const customer_route_1 = require("../modules/cusotmer/customer.route");
+const dashboard_route_1 = require("../modules/dashboard/dashboard.route");
+const refund_route_1 = require("../modules/refund/refund.route");
+const notification_routes_1 = require("../modules/notification/notification.routes");
+const router = express_1.default.Router();
 const modulesRoute = [
     {
         path: '/auth',
-        route: AuthRoutes,
+        route: auth_route_1.AuthRoutes,
     },
     {
         path: '/user',
-        route: UserRoutes,
+        route: user_route_1.UserRoutes,
     },
     {
         path: '/driver',
-        route: DriverRoutes,
+        route: driver_route_1.DriverRoutes,
     },
     {
         path: '/customer',
-        route: CustomerRoutes,
+        route: customer_route_1.CustomerRoutes,
     },
     {
         path: '/parcel',
-        route: ParcelRoutes,
+        route: parcel_route_1.ParcelRoutes,
     },
     {
         path: '/parcel',
-        route: ParcelRoutes,
+        route: parcel_route_1.ParcelRoutes,
     },
     {
         path: '/refund',
-        route: RefundRoutes,
+        route: refund_route_1.RefundRoutes,
     },
     {
         path: '/chat',
-        route: ChatRoutes,
+        route: chat_routes_1.ChatRoutes,
     },
     {
         path: '/review',
-        route: ReviewRoutes,
+        route: review_routes_1.ReviewRoutes,
     },
     {
         path: '/settings',
-        route: SettingsRoutes,
+        route: settings_routes_1.SettingsRoutes,
     },
     {
         path: '/dashboard',
-        route: DashboardRoute,
+        route: dashboard_route_1.DashboardRoute,
     },
     {
         path: '/notifications',
-        route: NotificationRoutes,
+        route: notification_routes_1.NotificationRoutes,
     },
 ];
 modulesRoute.forEach((route) => router.use(route.path, route.route));
-export default router;
+exports.default = router;
 //# sourceMappingURL=index.js.map

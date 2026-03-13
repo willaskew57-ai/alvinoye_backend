@@ -1,8 +1,13 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
 // ** import local files
-import configs from '../../../../config/env.config';
-import { getDBStatus } from '../../../../db';
+const env_config_1 = __importDefault(require("../../../../config/env.config"));
+const db_1 = require("../../../../db");
 const healthCheck = async (req, res) => {
-    const db = getDBStatus();
+    const db = (0, db_1.getDBStatus)();
     const healthCheck = {
         status: db.isConnected ? 'healthy' : 'degraded',
         timestamp: new Date().toISOString(),
@@ -18,10 +23,10 @@ const healthCheck = async (req, res) => {
                 rss: Math.round(process.memoryUsage().rss / 1024 / 1024) + 'MB',
                 heapUsed: Math.round(process.memoryUsage().heapUsed / 1024 / 1024) + 'MB',
             },
-            port: configs.port,
+            port: env_config_1.default.port,
         },
     };
     res.status(db.isConnected ? 200 : 503).json(healthCheck);
 };
-export default healthCheck;
+exports.default = healthCheck;
 //# sourceMappingURL=index.js.map

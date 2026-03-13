@@ -1,85 +1,91 @@
-import httpStatus from 'http-status';
-import AppError from '../../../../errors/app-error';
-import { Faq, PrivacyPolicy, TermsCondition } from './settings.model';
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.SettingsService = void 0;
+const http_status_1 = __importDefault(require("http-status"));
+const app_error_1 = __importDefault(require("../../../../errors/app-error"));
+const settings_model_1 = require("./settings.model");
 //** ----------------- Faq Services --------------
 const createFaqInDB = async (payload) => {
-    const result = await Faq.create(payload);
+    const result = await settings_model_1.Faq.create(payload);
     return result;
 };
 const getAllFaqsInDB = async () => {
-    const result = await Faq.find();
+    const result = await settings_model_1.Faq.find();
     return result;
 };
 const getSingleFaqInDB = async (id) => {
-    const result = await Faq.findById(id);
+    const result = await settings_model_1.Faq.findById(id);
     if (!result) {
-        throw new AppError(httpStatus.NOT_FOUND, 'FAQ not found');
+        throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'FAQ not found');
     }
     return result;
 };
 const updateFaqInDB = async (id, payload) => {
-    const result = await Faq.findByIdAndUpdate(id, payload, {
+    const result = await settings_model_1.Faq.findByIdAndUpdate(id, payload, {
         new: true,
         runValidators: true,
     });
     if (!result) {
-        throw new AppError(httpStatus.NOT_FOUND, 'FAQ not found');
+        throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'FAQ not found');
     }
     return result;
 };
 const deleteFaqInDB = async (id) => {
-    const result = await Faq.findByIdAndDelete(id);
+    const result = await settings_model_1.Faq.findByIdAndDelete(id);
     if (!result) {
-        throw new AppError(httpStatus.NOT_FOUND, 'FAQ not found');
+        throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'FAQ not found');
     }
     return result;
 };
 //** ----------------- Terms & Conditions Services --------------
 const createTermsInDB = async (payload) => {
-    const result = await TermsCondition.create(payload);
+    const result = await settings_model_1.TermsCondition.create(payload);
     return result;
 };
 const getSingleTermsInDB = async () => {
-    const result = await TermsCondition.findOne().sort({ created_at: -1 });
+    const result = await settings_model_1.TermsCondition.findOne().sort({ created_at: -1 });
     if (!result) {
-        throw new AppError(httpStatus.NOT_FOUND, 'Terms and Conditions not found');
+        throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'Terms and Conditions not found');
     }
     return result;
 };
 const updateTermsInDB = async (id, payload) => {
-    const result = await TermsCondition.findByIdAndUpdate(id, payload, {
+    const result = await settings_model_1.TermsCondition.findByIdAndUpdate(id, payload, {
         new: true,
         runValidators: true,
     });
     if (!result) {
-        throw new AppError(httpStatus.NOT_FOUND, 'Terms and Conditions not found');
+        throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'Terms and Conditions not found');
     }
     return result;
 };
 //** ----------------- Privacy Policy Services --------------
 const createPrivacyInDB = async (payload) => {
-    const result = await PrivacyPolicy.create(payload);
+    const result = await settings_model_1.PrivacyPolicy.create(payload);
     return result;
 };
 const getSinglePrivacyInDB = async () => {
-    const result = await PrivacyPolicy.findOne().sort({ created_at: -1 });
+    const result = await settings_model_1.PrivacyPolicy.findOne().sort({ created_at: -1 });
     if (!result) {
-        throw new AppError(httpStatus.NOT_FOUND, 'Privacy Policy not found');
+        throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'Privacy Policy not found');
     }
     return result;
 };
 const updatePrivacyInDB = async (id, payload) => {
-    const result = await PrivacyPolicy.findByIdAndUpdate(id, payload, {
+    const result = await settings_model_1.PrivacyPolicy.findByIdAndUpdate(id, payload, {
         new: true,
         runValidators: true,
     });
     if (!result) {
-        throw new AppError(httpStatus.NOT_FOUND, 'Privacy Policy not found');
+        throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'Privacy Policy not found');
     }
     return result;
 };
 //** ----------------- Exporting All Services --------------
-export const SettingsService = {
+exports.SettingsService = {
     // Faq
     createFaqInDB,
     getAllFaqsInDB,

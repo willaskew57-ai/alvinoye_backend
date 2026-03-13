@@ -1,5 +1,8 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.NOTIFICATION_PRIORITY = exports.NOTIFICATION_STATUS = exports.NOTIFICATION_TYPE = void 0;
 // Notification Types
-export const NOTIFICATION_TYPE = {
+exports.NOTIFICATION_TYPE = {
     PARCEL_CREATED: 'PARCEL_CREATED',
     PARCEL_ACCEPTED: 'PARCEL_ACCEPTED',
     PARCEL_ONGOING: 'PARCEL_ONGOING',
@@ -20,12 +23,12 @@ export const NOTIFICATION_TYPE = {
     SYSTEM: 'SYSTEM',
 };
 // Notification Status
-export const NOTIFICATION_STATUS = {
+exports.NOTIFICATION_STATUS = {
     UNREAD: 'UNREAD',
     READ: 'READ',
 };
 // Notification Priority
-export const NOTIFICATION_PRIORITY = {
+exports.NOTIFICATION_PRIORITY = {
     LOW: 'LOW',
     MEDIUM: 'MEDIUM',
     HIGH: 'HIGH',

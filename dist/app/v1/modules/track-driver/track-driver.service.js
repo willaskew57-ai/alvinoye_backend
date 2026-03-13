@@ -1,7 +1,13 @@
-import httpStatus from 'http-status';
-import AppError from '../../../../errors/app-error';
-import { DriverLocation } from './track-driver.model';
-import { getIO } from '../../../../socket';
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.TrackDriverServices = void 0;
+const http_status_1 = __importDefault(require("http-status"));
+const app_error_1 = __importDefault(require("../../../../errors/app-error"));
+const track_driver_model_1 = require("./track-driver.model");
+const socket_1 = require("../../../../socket");
 const updateDriverLocationInDB = async (payload) => {
     const locationData = {
         driver_id: payload.driver_id,
@@ -14,13 +20,13 @@ const updateDriverLocationInDB = async (payload) => {
         is_online: true,
         last_updated: new Date(),
     };
-    const location = await DriverLocation.findOneAndUpdate({ driver_id: payload.driver_id }, locationData, {
+    const location = await track_driver_model_1.DriverLocation.findOneAndUpdate({ driver_id: payload.driver_id }, locationData, {
         new: true,
         upsert: true,
         runValidators: true,
     }).populate('driver_id', 'full_name phone_number profile_image');
     try {
-        const io = getIO();
+        const io = (0, socket_1.getIO)();
         io.to(`driver_${payload.driver_id}`).emit('location_updated', {
             location: location.toJSON(),
         });
@@ -44,7 +50,7 @@ const updateDriverLocationInDB = async (payload) => {
     return location;
 };
 const getDriverLocationFromDB = async (driverId) => {
-    const location = await DriverLocation.findOne({
+    const location = await track_driver_model_1.DriverLocation.findOne({
         driver_id: driverId,
     })
         .populate('driver_id', 'full_name phone_number profile_image')
@@ -52,7 +58,7 @@ const getDriverLocationFromDB = async (driverId) => {
     return location;
 };
 const getLocationHistoryFromDB = async (driverId, limit = 50) => {
-    const history = await DriverLocation.find({
+    const history = await track_driver_model_1.DriverLocation.find({
         driver_id: driverId,
     })
         .sort({ created_at: -1 })
@@ -67,7 +73,7 @@ const getLocationHistoryFromDB = async (driverId, limit = 50) => {
     }));
 };
 const getParcelDriverLocationFromDB = async (parcelId) => {
-    const location = await DriverLocation.findOne({
+    const location = await track_driver_model_1.DriverLocation.findOne({
         parcel_id: parcelId,
         is_online: true,
     })
@@ -75,17 +81,17 @@ const getParcelDriverLocationFromDB = async (parcelId) => {
         .populate('driver_id', 'full_name phone_number profile_image')
         .populate('parcel_id', 'parcel_id parcel_name status');
     if (!location) {
-        throw new AppError(httpStatus.NOT_FOUND, 'No active driver found for this parcel');
+        throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'No active driver found for this parcel');
     }
     return location;
 };
 const markDriverOfflineInDB = async (driverId) => {
-    const location = await DriverLocation.findOneAndUpdate({ driver_id: driverId }, {
+    const location = await track_driver_model_1.DriverLocation.findOneAndUpdate({ driver_id: driverId }, {
         is_online: false,
         last_updated: new Date(),
     }, { new: true });
     try {
-        const io = getIO();
+        const io = (0, socket_1.getIO)();
         io.to(`driver_${driverId}`).emit('driver_offline', {
             driver_id: driverId,
             timestamp: new Date(),
@@ -98,7 +104,7 @@ const markDriverOfflineInDB = async (driverId) => {
 };
 const getNearbyDriversFromDB = async (latitude, longitude, radiusKm = 10) => {
     const radiusRad = radiusKm / 6371;
-    const drivers = await DriverLocation.find({
+    const drivers = await track_driver_model_1.DriverLocation.find({
         is_online: true,
         latitude: {
             $gte: latitude - radiusRad * (180 / Math.PI),
@@ -128,13 +134,13 @@ const saveLocationHistory = async (payload) => {
         if (payload.parcel_id) {
             historyData.parcel_id = payload.parcel_id;
         }
-        await DriverLocation.create(historyData);
+        await track_driver_model_1.DriverLocation.create(historyData);
     }
     catch (error) {
         console.error('Failed to save location history:', error);
     }
 };
-export const TrackDriverServices = {
+exports.TrackDriverServices = {
     updateDriverLocationInDB,
     getDriverLocationFromDB,
     getLocationHistoryFromDB,

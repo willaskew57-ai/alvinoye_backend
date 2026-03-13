@@ -1,13 +1,19 @@
-import { Router } from 'express';
-import { ReviewController } from './review.controller';
-import { auth } from '../../../../middleware/auth';
-import { createReviewValidationSchema } from './review.validation';
-import validateRequest from '../../../../middleware/validate-request';
-import { USER_ROLE } from '../user/user.interface';
-const router = Router();
-router.post('/create', auth(USER_ROLE.CUSTOMER), validateRequest(createReviewValidationSchema), ReviewController.createReview);
-router.get('/get/:id', auth(), ReviewController.getSingleReview);
-router.get('/get-driver-review', auth(USER_ROLE.DRIVER), ReviewController.getDriverReviews);
-router.get('/get-customer-review', auth(USER_ROLE.CUSTOMER), ReviewController.getCustomerReviews);
-export const ReviewRoutes = router;
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ReviewRoutes = void 0;
+const express_1 = require("express");
+const review_controller_1 = require("./review.controller");
+const auth_1 = require("../../../../middleware/auth");
+const review_validation_1 = require("./review.validation");
+const validate_request_1 = __importDefault(require("../../../../middleware/validate-request"));
+const user_interface_1 = require("../user/user.interface");
+const router = (0, express_1.Router)();
+router.post('/create', (0, auth_1.auth)(user_interface_1.USER_ROLE.CUSTOMER), (0, validate_request_1.default)(review_validation_1.createReviewValidationSchema), review_controller_1.ReviewController.createReview);
+router.get('/get/:id', (0, auth_1.auth)(), review_controller_1.ReviewController.getSingleReview);
+router.get('/get-driver-review', (0, auth_1.auth)(user_interface_1.USER_ROLE.DRIVER), review_controller_1.ReviewController.getDriverReviews);
+router.get('/get-customer-review', (0, auth_1.auth)(user_interface_1.USER_ROLE.CUSTOMER), review_controller_1.ReviewController.getCustomerReviews);
+exports.ReviewRoutes = router;
 //# sourceMappingURL=review.routes.js.map

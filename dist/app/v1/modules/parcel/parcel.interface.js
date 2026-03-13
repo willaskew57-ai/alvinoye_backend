@@ -1,5 +1,7 @@
-import { Types, Document } from 'mongoose';
-export const PARCEL_STATUS = {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.PRICE_REQUEST_STATUS = exports.PROPOSED_BY = exports.PRICE_TYPE = exports.PRICE_STATUS = exports.PARCEL_STATUS = void 0;
+exports.PARCEL_STATUS = {
     INITIAL: 'INITIAL',
     WAITING: 'WAITING',
     PENDING: 'PENDING',
@@ -7,7 +9,7 @@ export const PARCEL_STATUS = {
     COMPLETED: 'COMPLETED',
     REJECTED: 'REJECTED',
 };
-export const PRICE_STATUS = {
+exports.PRICE_STATUS = {
     NOT_SET: 'NOT_SET',
     PROPOSED: 'PROPOSED',
     COUNTERED: 'COUNTERED',
@@ -15,17 +17,17 @@ export const PRICE_STATUS = {
     ACCEPTED: 'ACCEPTED',
     REJECTED: 'REJECTED',
 };
-export const PRICE_TYPE = {
+exports.PRICE_TYPE = {
     PROPOSED: 'PROPOSED',
     COUNTERED: 'COUNTERED',
     FINAL_OFFER: 'FINAL_OFFER',
 };
-export const PROPOSED_BY = {
+exports.PROPOSED_BY = {
     SUPER_ADMIN: 'SUPER_ADMIN',
     ADMIN: 'ADMIN',
     CUSTOMER: 'CUSTOMER',
 };
-export const PRICE_REQUEST_STATUS = {
+exports.PRICE_REQUEST_STATUS = {
     PENDING: 'PENDING',
     ACCEPTED: 'ACCEPTED',
     REJECTED: 'REJECTED',

@@ -1,16 +1,22 @@
-import z from 'zod/v3';
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.refundPaymentSchema = exports.createCheckoutSchema = void 0;
+const v3_1 = __importDefault(require("zod/v3"));
 /**
  * Zod Schemas
  */
-export const createCheckoutSchema = z.object({
-    body: z.object({
-        parcel_id: z.string().min(1, 'Parcel ID is required'),
+exports.createCheckoutSchema = v3_1.default.object({
+    body: v3_1.default.object({
+        parcel_id: v3_1.default.string().min(1, 'Parcel ID is required'),
     }),
 });
-export const refundPaymentSchema = z.object({
-    body: z.object({
-        payment_id: z.string().min(1, 'Payment ID is required'),
-        reason: z.string().optional(),
+exports.refundPaymentSchema = v3_1.default.object({
+    body: v3_1.default.object({
+        payment_id: v3_1.default.string().min(1, 'Payment ID is required'),
+        reason: v3_1.default.string().optional(),
     }),
 });
 //# sourceMappingURL=payment.validation.js.map

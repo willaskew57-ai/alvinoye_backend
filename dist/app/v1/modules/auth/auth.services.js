@@ -1,15 +1,21 @@
-import httpStatus from 'http-status';
-import configs from '../../../../config/env.config';
-import AppError from '../../../../errors/app-error';
-import { createToken, verifyToken } from './auth.utils';
-import User from '../user/user.model';
-import { OtpServices } from '../otp/otp.services';
-import { EmailHelpers } from '../../../../utils/email-helper';
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.AuthServices = void 0;
+const http_status_1 = __importDefault(require("http-status"));
+const env_config_1 = __importDefault(require("../../../../config/env.config"));
+const app_error_1 = __importDefault(require("../../../../errors/app-error"));
+const auth_utils_1 = require("./auth.utils");
+const user_model_1 = __importDefault(require("../user/user.model"));
+const otp_services_1 = require("../otp/otp.services");
+const email_helper_1 = require("../../../../utils/email-helper");
 // ** ------- Register User Service -------
 const registerUser = async (payload) => {
-    const isUserExists = await User.isUserExistsByEmail(payload.email);
+    const isUserExists = await user_model_1.default.isUserExistsByEmail(payload.email);
     if (isUserExists) {
-        throw new AppError(httpStatus.CONFLICT, 'User with this email already exists!');
+        throw new app_error_1.default(http_status_1.default.CONFLICT, 'User with this email already exists!');
     }
     const isProfileCompleted = payload.role !== 'DRIVER';
     const status = payload.role === 'DRIVER' ? 'PENDING' : 'ACTIVE';
@@ -20,27 +26,27 @@ const registerUser = async (payload) => {
         is_verified: false,
         request_date: new Date(),
     };
-    const newUser = await User.create(userData);
+    const newUser = await user_model_1.default.create(userData);
     if (!newUser) {
-        throw new AppError(httpStatus.BAD_REQUEST, 'Failed to register user');
+        throw new app_error_1.default(http_status_1.default.BAD_REQUEST, 'Failed to register user');
     }
-    const otp = await OtpServices.generateAndSaveOtp({
+    const otp = await otp_services_1.OtpServices.generateAndSaveOtp({
         user_id: newUser._id,
         purpose: 'REGISTER',
     });
     console.log(otp, 'register Otp');
     // Send registration email
-    await EmailHelpers.sendRegisterEmail(newUser.email, {
+    await email_helper_1.EmailHelpers.sendRegisterEmail(newUser.email, {
         user: newUser.full_name || 'User',
         activationCode: otp,
-        activationCodeExpire: configs.otp_expiry_minutes || 5,
+        activationCodeExpire: env_config_1.default.otp_expiry_minutes || 5,
     });
     const jwtPayload = {
         user_id: newUser._id.toString(),
         role: newUser.role,
     };
-    const accessToken = createToken(jwtPayload, configs.jwt_access_token, configs.jwt_access_expiresIn);
-    const refreshToken = createToken(jwtPayload, configs.jwt_refresh_token, configs.jwt_access_expiresIn);
+    const accessToken = (0, auth_utils_1.createToken)(jwtPayload, env_config_1.default.jwt_access_token, env_config_1.default.jwt_access_expiresIn);
+    const refreshToken = (0, auth_utils_1.createToken)(jwtPayload, env_config_1.default.jwt_refresh_token, env_config_1.default.jwt_access_expiresIn);
     return {
         user: newUser,
         accessToken,
@@ -51,19 +57,19 @@ const registerUser = async (payload) => {
 // ** -------- Login Service ---------
 const loginServices = async (payload) => {
     // Use the static method from User model
-    const user = await User.isUserExistsByEmail(payload.email);
+    const user = await user_model_1.default.isUserExistsByEmail(payload.email);
     if (!user) {
-        throw new AppError(httpStatus.NOT_FOUND, 'User does not exist with these credentials!');
+        throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'User does not exist with these credentials!');
     }
-    if (await User.isUserDeleted(user)) {
-        throw new AppError(httpStatus.FORBIDDEN, 'This account has been deleted!');
+    if (await user_model_1.default.isUserDeleted(user)) {
+        throw new app_error_1.default(http_status_1.default.FORBIDDEN, 'This account has been deleted!');
     }
-    if (await User.isUserBlocked(user)) {
-        throw new AppError(httpStatus.FORBIDDEN, 'This account is currently blocked!');
+    if (await user_model_1.default.isUserBlocked(user)) {
+        throw new app_error_1.default(http_status_1.default.FORBIDDEN, 'This account is currently blocked!');
     }
-    const isVerified = await User.isUserVerified(user);
+    const isVerified = await user_model_1.default.isUserVerified(user);
     if (!isVerified) {
-        throw new AppError(httpStatus.UNAUTHORIZED, 'Your email is not verified. Please verify your OTP first.');
+        throw new app_error_1.default(http_status_1.default.UNAUTHORIZED, 'Your email is not verified. Please verify your OTP first.');
     }
     // const isActive = await User.isUserActive(user);
     // if (!isActive) {
@@ -73,9 +79,9 @@ const loginServices = async (payload) => {
     //   );
     // }
     // Compare Password
-    const isPasswordMatched = await User.compareUserPassword(payload.password, user.password);
+    const isPasswordMatched = await user_model_1.default.compareUserPassword(payload.password, user.password);
     if (!isPasswordMatched) {
-        throw new AppError(httpStatus.FORBIDDEN, 'Invalid credentials!');
+        throw new app_error_1.default(http_status_1.default.FORBIDDEN, 'Invalid credentials!');
     }
     const userData = {
         _id: user._id,
@@ -90,8 +96,8 @@ const loginServices = async (payload) => {
         user_id: user._id.toString(),
         role: user.role, // Added role
     };
-    const accessToken = createToken(jwtPayload, configs.jwt_access_token, configs.jwt_access_expiresIn);
-    const refreshToken = createToken(jwtPayload, configs.jwt_refresh_token, configs.jwt_access_expiresIn);
+    const accessToken = (0, auth_utils_1.createToken)(jwtPayload, env_config_1.default.jwt_access_token, env_config_1.default.jwt_access_expiresIn);
+    const refreshToken = (0, auth_utils_1.createToken)(jwtPayload, env_config_1.default.jwt_refresh_token, env_config_1.default.jwt_access_expiresIn);
     return {
         accessToken,
         refreshToken,
@@ -103,15 +109,15 @@ const loginServices = async (payload) => {
  */
 const changePasswordIntoDB = async (userData, payload) => {
     const { old_password, new_password } = payload;
-    const user = await User.findById(userData.user_id).select('+password');
+    const user = await user_model_1.default.findById(userData.user_id).select('+password');
     if (!user ||
-        (await User.isUserDeleted(user)) ||
-        (await User.isUserBlocked(user))) {
-        throw new AppError(httpStatus.NOT_FOUND, 'User not found or inaccessible!');
+        (await user_model_1.default.isUserDeleted(user)) ||
+        (await user_model_1.default.isUserBlocked(user))) {
+        throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'User not found or inaccessible!');
     }
-    const isPasswordMatched = await User.compareUserPassword(old_password, user.password);
+    const isPasswordMatched = await user_model_1.default.compareUserPassword(old_password, user.password);
     if (!isPasswordMatched) {
-        throw new AppError(httpStatus.UNAUTHORIZED, 'The old password you entered is incorrect!');
+        throw new app_error_1.default(http_status_1.default.UNAUTHORIZED, 'The old password you entered is incorrect!');
     }
     // Note: Password hashing is handled by the UserSchema.pre('save') middleware
     // So we just update the document and save it.
@@ -125,16 +131,16 @@ const changePasswordIntoDB = async (userData, payload) => {
 const verifyOtp = async (payload, token) => {
     const { otp, purpose } = payload;
     const secretKey = purpose === 'REGISTER'
-        ? configs.jwt_access_token
-        : configs.jwt_reset_token;
-    const decoded = verifyToken(token, secretKey);
-    await OtpServices.verifyOtpFromDB({
+        ? env_config_1.default.jwt_access_token
+        : env_config_1.default.jwt_reset_token;
+    const decoded = (0, auth_utils_1.verifyToken)(token, secretKey);
+    await otp_services_1.OtpServices.verifyOtpFromDB({
         user_id: decoded.user_id,
         inputOtp: otp,
         purpose,
     });
     if (purpose === 'REGISTER') {
-        await User.findByIdAndUpdate(decoded.user_id, { is_verified: true });
+        await user_model_1.default.findByIdAndUpdate(decoded.user_id, { is_verified: true });
     }
     return null;
 };
@@ -143,20 +149,20 @@ const verifyOtp = async (payload, token) => {
  */
 const resendOtp = async (payload) => {
     const { email, purpose } = payload;
-    const user = await User.findOne({ email });
+    const user = await user_model_1.default.findOne({ email });
     if (!user) {
-        throw new AppError(httpStatus.NOT_FOUND, 'User not found with this email!');
+        throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'User not found with this email!');
     }
-    const otp = await OtpServices.generateAndSaveOtp({
+    const otp = await otp_services_1.OtpServices.generateAndSaveOtp({
         user_id: user._id,
         purpose,
     });
     console.log(otp);
     // Send resend OTP email
-    await EmailHelpers.sendOtpResendEmail(email, {
+    await email_helper_1.EmailHelpers.sendOtpResendEmail(email, {
         user: user.full_name || 'User',
         code: otp,
-        expiresIn: configs.otp_expiry_minutes || 5,
+        expiresIn: env_config_1.default.otp_expiry_minutes || 5,
     });
     return null;
 };
@@ -164,24 +170,24 @@ const resendOtp = async (payload) => {
  * Refresh Token Service
  */
 const refreshToken = async (token) => {
-    const decoded = verifyToken(token, configs.jwt_refresh_token);
+    const decoded = (0, auth_utils_1.verifyToken)(token, env_config_1.default.jwt_refresh_token);
     const { user_id, iat } = decoded;
-    const user = await User.findById(user_id);
+    const user = await user_model_1.default.findById(user_id);
     if (!user ||
-        (await User.isUserDeleted(user)) ||
-        (await User.isUserBlocked(user))) {
-        throw new AppError(httpStatus.FORBIDDEN, 'Authentication failed. User is no longer active!');
+        (await user_model_1.default.isUserDeleted(user)) ||
+        (await user_model_1.default.isUserBlocked(user))) {
+        throw new app_error_1.default(http_status_1.default.FORBIDDEN, 'Authentication failed. User is no longer active!');
     }
     // Security: Check if password was changed after this refresh token was issued
     if (user.password_changed_at &&
-        User.isJWTIssuedBeforePasswordChanged(user.password_changed_at, iat)) {
-        throw new AppError(httpStatus.UNAUTHORIZED, 'Password recently changed. Please login again.');
+        user_model_1.default.isJWTIssuedBeforePasswordChanged(user.password_changed_at, iat)) {
+        throw new app_error_1.default(http_status_1.default.UNAUTHORIZED, 'Password recently changed. Please login again.');
     }
     const jwtPayload = {
         user_id: user._id.toString(),
         role: user.role,
     };
-    const accessToken = createToken(jwtPayload, configs.jwt_access_token, configs.jwt_access_expiresIn);
+    const accessToken = (0, auth_utils_1.createToken)(jwtPayload, env_config_1.default.jwt_access_token, env_config_1.default.jwt_access_expiresIn);
     return {
         accessToken,
     };
@@ -191,29 +197,29 @@ const refreshToken = async (token) => {
  */
 const forgetPassword = async (email) => {
     // 1. Check if user exists
-    const user = await User.isUserExistsByEmail(email);
+    const user = await user_model_1.default.isUserExistsByEmail(email);
     if (!user ||
-        (await User.isUserDeleted(user)) ||
-        (await User.isUserBlocked(user))) {
-        throw new AppError(httpStatus.NOT_FOUND, 'No active account found with this email!');
+        (await user_model_1.default.isUserDeleted(user)) ||
+        (await user_model_1.default.isUserBlocked(user))) {
+        throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'No active account found with this email!');
     }
     const user_id = user._id;
-    const otp = await OtpServices.generateAndSaveOtp({
+    const otp = await otp_services_1.OtpServices.generateAndSaveOtp({
         user_id: user_id,
         purpose: 'RESET_PASSWORD',
     });
     console.log(otp);
     // Send reset password email
-    await EmailHelpers.sendResetPasswordEmail(email, {
+    await email_helper_1.EmailHelpers.sendResetPasswordEmail(email, {
         name: user.full_name || 'User',
         verificationCode: otp,
-        verificationCodeExpire: configs.otp_expiry_minutes || 5,
+        verificationCodeExpire: env_config_1.default.otp_expiry_minutes || 5,
     });
     const jwtPayload = {
         user_id: user_id.toString(),
         role: user.role,
     };
-    const resetToken = createToken(jwtPayload, configs.jwt_reset_token, configs.jwt_reset_expiresIn);
+    const resetToken = (0, auth_utils_1.createToken)(jwtPayload, env_config_1.default.jwt_reset_token, env_config_1.default.jwt_reset_expiresIn);
     return {
         resetToken,
         user_id: user._id,
@@ -223,12 +229,12 @@ const forgetPassword = async (email) => {
  * Reset Password Service (Final Step)
  */
 const resetPassword = async (payload, token) => {
-    const decoded = verifyToken(token, configs.jwt_reset_token);
-    const user = await User.findById(decoded.user_id);
+    const decoded = (0, auth_utils_1.verifyToken)(token, env_config_1.default.jwt_reset_token);
+    const user = await user_model_1.default.findById(decoded.user_id);
     if (!user ||
-        (await User.isUserDeleted(user)) ||
-        (await User.isUserBlocked(user))) {
-        throw new AppError(httpStatus.NOT_FOUND, 'Account is no longer active!');
+        (await user_model_1.default.isUserDeleted(user)) ||
+        (await user_model_1.default.isUserBlocked(user))) {
+        throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'Account is no longer active!');
     }
     // 4. Update password (pre-save middleware handles hashing)
     user.password = payload.new_password;
@@ -237,7 +243,7 @@ const resetPassword = async (payload, token) => {
     await user.save();
     return null;
 };
-export const AuthServices = {
+exports.AuthServices = {
     registerUser,
     loginServices,
     verifyOtp,

@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 
 // Load environment variables
-dotenv.config();
+dotenv.config({ path: path.join(process.cwd(), '.env') });
 
 const configs = {
   node_env: process.env.NODE_ENV || 'development',

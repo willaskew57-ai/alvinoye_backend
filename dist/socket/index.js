@@ -1,20 +1,25 @@
-import { Server as HttpServer } from 'http';
-import { Server, Socket } from 'socket.io';
-import colors from 'colors';
-import { socketAuth } from './socket-auth';
-import { TrackDriverServices } from '../app/v1/modules/track-driver-v2/track.service-v2';
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getIO = exports.initSocket = exports.onlineUsers = void 0;
+const socket_io_1 = require("socket.io");
+const colors_1 = __importDefault(require("colors"));
+const socket_auth_1 = require("./socket-auth");
+const track_service_v2_1 = require("../app/v1/modules/track-driver-v2/track.service-v2");
 let io;
-export const onlineUsers = new Set();
-export const initSocket = (server) => {
-    io = new Server(server, {
+exports.onlineUsers = new Set();
+const initSocket = (server) => {
+    io = new socket_io_1.Server(server, {
         cors: { origin: '*' },
     });
-    io.use(socketAuth());
+    io.use((0, socket_auth_1.socketAuth)());
     io.on('connection', (socket) => {
         const userId = socket.user.user_id;
         const userRole = socket.user.role;
-        onlineUsers.add(userId);
-        console.info(colors.blue(`🔌🟢 Socket Connected: ${userId} (${userRole})`));
+        exports.onlineUsers.add(userId);
+        console.info(colors_1.default.blue(`🔌🟢 Socket Connected: ${userId} (${userRole})`));
         // ==========================================
         // 1. IDENTITY & ROLE-BASED ROOMS (For Chat)
         // ==========================================
@@ -24,11 +29,11 @@ export const initSocket = (server) => {
         socket.emit('chat message', 'Welcome to the chat!');
         if (userRole === 'ADMIN' || userRole === 'SUPER_ADMIN') {
             socket.join('admin_support_room');
-            console.log(colors.yellow(`Admin ${userId} joined support room.`));
+            console.log(colors_1.default.yellow(`Admin ${userId} joined support room.`));
         }
         if (userRole === 'DRIVER') {
             socket.join(`driver_${userId}`);
-            console.log(colors.cyan(`Driver ${userId} joined tracking room.`));
+            console.log(colors_1.default.cyan(`Driver ${userId} joined tracking room.`));
         }
         // ==========================================
         // 2. CHAT & GENERAL ROOM EVENTS
@@ -69,7 +74,7 @@ export const initSocket = (server) => {
                     payload.speed = data.speed;
                 if (data.accuracy !== undefined)
                     payload.accuracy = data.accuracy;
-                await TrackDriverServices.updateDriverLocationInDB(payload);
+                await track_service_v2_1.TrackDriverServices.updateDriverLocationInDB(payload);
             }
             catch (error) {
                 const msg = error instanceof Error ? error.message : 'Unknown error';
@@ -80,8 +85,8 @@ export const initSocket = (server) => {
         socket.on('join_parcel_tracking', async (parcelId) => {
             try {
                 socket.join(`parcel_${parcelId}`);
-                console.info(colors.green(`User ${userId} tracking parcel: ${parcelId}`));
-                const currentLocation = await TrackDriverServices.getParcelDriverLocationFromDB(parcelId);
+                console.info(colors_1.default.green(`User ${userId} tracking parcel: ${parcelId}`));
+                const currentLocation = await track_service_v2_1.TrackDriverServices.getParcelDriverLocationFromDB(parcelId);
                 if (currentLocation) {
                     socket.emit('driver_location_data', { success: true, data: currentLocation });
                 }
@@ -96,7 +101,7 @@ export const initSocket = (server) => {
         });
         socket.on('get_parcel_driver_location', async (parcelId) => {
             try {
-                const location = await TrackDriverServices.getParcelDriverLocationFromDB(parcelId);
+                const location = await track_service_v2_1.TrackDriverServices.getParcelDriverLocationFromDB(parcelId);
                 socket.emit('driver_location_data', { success: true, data: location });
             }
             catch (error) {
@@ -107,15 +112,17 @@ export const initSocket = (server) => {
         // 4. DISCONNECT
         // ==========================================
         socket.on('disconnect', () => {
-            onlineUsers.delete(userId);
-            console.info(colors.red(`🔌🔴 Socket Disconnected: ${userId}`));
+            exports.onlineUsers.delete(userId);
+            console.info(colors_1.default.red(`🔌🔴 Socket Disconnected: ${userId}`));
         });
     });
     return io;
 };
-export const getIO = () => {
+exports.initSocket = initSocket;
+const getIO = () => {
     if (!io)
         throw new Error('Socket.io not initialized!');
     return io;
 };
+exports.getIO = getIO;
 //# sourceMappingURL=index.js.map
