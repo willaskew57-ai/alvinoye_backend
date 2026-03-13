@@ -49,7 +49,7 @@ const parcel_interface_1 = require("../parcel/parcel.interface");
 const otp_services_1 = require("../otp/otp.services");
 const email_helper_1 = require("../../../../utils/email-helper");
 const send_sms_1 = require("../../../../utils/send-sms");
-const deleteFileHelper_1 = require("../../../../utils/deleteFileHelper");
+const deleteFromS3_1 = require("../../../../aws/deleteFromS3");
 const env_config_1 = __importDefault(require("../../../../config/env.config"));
 const axios_1 = __importDefault(require("axios"));
 const notification_service_1 = require("../notification/notification.service");
@@ -100,7 +100,7 @@ const updateDriverInfoInDB = async (userId, payload) => {
         if (driverInfo) {
             const existingDriver = await driver_model_1.Driver.findOne({ user_id: userId });
             if (driverInfo.license_image && existingDriver?.license_image) {
-                (0, deleteFileHelper_1.deleteLocalFile)(existingDriver.license_image);
+                (0, deleteFromS3_1.deleteFileFromS3)(existingDriver.license_image);
             }
             await driver_model_1.Driver.findOneAndUpdate({ user_id: userId }, driverInfo, {
                 session,
@@ -113,14 +113,14 @@ const updateDriverInfoInDB = async (userId, payload) => {
             let finalImages = existingVehicle.vehicle_images || [];
             if (vehicle.existing_vehicle_images) {
                 const toDelete = existingVehicle.vehicle_images.filter((img) => !vehicle.existing_vehicle_images.includes(img));
-                toDelete.forEach((img) => (0, deleteFileHelper_1.deleteLocalFile)(img));
+                toDelete.forEach((img) => (0, deleteFromS3_1.deleteFileFromS3)(img));
                 finalImages = vehicle.existing_vehicle_images;
             }
             if (vehicle.vehicle_images) {
                 finalImages = [...finalImages, ...vehicle.vehicle_images];
             }
             if (vehicle.number_plate_image && existingVehicle.number_plate_image) {
-                (0, deleteFileHelper_1.deleteLocalFile)(existingVehicle.number_plate_image);
+                (0, deleteFromS3_1.deleteFileFromS3)(existingVehicle.number_plate_image);
             }
             const vehicleData = { ...vehicle, vehicle_images: finalImages };
             delete vehicleData.existing_vehicle_images;

@@ -8,7 +8,7 @@ const http_status_1 = __importDefault(require("http-status"));
 const catch_async_1 = __importDefault(require("../../../../utils/catch-async"));
 const send_response_1 = __importDefault(require("../../../../utils/send-response"));
 const driver_service_1 = require("./driver.service");
-const fileUploadHelper_1 = require("../../../../utils/fileUploadHelper");
+const multer_s3_uploader_1 = require("../../../../aws/multer-s3-uploader");
 const registerDriver = (0, catch_async_1.default)(async (req, res) => {
     const user_id = req.user.user_id;
     const files = req.files;
@@ -17,14 +17,14 @@ const registerDriver = (0, catch_async_1.default)(async (req, res) => {
     if (!req.body.vehicle)
         req.body.vehicle = {};
     if (files?.license_image?.[0]) {
-        req.body.driverInfo.license_image = (0, fileUploadHelper_1.getLocalFileUrl)(files.license_image[0].path);
+        req.body.driverInfo.license_image = (0, multer_s3_uploader_1.getCloudFrontUrl)(files.license_image[0].key);
     }
     if (files?.number_plate_image?.[0]) {
-        req.body.vehicle.number_plate_image = (0, fileUploadHelper_1.getLocalFileUrl)(files.number_plate_image[0].path);
+        req.body.vehicle.number_plate_image = (0, multer_s3_uploader_1.getCloudFrontUrl)(files.number_plate_image[0].key);
     }
     // 3. Handle Multiple Vehicle Images (Array)
     if (files?.vehicle_images) {
-        req.body.vehicle.vehicle_images = files.vehicle_images.map((file) => (0, fileUploadHelper_1.getLocalFileUrl)(file.path));
+        req.body.vehicle.vehicle_images = files.vehicle_images.map((file) => (0, multer_s3_uploader_1.getCloudFrontUrl)(file.key));
     }
     const result = await driver_service_1.DriverServices.addDriverInfoIntoDB(req.body, user_id);
     (0, send_response_1.default)(res, {

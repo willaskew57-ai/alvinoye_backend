@@ -10,7 +10,7 @@ const auth_1 = require("../../../../middleware/auth");
 const validate_request_1 = __importDefault(require("../../../../middleware/validate-request"));
 const chat_validation_1 = require("./chat.validation");
 const chat_interface_1 = require("./chat.interface");
-const fileUploadHelper_1 = require("../../../../utils/fileUploadHelper");
+const multer_s3_uploader_1 = require("../../../../aws/multer-s3-uploader");
 const router = (0, express_1.Router)();
 /**
  * @route POST /api/v1/chat/initiate
@@ -32,7 +32,7 @@ router.get('/messages/:id', (0, auth_1.auth)(), chat_controller_1.ChatController
  * @route POST /api/v1/chat/send
  * @desc Send a message (Customer to Admin or Admin to Customer)
  */
-router.post('/send', (0, auth_1.auth)(), fileUploadHelper_1.upload.array('attachments', 5), (req, res, next) => {
+router.post('/send', (0, auth_1.auth)(), (0, multer_s3_uploader_1.uploadFile)(), (req, res, next) => {
     // If files are sent, field values often end up in req.body.data
     if (req.body.data)
         req.body = JSON.parse(req.body.data);

@@ -10,25 +10,25 @@ const validate_request_1 = __importDefault(require("../../../../middleware/valid
 const user_interface_1 = require("../user/user.interface");
 const parcel_controller_1 = require("./parcel.controller");
 const parcel_validation_1 = require("./parcel.validation");
-const fileUploadHelper_1 = require("../../../../utils/fileUploadHelper");
+const multer_s3_uploader_1 = require("../../../../aws/multer-s3-uploader");
 const router = express_1.default.Router();
-router.post('/create', (0, auth_1.auth)(user_interface_1.USER_ROLE.CUSTOMER), fileUploadHelper_1.upload.fields([{ name: 'parcel_images', maxCount: 5 }]), (req, res, next) => {
+router.post('/create', (0, auth_1.auth)(user_interface_1.USER_ROLE.CUSTOMER), (0, multer_s3_uploader_1.uploadFile)(), (req, res, next) => {
     if (req.body.data) {
         req.body = JSON.parse(req.body.data);
     }
     const files = req.files;
     if (files?.parcel_images) {
-        req.body.parcel_images = files.parcel_images.map((file) => (0, fileUploadHelper_1.getLocalFileUrl)(file.path));
+        req.body.parcel_images = files.parcel_images.map((file) => (0, multer_s3_uploader_1.getCloudFrontUrl)(file.key));
     }
     next();
 }, (0, validate_request_1.default)(parcel_validation_1.ParcelValidations.createParcelValidationSchema), parcel_controller_1.ParcelControllers.createParcel);
-router.patch('/update/:id', (0, auth_1.auth)(user_interface_1.USER_ROLE.CUSTOMER), fileUploadHelper_1.upload.fields([{ name: 'parcel_images', maxCount: 5 }]), (req, res, next) => {
+router.patch('/update/:id', (0, auth_1.auth)(user_interface_1.USER_ROLE.CUSTOMER), (0, multer_s3_uploader_1.uploadFile)(), (req, res, next) => {
     if (req.body.data) {
         req.body = JSON.parse(req.body.data);
     }
     const files = req.files;
     if (files?.parcel_images) {
-        req.body.parcel_images = files.parcel_images.map((file) => (0, fileUploadHelper_1.getLocalFileUrl)(file.path));
+        req.body.parcel_images = files.parcel_images.map((file) => (0, multer_s3_uploader_1.getCloudFrontUrl)(file.key));
     }
     next();
 }, (0, validate_request_1.default)(parcel_validation_1.ParcelValidations.updateParcelValidationSchema), parcel_controller_1.ParcelControllers.updateParcel);
