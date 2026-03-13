@@ -1,12 +1,15 @@
-import { Schema, model } from 'mongoose';
-const LocationSchema = new Schema({
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Driver = void 0;
+const mongoose_1 = require("mongoose");
+const LocationSchema = new mongoose_1.Schema({
     address: { type: String, required: true },
     latitude: { type: Number, required: true },
     longitude: { type: Number, required: true },
 }, { _id: false });
-const DriverInfoSchema = new Schema({
+const DriverInfoSchema = new mongoose_1.Schema({
     user_id: {
-        type: Schema.Types.ObjectId,
+        type: mongoose_1.Schema.Types.ObjectId,
         ref: 'User',
         required: [true, 'User ID is required'],
         unique: true,
@@ -37,9 +40,9 @@ DriverInfoSchema.virtual('vehicle', {
     foreignField: 'user_id',
     justOne: true,
 });
-export const Driver = model('DriverInfo', DriverInfoSchema);
+exports.Driver = (0, mongoose_1.model)('DriverInfo', DriverInfoSchema);
 // Drop stale 'user_data_1' index if it exists (legacy index cleanup)
-Driver.collection.dropIndex('user_data_1').catch((err) => {
+exports.Driver.collection.dropIndex('user_data_1').catch((err) => {
     if (err?.codeName !== 'IndexNotFound') {
         console.warn('Could not drop stale index user_data_1:', err?.message);
     }

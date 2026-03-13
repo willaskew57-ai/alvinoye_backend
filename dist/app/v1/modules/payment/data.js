@@ -1,4 +1,5 @@
-export {};
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 // {
 //   "id": "pm_1SqXyzKNq98abcgISYDThIla",
 //   "object": "payment_method",

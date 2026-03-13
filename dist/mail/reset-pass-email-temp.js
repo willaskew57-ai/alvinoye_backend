@@ -1,4 +1,7 @@
-export const resetPassEmailTemp = (data) => {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.resetPassEmailTemp = void 0;
+const resetPassEmailTemp = (data) => {
     const logoUrl = process.env.EMAIL_TEMP_IMAGE || 'https://via.placeholder.com/150';
     return `
   <html>
@@ -93,4 +96,5 @@ export const resetPassEmailTemp = (data) => {
   </html>
 `;
 };
+exports.resetPassEmailTemp = resetPassEmailTemp;
 //# sourceMappingURL=reset-pass-email-temp.js.map

@@ -1,30 +1,36 @@
-import httpStatus from 'http-status';
-import mongoose from 'mongoose';
-import QueryBuilder from '../../../../builders/query-builder';
-import AppError from '../../../../errors/app-error';
-import { USER_ROLE } from '../user/user.interface';
-import { Parcel, ParcelPriceRequest } from './parcel.model';
-import { PARCEL_STATUS, PRICE_REQUEST_STATUS, PRICE_STATUS, PROPOSED_BY, } from './parcel.interface';
-import { generateParcelId } from './parcel.utils';
-import { deleteLocalFile } from '../../../../utils/deleteFileHelper';
-import { NotificationServices } from '../notification/notification.service';
-import { NOTIFICATION_TYPE } from '../notification/notification.constant';
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ParcelServices = void 0;
+const http_status_1 = __importDefault(require("http-status"));
+const mongoose_1 = __importDefault(require("mongoose"));
+const query_builder_1 = __importDefault(require("../../../../builders/query-builder"));
+const app_error_1 = __importDefault(require("../../../../errors/app-error"));
+const user_interface_1 = require("../user/user.interface");
+const parcel_model_1 = require("./parcel.model");
+const parcel_interface_1 = require("./parcel.interface");
+const parcel_utils_1 = require("./parcel.utils");
+const deleteFileHelper_1 = require("../../../../utils/deleteFileHelper");
+const notification_service_1 = require("../notification/notification.service");
+const notification_constant_1 = require("../notification/notification.constant");
 // ** ----- create parcel -----
 // parcel.service.ts
 const createParcelIntoDB = async (userId, payload) => {
     const parcelData = {
         ...payload,
         user_id: userId,
-        parcel_id: generateParcelId(), // Ensure you have this helper
+        parcel_id: (0, parcel_utils_1.generateParcelId)(), // Ensure you have this helper
         status: 'INITIAL',
         price_status: 'NOT_SET',
     };
-    const result = await Parcel.create(parcelData);
+    const result = await parcel_model_1.Parcel.create(parcelData);
     // Create notification for parcel creation
     try {
-        await NotificationServices.createNotificationIntoDB({
+        await notification_service_1.NotificationServices.createNotificationIntoDB({
             user_id: userId,
-            type: NOTIFICATION_TYPE.PARCEL_CREATED,
+            type: notification_constant_1.NOTIFICATION_TYPE.PARCEL_CREATED,
             title: 'Parcel Created',
             message: `Your parcel "${result.parcel_name}" has been created successfully.`,
             parcel_id: result._id,
@@ -48,10 +54,10 @@ const getAllParcelsFromDB = async (query, user) => {
         }
         delete queryObj.search;
     }
-    if (user.role === USER_ROLE.CUSTOMER) {
+    if (user.role === user_interface_1.USER_ROLE.CUSTOMER) {
         queryObj.user_id = user.user_id;
     }
-    const parcelQuery = new QueryBuilder(Parcel.find().populate('user_id accepted_by'), queryObj)
+    const parcelQuery = new query_builder_1.default(parcel_model_1.Parcel.find().populate('user_id accepted_by'), queryObj)
         .search(parcelSearchableFields)
         .filter()
         .sort()
@@ -71,13 +77,13 @@ const getMyParcelsFromDB = async (query, userId, role) => {
         queryObj.searchTerm = queryObj.search;
         delete queryObj.search;
     }
-    if (role === USER_ROLE.CUSTOMER) {
+    if (role === user_interface_1.USER_ROLE.CUSTOMER) {
         queryObj.user_id = userId;
     }
-    else if (role === USER_ROLE.DRIVER) {
+    else if (role === user_interface_1.USER_ROLE.DRIVER) {
         queryObj.accepted_by = userId;
     }
-    const parcelQuery = new QueryBuilder(Parcel.find().populate('user_id accepted_by'), queryObj)
+    const parcelQuery = new query_builder_1.default(parcel_model_1.Parcel.find().populate('user_id accepted_by'), queryObj)
         .search(parcelSearchableFields)
         .filter()
         .sort()
@@ -88,21 +94,21 @@ const getMyParcelsFromDB = async (query, userId, role) => {
     return { meta, data };
 };
 const getSingleParcelFromDB = async (id) => {
-    const result = await Parcel.findById(id).populate('user_id accepted_by price_requests review');
+    const result = await parcel_model_1.Parcel.findById(id).populate('user_id accepted_by price_requests review');
     if (!result) {
-        throw new AppError(httpStatus.NOT_FOUND, 'Parcel not found!');
+        throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'Parcel not found!');
     }
     return result;
 };
 const updateParcelInDB = async (id, payload) => {
     // 1. Fetch the existing parcel
-    const existingParcel = await Parcel.findById(id);
+    const existingParcel = await parcel_model_1.Parcel.findById(id);
     if (!existingParcel) {
-        throw new AppError(httpStatus.NOT_FOUND, 'Parcel not found!');
+        throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'Parcel not found!');
     }
     // 2. CRITICAL: Only allow update if status is INITIAL
-    if (existingParcel.status !== PARCEL_STATUS.INITIAL) {
-        throw new AppError(httpStatus.FORBIDDEN, `Cannot update parcel. Updates are only allowed when status is '${PARCEL_STATUS.INITIAL}'.`);
+    if (existingParcel.status !== parcel_interface_1.PARCEL_STATUS.INITIAL) {
+        throw new app_error_1.default(http_status_1.default.FORBIDDEN, `Cannot update parcel. Updates are only allowed when status is '${parcel_interface_1.PARCEL_STATUS.INITIAL}'.`);
     }
     // 3. Prevent direct update of restricted fields
     const restrictedFields = [
@@ -119,7 +125,7 @@ const updateParcelInDB = async (id, payload) => {
         // Identify images that were in the DB but are NOT in the 'keep' list
         const imagesToDelete = existingParcel.parcel_images.filter((img) => !payload.existing_parcel_images?.includes(img));
         // Physically delete them from the local folder
-        imagesToDelete.forEach((img) => deleteLocalFile(img));
+        imagesToDelete.forEach((img) => (0, deleteFileHelper_1.deleteLocalFile)(img));
         // Update our array to contain only the kept images
         finalParcelImages = payload.existing_parcel_images;
     }
@@ -131,23 +137,23 @@ const updateParcelInDB = async (id, payload) => {
     payload.parcel_images = finalParcelImages;
     delete payload.existing_parcel_images; // Clean up the helper field
     // 6. Update the database
-    const result = await Parcel.findByIdAndUpdate(id, payload, {
+    const result = await parcel_model_1.Parcel.findByIdAndUpdate(id, payload, {
         new: true,
         runValidators: true,
     });
     return result;
 };
 const rejectParcelFromDB = async (id, payload) => {
-    const parcel = await Parcel.findById(id);
+    const parcel = await parcel_model_1.Parcel.findById(id);
     if (!parcel) {
-        throw new AppError(httpStatus.NOT_FOUND, 'Parcel not found!');
+        throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'Parcel not found!');
     }
     // Optional: Check if the parcel is already in a state that cannot be rejected
-    if (parcel.status !== PARCEL_STATUS.WAITING) {
-        throw new AppError(httpStatus.BAD_REQUEST, `Cannot reject a parcel that is already ${parcel.status.toLowerCase()}`);
+    if (parcel.status !== parcel_interface_1.PARCEL_STATUS.WAITING) {
+        throw new app_error_1.default(http_status_1.default.BAD_REQUEST, `Cannot reject a parcel that is already ${parcel.status.toLowerCase()}`);
     }
-    const result = await Parcel.findByIdAndUpdate(id, {
-        status: PARCEL_STATUS.REJECTED,
+    const result = await parcel_model_1.Parcel.findByIdAndUpdate(id, {
+        status: parcel_interface_1.PARCEL_STATUS.REJECTED,
         rejection_reason: payload.rejection_reason,
     }, {
         new: true,
@@ -156,16 +162,16 @@ const rejectParcelFromDB = async (id, payload) => {
     return result;
 };
 const requestForPriceInDB = async (id) => {
-    const parcel = await Parcel.findById(id);
+    const parcel = await parcel_model_1.Parcel.findById(id);
     if (!parcel) {
-        throw new AppError(httpStatus.NOT_FOUND, 'Parcel not found!');
+        throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'Parcel not found!');
     }
     // Optional: Check if the parcel is already in a state that cannot be rejected
-    if (parcel.status !== PARCEL_STATUS.INITIAL) {
-        throw new AppError(httpStatus.BAD_REQUEST, `Cannot request price for a parcel that is already ${parcel.status.toLowerCase()}`);
+    if (parcel.status !== parcel_interface_1.PARCEL_STATUS.INITIAL) {
+        throw new app_error_1.default(http_status_1.default.BAD_REQUEST, `Cannot request price for a parcel that is already ${parcel.status.toLowerCase()}`);
     }
-    const result = await Parcel.findByIdAndUpdate(id, {
-        status: PARCEL_STATUS.WAITING,
+    const result = await parcel_model_1.Parcel.findByIdAndUpdate(id, {
+        status: parcel_interface_1.PARCEL_STATUS.WAITING,
     }, {
         new: true,
         runValidators: true,
@@ -177,12 +183,12 @@ const requestForPriceInDB = async (id) => {
 const proposePriceInDB = async (role, payload // This matches your createPriceRequestValidationSchema
 ) => {
     // 1. Verify the Parcel exists
-    const parcel = await Parcel.findById(payload.parcel_id);
+    const parcel = await parcel_model_1.Parcel.findById(payload.parcel_id);
     if (!parcel) {
-        throw new AppError(httpStatus.NOT_FOUND, 'Parcel not found!');
+        throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'Parcel not found!');
     }
-    if (parcel.status !== PARCEL_STATUS.WAITING) {
-        throw new AppError(httpStatus.BAD_REQUEST, 'You can only propose a price when the parcel is in WAITING status.');
+    if (parcel.status !== parcel_interface_1.PARCEL_STATUS.WAITING) {
+        throw new app_error_1.default(http_status_1.default.BAD_REQUEST, 'You can only propose a price when the parcel is in WAITING status.');
     }
     const isAdmin = role === 'ADMIN' || role === 'SUPER_ADMIN';
     const currentStatus = parcel.price_status;
@@ -190,50 +196,50 @@ const proposePriceInDB = async (role, payload // This matches your createPriceRe
     let isFinalOffer = false;
     // 2. Logic to determine status changes
     if (isAdmin) {
-        if (currentStatus === PRICE_STATUS.NOT_SET ||
-            currentStatus === PRICE_STATUS.REJECTED) {
-            newPriceStatus = PRICE_STATUS.PROPOSED;
+        if (currentStatus === parcel_interface_1.PRICE_STATUS.NOT_SET ||
+            currentStatus === parcel_interface_1.PRICE_STATUS.REJECTED) {
+            newPriceStatus = parcel_interface_1.PRICE_STATUS.PROPOSED;
         }
-        else if (currentStatus === PRICE_STATUS.COUNTERED) {
-            newPriceStatus = PRICE_STATUS.FINAL_OFFER;
+        else if (currentStatus === parcel_interface_1.PRICE_STATUS.COUNTERED) {
+            newPriceStatus = parcel_interface_1.PRICE_STATUS.FINAL_OFFER;
             isFinalOffer = true;
         }
         else {
-            throw new AppError(httpStatus.BAD_REQUEST, `Admin cannot propose price when status is ${currentStatus}`);
+            throw new app_error_1.default(http_status_1.default.BAD_REQUEST, `Admin cannot propose price when status is ${currentStatus}`);
         }
     }
     else {
         // CUSTOMER LOGIC
-        if (currentStatus === PRICE_STATUS.PROPOSED) {
-            newPriceStatus = PRICE_STATUS.COUNTERED;
+        if (currentStatus === parcel_interface_1.PRICE_STATUS.PROPOSED) {
+            newPriceStatus = parcel_interface_1.PRICE_STATUS.COUNTERED;
         }
-        else if (currentStatus === PRICE_STATUS.FINAL_OFFER) {
-            throw new AppError(httpStatus.BAD_REQUEST, 'This is the final offer. You can only Accept or Reject.');
+        else if (currentStatus === parcel_interface_1.PRICE_STATUS.FINAL_OFFER) {
+            throw new app_error_1.default(http_status_1.default.BAD_REQUEST, 'This is the final offer. You can only Accept or Reject.');
         }
         else {
-            throw new AppError(httpStatus.BAD_REQUEST, 'You cannot propose a price at this stage.');
+            throw new app_error_1.default(http_status_1.default.BAD_REQUEST, 'You cannot propose a price at this stage.');
         }
     }
     // 3. Create the Price Request (Simplified: No session, No array)
     // This aligns with your PriceRequestSchema
-    const priceRequest = await ParcelPriceRequest.create({
+    const priceRequest = await parcel_model_1.ParcelPriceRequest.create({
         parcel_id: payload.parcel_id,
         price_type: 'PROPOSED',
         proposed_price: payload.proposed_price,
         message: payload.message || '',
-        proposed_by: isAdmin ? PROPOSED_BY.ADMIN : PROPOSED_BY.CUSTOMER,
+        proposed_by: isAdmin ? parcel_interface_1.PROPOSED_BY.ADMIN : parcel_interface_1.PROPOSED_BY.CUSTOMER,
         is_final_offer: isFinalOffer,
-        status: PRICE_REQUEST_STATUS.PENDING,
+        status: parcel_interface_1.PRICE_REQUEST_STATUS.PENDING,
     });
     // 4. Update the Parcel price_status
-    await Parcel.findByIdAndUpdate(payload.parcel_id, { price_status: newPriceStatus }, { new: true });
+    await parcel_model_1.Parcel.findByIdAndUpdate(payload.parcel_id, { price_status: newPriceStatus }, { new: true });
     // Create notification for price proposal/counter-offer
     try {
         // Determine notification type and recipient
-        let type = NOTIFICATION_TYPE.PRICE_PROPOSED;
-        if (newPriceStatus === PRICE_STATUS.COUNTERED ||
-            newPriceStatus === PRICE_STATUS.FINAL_OFFER) {
-            type = NOTIFICATION_TYPE.PRICE_COUNTERED;
+        let type = notification_constant_1.NOTIFICATION_TYPE.PRICE_PROPOSED;
+        if (newPriceStatus === parcel_interface_1.PRICE_STATUS.COUNTERED ||
+            newPriceStatus === parcel_interface_1.PRICE_STATUS.FINAL_OFFER) {
+            type = notification_constant_1.NOTIFICATION_TYPE.PRICE_COUNTERED;
         }
         // If Admin proposed, notify Customer (parcel owner)
         // If Customer proposed, we might notify Admin (if there's a specific admin user or system notification)
@@ -241,13 +247,13 @@ const proposePriceInDB = async (role, payload // This matches your createPriceRe
         // Only notify if there is a clear recipient.
         // If Admin proposed -> Notify Parcel Owner (Customer)
         if (isAdmin) {
-            await NotificationServices.createNotificationIntoDB({
+            await notification_service_1.NotificationServices.createNotificationIntoDB({
                 user_id: parcel.user_id, // Notify the customer
                 type: type,
-                title: type === NOTIFICATION_TYPE.PRICE_COUNTERED
+                title: type === notification_constant_1.NOTIFICATION_TYPE.PRICE_COUNTERED
                     ? 'Price Counter Offer'
                     : 'Price Proposed',
-                message: type === NOTIFICATION_TYPE.PRICE_COUNTERED
+                message: type === notification_constant_1.NOTIFICATION_TYPE.PRICE_COUNTERED
                     ? `A counter offer of $${payload.proposed_price} has been made for your parcel "${parcel.parcel_name}".`
                     : `A price of $${payload.proposed_price} has been proposed for your parcel "${parcel.parcel_name}".`,
                 parcel_id: parcel._id,
@@ -275,40 +281,40 @@ const proposePriceInDB = async (role, payload // This matches your createPriceRe
 };
 // **  Accepting  price proposal
 const acceptPriceProposalInDB = async (requestId, user) => {
-    const session = await mongoose.startSession();
+    const session = await mongoose_1.default.startSession();
     try {
         session.startTransaction();
-        const priceRequest = await ParcelPriceRequest.findById(requestId).session(session);
+        const priceRequest = await parcel_model_1.ParcelPriceRequest.findById(requestId).session(session);
         if (!priceRequest) {
-            throw new AppError(httpStatus.NOT_FOUND, 'Request not found!');
+            throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'Request not found!');
         }
-        if (priceRequest.status !== PRICE_REQUEST_STATUS.PENDING) {
-            throw new AppError(httpStatus.BAD_REQUEST, 'This proposal has already been decided!');
+        if (priceRequest.status !== parcel_interface_1.PRICE_REQUEST_STATUS.PENDING) {
+            throw new app_error_1.default(http_status_1.default.BAD_REQUEST, 'This proposal has already been decided!');
         }
         const isAdmin = user.role === 'ADMIN' || user.role === 'SUPER_ADMIN';
-        const userRoleType = isAdmin ? PROPOSED_BY.ADMIN : PROPOSED_BY.CUSTOMER;
+        const userRoleType = isAdmin ? parcel_interface_1.PROPOSED_BY.ADMIN : parcel_interface_1.PROPOSED_BY.CUSTOMER;
         if (priceRequest.proposed_by === userRoleType) {
-            throw new AppError(httpStatus.FORBIDDEN, 'You cannot respond to your own proposal.');
+            throw new app_error_1.default(http_status_1.default.FORBIDDEN, 'You cannot respond to your own proposal.');
         }
-        priceRequest.status = PRICE_REQUEST_STATUS.ACCEPTED;
+        priceRequest.status = parcel_interface_1.PRICE_REQUEST_STATUS.ACCEPTED;
         priceRequest.decided_at = new Date();
         await priceRequest.save({ session });
-        const updatedParcel = await Parcel.findByIdAndUpdate(priceRequest.parcel_id, {
+        const updatedParcel = await parcel_model_1.Parcel.findByIdAndUpdate(priceRequest.parcel_id, {
             final_price: priceRequest.proposed_price,
-            price_status: PRICE_STATUS.ACCEPTED,
-            status: PARCEL_STATUS.PENDING,
+            price_status: parcel_interface_1.PRICE_STATUS.ACCEPTED,
+            status: parcel_interface_1.PARCEL_STATUS.PENDING,
         }, { session, new: true });
         if (!updatedParcel) {
-            throw new AppError(httpStatus.NOT_FOUND, 'Associated parcel not found!');
+            throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'Associated parcel not found!');
         }
         await session.commitTransaction();
         try {
-            const notifyUserId = priceRequest.proposed_by === PROPOSED_BY.CUSTOMER
+            const notifyUserId = priceRequest.proposed_by === parcel_interface_1.PROPOSED_BY.CUSTOMER
                 ? updatedParcel.user_id
                 : priceRequest.proposed_by;
-            await NotificationServices.createNotificationIntoDB({
+            await notification_service_1.NotificationServices.createNotificationIntoDB({
                 user_id: notifyUserId,
-                type: NOTIFICATION_TYPE.PRICE_ACCEPTED,
+                type: notification_constant_1.NOTIFICATION_TYPE.PRICE_ACCEPTED,
                 title: 'Price Accepted',
                 message: `The price of $${priceRequest.proposed_price} for parcel "${updatedParcel.parcel_name}" has been accepted.`,
                 parcel_id: updatedParcel._id,
@@ -334,30 +340,30 @@ const acceptPriceProposalInDB = async (requestId, user) => {
 };
 // ** Rejecting price proposal
 const rejectPriceProposalInDB = async (requestId, user) => {
-    const session = await mongoose.startSession();
+    const session = await mongoose_1.default.startSession();
     try {
         session.startTransaction();
-        const priceRequest = await ParcelPriceRequest.findById(requestId).session(session);
+        const priceRequest = await parcel_model_1.ParcelPriceRequest.findById(requestId).session(session);
         if (!priceRequest) {
-            throw new AppError(httpStatus.NOT_FOUND, 'Request not found!');
+            throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'Request not found!');
         }
-        if (priceRequest.status !== PRICE_REQUEST_STATUS.PENDING) {
-            throw new AppError(httpStatus.BAD_REQUEST, 'This proposal has already been decided!');
+        if (priceRequest.status !== parcel_interface_1.PRICE_REQUEST_STATUS.PENDING) {
+            throw new app_error_1.default(http_status_1.default.BAD_REQUEST, 'This proposal has already been decided!');
         }
         const isAdmin = user.role === 'ADMIN' || user.role === 'SUPER_ADMIN';
-        const userRoleType = isAdmin ? PROPOSED_BY.ADMIN : PROPOSED_BY.CUSTOMER;
+        const userRoleType = isAdmin ? parcel_interface_1.PROPOSED_BY.ADMIN : parcel_interface_1.PROPOSED_BY.CUSTOMER;
         if (priceRequest.proposed_by === userRoleType) {
-            throw new AppError(httpStatus.FORBIDDEN, 'You cannot respond to your own proposal.');
+            throw new app_error_1.default(http_status_1.default.FORBIDDEN, 'You cannot respond to your own proposal.');
         }
         priceRequest.status = 'REJECTED';
         priceRequest.decided_at = new Date();
         await priceRequest.save({ session });
-        const updatedParcel = await Parcel.findByIdAndUpdate(priceRequest.parcel_id, {
-            price_status: PRICE_STATUS.REJECTED,
-            status: PARCEL_STATUS.REJECTED,
+        const updatedParcel = await parcel_model_1.Parcel.findByIdAndUpdate(priceRequest.parcel_id, {
+            price_status: parcel_interface_1.PRICE_STATUS.REJECTED,
+            status: parcel_interface_1.PARCEL_STATUS.REJECTED,
         }, { session, new: true });
         if (!updatedParcel) {
-            throw new AppError(httpStatus.NOT_FOUND, 'Associated parcel not found!');
+            throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'Associated parcel not found!');
         }
         await session.commitTransaction();
         return priceRequest;
@@ -371,58 +377,58 @@ const rejectPriceProposalInDB = async (requestId, user) => {
     }
 };
 const rejectAndCounterPriceInDB = async (requestId, payload) => {
-    const currentRequest = await ParcelPriceRequest.findById(requestId);
-    const parcel = await Parcel.findById(payload.parcel_id);
+    const currentRequest = await parcel_model_1.ParcelPriceRequest.findById(requestId);
+    const parcel = await parcel_model_1.Parcel.findById(payload.parcel_id);
     if (!currentRequest) {
-        throw new AppError(httpStatus.NOT_FOUND, 'Price request not found!');
+        throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'Price request not found!');
     }
-    if (currentRequest.status !== PRICE_REQUEST_STATUS.PENDING) {
-        throw new AppError(httpStatus.BAD_REQUEST, `This price request has already been ${currentRequest.status.toLowerCase()}`);
+    if (currentRequest.status !== parcel_interface_1.PRICE_REQUEST_STATUS.PENDING) {
+        throw new app_error_1.default(http_status_1.default.BAD_REQUEST, `This price request has already been ${currentRequest.status.toLowerCase()}`);
     }
     if (!parcel) {
-        throw new AppError(httpStatus.NOT_FOUND, 'Parcel not found!');
+        throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'Parcel not found!');
     }
-    currentRequest.status = PRICE_REQUEST_STATUS.REJECTED;
+    currentRequest.status = parcel_interface_1.PRICE_REQUEST_STATUS.REJECTED;
     currentRequest.rejection_reason = payload.rejection_reason;
     currentRequest.decided_at = new Date();
     await currentRequest.save();
-    const newCounterOffer = await ParcelPriceRequest.create({
+    const newCounterOffer = await parcel_model_1.ParcelPriceRequest.create({
         parcel_id: payload.parcel_id,
-        proposed_by: PROPOSED_BY.CUSTOMER,
+        proposed_by: parcel_interface_1.PROPOSED_BY.CUSTOMER,
         price_type: 'COUNTERED',
         proposed_price: payload.suggested_price,
-        status: PRICE_REQUEST_STATUS.PENDING,
+        status: parcel_interface_1.PRICE_REQUEST_STATUS.PENDING,
     });
-    await Parcel.findByIdAndUpdate(payload.parcel_id, { price_status: PRICE_STATUS.COUNTERED }, { new: true });
+    await parcel_model_1.Parcel.findByIdAndUpdate(payload.parcel_id, { price_status: parcel_interface_1.PRICE_STATUS.COUNTERED }, { new: true });
     return newCounterOffer;
 };
 const adminRejectAndFinalOfferInDB = async (requestId, payload) => {
-    const customerRequest = await ParcelPriceRequest.findById(requestId);
+    const customerRequest = await parcel_model_1.ParcelPriceRequest.findById(requestId);
     if (!customerRequest) {
-        throw new AppError(httpStatus.NOT_FOUND, 'Counter offer not found');
+        throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'Counter offer not found');
     }
-    if (customerRequest.status !== PRICE_REQUEST_STATUS.PENDING) {
-        throw new AppError(httpStatus.BAD_REQUEST, `This price request has already been ${customerRequest.status.toLowerCase()}`);
+    if (customerRequest.status !== parcel_interface_1.PRICE_REQUEST_STATUS.PENDING) {
+        throw new app_error_1.default(http_status_1.default.BAD_REQUEST, `This price request has already been ${customerRequest.status.toLowerCase()}`);
     }
-    customerRequest.status = PRICE_REQUEST_STATUS.REJECTED;
+    customerRequest.status = parcel_interface_1.PRICE_REQUEST_STATUS.REJECTED;
     customerRequest.rejection_reason = payload?.message ?? null;
     customerRequest.decided_at = new Date();
     await customerRequest.save();
-    const finalOffer = await ParcelPriceRequest.create({
+    const finalOffer = await parcel_model_1.ParcelPriceRequest.create({
         parcel_id: payload.parcel_id,
-        proposed_by: PROPOSED_BY.ADMIN,
+        proposed_by: parcel_interface_1.PROPOSED_BY.ADMIN,
         price_type: 'FINAL_OFFER',
         proposed_price: payload.final_price,
         message: payload.message || 'This is our final offer.',
         is_final_offer: true,
-        status: PRICE_REQUEST_STATUS.PENDING,
+        status: parcel_interface_1.PRICE_REQUEST_STATUS.PENDING,
     });
-    await Parcel.findByIdAndUpdate(payload.parcel_id, {
-        price_status: PRICE_STATUS.FINAL_OFFER,
+    await parcel_model_1.Parcel.findByIdAndUpdate(payload.parcel_id, {
+        price_status: parcel_interface_1.PRICE_STATUS.FINAL_OFFER,
     });
     return finalOffer;
 };
-export const ParcelServices = {
+exports.ParcelServices = {
     createParcelIntoDB,
     getAllParcelsFromDB,
     getMyParcelsFromDB,

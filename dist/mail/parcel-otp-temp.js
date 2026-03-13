@@ -1,4 +1,7 @@
-export const parcelOtpEmailTemp = (data) => {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.parcelOtpEmailTemp = void 0;
+const parcelOtpEmailTemp = (data) => {
     const logoUrl = process.env.EMAIL_TEMP_IMAGE || 'https://via.placeholder.com/150';
     return `
   <html>
@@ -90,4 +93,5 @@ export const parcelOtpEmailTemp = (data) => {
   </html>
 `;
 };
+exports.parcelOtpEmailTemp = parcelOtpEmailTemp;
 //# sourceMappingURL=parcel-otp-temp.js.map

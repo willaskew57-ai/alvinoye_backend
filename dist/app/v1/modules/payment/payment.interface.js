@@ -1,4 +1,3 @@
-// src/app/v1/modules/payment/payment.interface.ts
-import { Document, Types } from 'mongoose';
-import { PAYMENT_STATUS } from './payment.constants';
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 //# sourceMappingURL=payment.interface.js.map

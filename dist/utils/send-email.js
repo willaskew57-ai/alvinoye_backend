@@ -1,22 +1,28 @@
-import nodemailer from 'nodemailer';
-import configs from '../config/env.config';
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.sendEmail = void 0;
+const nodemailer_1 = __importDefault(require("nodemailer"));
+const env_config_1 = __importDefault(require("../config/env.config"));
 /**
  * Sends an email using SMTP configuration.
  * @param options - Object containing recipient email, subject, and HTML content.
  */
-export const sendEmail = async (options) => {
-    const transporter = nodemailer.createTransport({
-        host: configs.smtp_host || 'smtp.gmail.com',
-        port: configs.smtp_port ? parseInt(configs.smtp_port) : 587,
-        secure: configs.smtp_port === '465',
+const sendEmail = async (options) => {
+    const transporter = nodemailer_1.default.createTransport({
+        host: env_config_1.default.smtp_host || 'smtp.gmail.com',
+        port: env_config_1.default.smtp_port ? parseInt(env_config_1.default.smtp_port) : 587,
+        secure: env_config_1.default.smtp_port === '465',
         auth: {
-            user: configs.smtp_mail,
-            pass: configs.smtp_password,
+            user: env_config_1.default.smtp_mail,
+            pass: env_config_1.default.smtp_password,
         },
     });
     const { email, subject, html } = options;
     const mailOptions = {
-        from: `"${configs.smtp_service_name || 'Support'}" <${configs.smtp_mail}>`,
+        from: `"${env_config_1.default.smtp_service_name || 'Support'}" <${env_config_1.default.smtp_mail}>`,
         to: email,
         subject: subject,
         html: html,
@@ -34,4 +40,5 @@ export const sendEmail = async (options) => {
         throw error;
     }
 };
+exports.sendEmail = sendEmail;
 //# sourceMappingURL=send-email.js.map

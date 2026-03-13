@@ -1,13 +1,16 @@
-import { Schema, model, Types } from 'mongoose';
-const OtpSchema = new Schema({
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Otp = void 0;
+const mongoose_1 = require("mongoose");
+const OtpSchema = new mongoose_1.Schema({
     user: {
-        type: Schema.Types.ObjectId,
+        type: mongoose_1.Schema.Types.ObjectId,
         ref: 'User',
         required: false,
         index: true,
     },
     parcel: {
-        type: Schema.Types.ObjectId,
+        type: mongoose_1.Schema.Types.ObjectId,
         ref: 'Parcel',
         required: false,
         index: true,
@@ -46,6 +49,6 @@ OtpSchema.index({ expires_at: 1 }, {
         expires_at: { $exists: true },
     },
 });
-export const Otp = model('Otp', OtpSchema);
-export default Otp;
+exports.Otp = (0, mongoose_1.model)('Otp', OtpSchema);
+exports.default = exports.Otp;
 //# sourceMappingURL=otp.model.js.map

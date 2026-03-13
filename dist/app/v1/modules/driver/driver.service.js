@@ -1,44 +1,82 @@
-import httpStatus from 'http-status';
-import AppError from '../../../../errors/app-error';
-import { Driver } from './driver.model';
-import QueryBuilder from '../../../../builders/query-builder';
-import mongoose, { Types } from 'mongoose';
-import { Vehicle } from '../vehicle/vehicle.model';
-import User from '../user/user.model';
-import { Parcel } from '../parcel/parcel.model';
-import { PARCEL_STATUS, PRICE_STATUS } from '../parcel/parcel.interface';
-import { OtpServices } from '../otp/otp.services';
-import Otp from '../otp/otp.model';
-import { EmailHelpers } from '../../../../utils/email-helper';
-import { sendSms } from '../../../../utils/send-sms';
-import { deleteLocalFile } from '../../../../utils/deleteFileHelper';
-import configs from '../../../../config/env.config';
-import axios from 'axios';
-import { NotificationServices } from '../notification/notification.service';
-import { NOTIFICATION_TYPE } from '../notification/notification.constant';
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.DriverServices = void 0;
+const http_status_1 = __importDefault(require("http-status"));
+const app_error_1 = __importDefault(require("../../../../errors/app-error"));
+const driver_model_1 = require("./driver.model");
+const query_builder_1 = __importDefault(require("../../../../builders/query-builder"));
+const mongoose_1 = __importStar(require("mongoose"));
+const vehicle_model_1 = require("../vehicle/vehicle.model");
+const user_model_1 = __importDefault(require("../user/user.model"));
+const parcel_model_1 = require("../parcel/parcel.model");
+const parcel_interface_1 = require("../parcel/parcel.interface");
+const otp_services_1 = require("../otp/otp.services");
+const email_helper_1 = require("../../../../utils/email-helper");
+const send_sms_1 = require("../../../../utils/send-sms");
+const deleteFileHelper_1 = require("../../../../utils/deleteFileHelper");
+const env_config_1 = __importDefault(require("../../../../config/env.config"));
+const axios_1 = __importDefault(require("axios"));
+const notification_service_1 = require("../notification/notification.service");
+const notification_constant_1 = require("../notification/notification.constant");
 const addDriverInfoIntoDB = async (payload, userIdFromToken) => {
     const { driverInfo, vehicle } = payload;
     const finalUserId = driverInfo.user_id || userIdFromToken;
     if (!finalUserId) {
-        throw new AppError(httpStatus.BAD_REQUEST, 'User ID is required!');
+        throw new app_error_1.default(http_status_1.default.BAD_REQUEST, 'User ID is required!');
     }
-    const isDriverExists = await Driver.findOne({ user_id: finalUserId });
+    const isDriverExists = await driver_model_1.Driver.findOne({ user_id: finalUserId });
     if (isDriverExists) {
-        throw new AppError(httpStatus.CONFLICT, 'Driver profile already exists!');
+        throw new app_error_1.default(http_status_1.default.CONFLICT, 'Driver profile already exists!');
     }
-    const session = await mongoose.startSession();
+    const session = await mongoose_1.default.startSession();
     try {
         session.startTransaction();
         const driverData = { ...driverInfo, user_id: finalUserId };
-        const newDriver = await Driver.create([driverData], { session });
+        const newDriver = await driver_model_1.Driver.create([driverData], { session });
         const vehicleData = {
             ...vehicle,
             user_id: finalUserId,
         };
-        const newVehicle = await Vehicle.create([vehicleData], { session });
-        const updatedUser = await User.findByIdAndUpdate(finalUserId, { is_profile_completed: true, status: 'ACTIVE' }, { session, new: true });
+        const newVehicle = await vehicle_model_1.Vehicle.create([vehicleData], { session });
+        const updatedUser = await user_model_1.default.findByIdAndUpdate(finalUserId, { is_profile_completed: true, status: 'ACTIVE' }, { session, new: true });
         if (!updatedUser) {
-            throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+            throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'User not found');
         }
         await session.commitTransaction();
         return {
@@ -48,7 +86,7 @@ const addDriverInfoIntoDB = async (payload, userIdFromToken) => {
     }
     catch (error) {
         await session.abortTransaction();
-        throw new AppError(httpStatus.BAD_REQUEST, error.message || 'Registration failed');
+        throw new app_error_1.default(http_status_1.default.BAD_REQUEST, error.message || 'Registration failed');
     }
     finally {
         await session.endSession();
@@ -56,42 +94,42 @@ const addDriverInfoIntoDB = async (payload, userIdFromToken) => {
 };
 const updateDriverInfoInDB = async (userId, payload) => {
     const { driverInfo, vehicle } = payload;
-    const session = await mongoose.startSession();
+    const session = await mongoose_1.default.startSession();
     try {
         session.startTransaction();
         if (driverInfo) {
-            const existingDriver = await Driver.findOne({ user_id: userId });
+            const existingDriver = await driver_model_1.Driver.findOne({ user_id: userId });
             if (driverInfo.license_image && existingDriver?.license_image) {
-                deleteLocalFile(existingDriver.license_image);
+                (0, deleteFileHelper_1.deleteLocalFile)(existingDriver.license_image);
             }
-            await Driver.findOneAndUpdate({ user_id: userId }, driverInfo, {
+            await driver_model_1.Driver.findOneAndUpdate({ user_id: userId }, driverInfo, {
                 session,
             });
         }
         if (vehicle) {
-            const existingVehicle = await Vehicle.findOne({ user_id: userId });
+            const existingVehicle = await vehicle_model_1.Vehicle.findOne({ user_id: userId });
             if (!existingVehicle)
                 throw new Error('Vehicle not found');
             let finalImages = existingVehicle.vehicle_images || [];
             if (vehicle.existing_vehicle_images) {
                 const toDelete = existingVehicle.vehicle_images.filter((img) => !vehicle.existing_vehicle_images.includes(img));
-                toDelete.forEach((img) => deleteLocalFile(img));
+                toDelete.forEach((img) => (0, deleteFileHelper_1.deleteLocalFile)(img));
                 finalImages = vehicle.existing_vehicle_images;
             }
             if (vehicle.vehicle_images) {
                 finalImages = [...finalImages, ...vehicle.vehicle_images];
             }
             if (vehicle.number_plate_image && existingVehicle.number_plate_image) {
-                deleteLocalFile(existingVehicle.number_plate_image);
+                (0, deleteFileHelper_1.deleteLocalFile)(existingVehicle.number_plate_image);
             }
             const vehicleData = { ...vehicle, vehicle_images: finalImages };
             delete vehicleData.existing_vehicle_images;
-            await Vehicle.findOneAndUpdate({ user_id: userId }, vehicleData, {
+            await vehicle_model_1.Vehicle.findOneAndUpdate({ user_id: userId }, vehicleData, {
                 session,
             });
         }
         await session.commitTransaction();
-        return await Driver.findOne({ user_id: userId }).populate('vehicle');
+        return await driver_model_1.Driver.findOne({ user_id: userId }).populate('vehicle');
     }
     catch (error) {
         await session.abortTransaction();
@@ -121,17 +159,17 @@ const getAllDriversFromDB = async (query) => {
                 $options: 'i',
             };
         }
-        const drivers = await Driver.find(locConditions).select('user_id');
+        const drivers = await driver_model_1.Driver.find(locConditions).select('user_id');
         driverIdsFromLocation = drivers.map((d) => d.user_id.toString());
     }
     if (search) {
-        const drivers = await Driver.find({
+        const drivers = await driver_model_1.Driver.find({
             driver_license_number: { $regex: search, $options: 'i' },
         }).select('user_id');
         driverIdsFromLicenseSearch = drivers.map((d) => d.user_id.toString());
     }
     if (query?.vehicle_type) {
-        const vehicles = await Vehicle.find({
+        const vehicles = await vehicle_model_1.Vehicle.find({
             vehicle_type: query.vehicle_type,
         }).select('user_id');
         vehicleMatchingUserIds = vehicles.map((v) => v.user_id.toString());
@@ -148,7 +186,7 @@ const getAllDriversFromDB = async (query) => {
         'fields',
     ];
     excludeFields.forEach((el) => delete queryObj[el]);
-    const userQuery = new QueryBuilder(User.find({ role: 'DRIVER', is_profile_completed: true })
+    const userQuery = new query_builder_1.default(user_model_1.default.find({ role: 'DRIVER', is_profile_completed: true })
         .populate('driver_info')
         .populate('vehicle'), queryObj);
     if (search) {
@@ -180,11 +218,11 @@ const getAllDriversFromDB = async (query) => {
     return { meta, data };
 };
 const getSingleDriverFromDB = async (id) => {
-    const result = await User.findOne({ _id: id, role: 'DRIVER' })
+    const result = await user_model_1.default.findOne({ _id: id, role: 'DRIVER' })
         .populate('driver_info')
         .populate('vehicle');
     if (!result) {
-        throw new AppError(httpStatus.NOT_FOUND, 'Driver not found!');
+        throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'Driver not found!');
     }
     return result;
 };
@@ -204,18 +242,18 @@ const getAvailableParcelsFromDB = async (userId, query) => {
     const page = Number(query.page) || 1;
     const limit = Number(query.limit) || 10;
     const skip = (page - 1) * limit;
-    const driver = await Driver.findOne({ user_id: userId });
-    const vehicle = await Vehicle.findOne({ user_id: userId });
+    const driver = await driver_model_1.Driver.findOne({ user_id: userId });
+    const vehicle = await vehicle_model_1.Vehicle.findOne({ user_id: userId });
     if (!driver) {
-        throw new AppError(httpStatus.NOT_FOUND, 'Driver profile not found!');
+        throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'Driver profile not found!');
     }
     if (!vehicle) {
-        throw new AppError(httpStatus.NOT_FOUND, 'Vehicle profile not found!');
+        throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'Vehicle profile not found!');
     }
-    const potentialParcels = await Parcel.find({
-        status: PARCEL_STATUS.PENDING,
+    const potentialParcels = await parcel_model_1.Parcel.find({
+        status: parcel_interface_1.PARCEL_STATUS.PENDING,
         vehicle_type: vehicle.vehicle_type,
-        price_status: PRICE_STATUS.ACCEPTED,
+        price_status: parcel_interface_1.PRICE_STATUS.ACCEPTED,
         accepted_by: null,
     }).lean();
     if (potentialParcels.length === 0) {
@@ -240,7 +278,7 @@ const getAvailableParcelsFromDB = async (userId, query) => {
             data: [],
         };
     }
-    const apiKey = configs.google_maps_api_key;
+    const apiKey = env_config_1.default.google_maps_api_key;
     const allMatchedParcels = [];
     const driverOrigin = `${driver.from.latitude},${driver.from.longitude}`;
     const driverDestination = `${driver.to.latitude},${driver.to.longitude}`;
@@ -248,7 +286,7 @@ const getAvailableParcelsFromDB = async (userId, query) => {
     let originalDistance = 0;
     let baselineAvailable = false;
     try {
-        const originalRouteRes = await axios.get(`https://maps.googleapis.com/maps/api/directions/json?origin=${driverOrigin}&destination=${driverDestination}&key=${apiKey}`);
+        const originalRouteRes = await axios_1.default.get(`https://maps.googleapis.com/maps/api/directions/json?origin=${driverOrigin}&destination=${driverDestination}&key=${apiKey}`);
         if (originalRouteRes.data.status === 'OK') {
             originalDistance = originalRouteRes.data.routes[0].legs[0].distance.value;
             baselineAvailable = true;
@@ -274,7 +312,7 @@ const getAvailableParcelsFromDB = async (userId, query) => {
                 continue;
             }
             const googleUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${driverOrigin}&destination=${driverDestination}&waypoints=${pickup}|${handover}&key=${apiKey}`;
-            const response = await axios.get(googleUrl);
+            const response = await axios_1.default.get(googleUrl);
             if (response.data.status === 'OK') {
                 const legs = response.data.routes[0].legs;
                 // legs[0]: driverOrigin → pickup
@@ -312,30 +350,30 @@ const getAvailableParcelsFromDB = async (userId, query) => {
     };
 };
 const acceptParcelFromDB = async (parcelId, driverIdFromToken) => {
-    const session = await mongoose.startSession();
+    const session = await mongoose_1.default.startSession();
     session.startTransaction();
     try {
-        const parcel = await Parcel.findById(parcelId).session(session);
+        const parcel = await parcel_model_1.Parcel.findById(parcelId).session(session);
         if (!parcel) {
-            throw new AppError(httpStatus.NOT_FOUND, 'Parcel not found');
+            throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'Parcel not found');
         }
-        if (parcel.status !== PARCEL_STATUS.PENDING) {
-            throw new AppError(httpStatus.BAD_REQUEST, 'Parcel is not available for acceptance');
+        if (parcel.status !== parcel_interface_1.PARCEL_STATUS.PENDING) {
+            throw new app_error_1.default(http_status_1.default.BAD_REQUEST, 'Parcel is not available for acceptance');
         }
-        parcel.status = PARCEL_STATUS.ONGOING;
-        parcel.accepted_by = new Types.ObjectId(driverIdFromToken);
+        parcel.status = parcel_interface_1.PARCEL_STATUS.ONGOING;
+        parcel.accepted_by = new mongoose_1.Types.ObjectId(driverIdFromToken);
         parcel.accepted_at = new Date();
         await parcel.save({ session });
-        const parcelOwner = await User.findById(parcel.user_id).session(session);
+        const parcelOwner = await user_model_1.default.findById(parcel.user_id).session(session);
         if (!parcelOwner) {
-            throw new AppError(httpStatus.NOT_FOUND, 'Parcel owner not found');
+            throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'Parcel owner not found');
         }
-        const otp = await OtpServices.generateAndSaveOtp({
+        const otp = await otp_services_1.OtpServices.generateAndSaveOtp({
             parcel_id: parcel._id,
             purpose: 'PARCEL',
         });
         console.log(otp);
-        await EmailHelpers.sendParcelOtpEmail({
+        await email_helper_1.EmailHelpers.sendParcelOtpEmail({
             email: parcelOwner.email,
             name: parcelOwner.full_name,
             verificationCode: otp,
@@ -345,7 +383,7 @@ const acceptParcelFromDB = async (parcelId, driverIdFromToken) => {
         if (parcel.receiver_phone) {
             const smsMessage = `Your parcel "${parcel.parcel_name}" has been picked up. Your verification OTP is: ${otp}. Please share this OTP with the driver for delivery confirmation.`;
             try {
-                const smsResult = await sendSms(parcel.receiver_phone, smsMessage);
+                const smsResult = await (0, send_sms_1.sendSms)(parcel.receiver_phone, smsMessage);
                 if (!smsResult.success) {
                     console.error('Failed to send SMS to receiver:', smsResult.error);
                 }
@@ -355,10 +393,10 @@ const acceptParcelFromDB = async (parcelId, driverIdFromToken) => {
             }
         }
         try {
-            const driverUser = await User.findById(driverIdFromToken);
-            await NotificationServices.createNotificationIntoDB({
+            const driverUser = await user_model_1.default.findById(driverIdFromToken);
+            await notification_service_1.NotificationServices.createNotificationIntoDB({
                 user_id: parcel.user_id,
-                type: NOTIFICATION_TYPE.PARCEL_ACCEPTED,
+                type: notification_constant_1.NOTIFICATION_TYPE.PARCEL_ACCEPTED,
                 title: 'Parcel Accepted',
                 message: `Driver ${driverUser?.full_name || 'has'} accepted your parcel "${parcel.parcel_name}".`,
                 parcel_id: parcel._id,
@@ -379,7 +417,7 @@ const acceptParcelFromDB = async (parcelId, driverIdFromToken) => {
     }
     catch (error) {
         await session.abortTransaction();
-        throw new AppError(httpStatus.BAD_REQUEST, error.message || 'Failed to accept parcel');
+        throw new app_error_1.default(http_status_1.default.BAD_REQUEST, error.message || 'Failed to accept parcel');
     }
     finally {
         await session.endSession();
@@ -387,32 +425,32 @@ const acceptParcelFromDB = async (parcelId, driverIdFromToken) => {
 };
 const verifyParcelOtpFromDB = async (payload) => {
     const { parcel_id, otp } = payload;
-    const session = await mongoose.startSession();
+    const session = await mongoose_1.default.startSession();
     try {
         session.startTransaction();
-        const parcel = await Parcel.findById(parcel_id).session(session);
+        const parcel = await parcel_model_1.Parcel.findById(parcel_id).session(session);
         if (!parcel) {
-            throw new AppError(httpStatus.NOT_FOUND, 'Parcel not found');
+            throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'Parcel not found');
         }
-        if (parcel.status !== PARCEL_STATUS.ONGOING) {
-            throw new AppError(httpStatus.BAD_REQUEST, 'Parcel is not in ONGOING state');
+        if (parcel.status !== parcel_interface_1.PARCEL_STATUS.ONGOING) {
+            throw new app_error_1.default(http_status_1.default.BAD_REQUEST, 'Parcel is not in ONGOING state');
         }
-        await OtpServices.verifyOtpFromDB({
+        await otp_services_1.OtpServices.verifyOtpFromDB({
             parcel_id: parcel._id.toString(),
             inputOtp: otp,
             purpose: 'PARCEL',
         });
         // Complete the parcel automatically after OTP verification
-        parcel.status = PARCEL_STATUS.COMPLETED;
+        parcel.status = parcel_interface_1.PARCEL_STATUS.COMPLETED;
         parcel.completed_at = new Date();
         await parcel.save({ session });
         await session.commitTransaction();
         // Send notification after parcel is completed
         try {
-            const driverUser = await User.findById(parcel.accepted_by);
-            await NotificationServices.createNotificationIntoDB({
+            const driverUser = await user_model_1.default.findById(parcel.accepted_by);
+            await notification_service_1.NotificationServices.createNotificationIntoDB({
                 user_id: parcel.user_id,
-                type: NOTIFICATION_TYPE.PARCEL_COMPLETED,
+                type: notification_constant_1.NOTIFICATION_TYPE.PARCEL_COMPLETED,
                 title: 'Parcel Delivered',
                 message: `Your parcel "${parcel.parcel_name}" has been delivered successfully by ${driverUser?.full_name || 'the driver'}.`,
                 parcel_id: parcel._id,
@@ -433,7 +471,7 @@ const verifyParcelOtpFromDB = async (payload) => {
     }
     catch (error) {
         await session.abortTransaction();
-        throw new AppError(httpStatus.BAD_REQUEST, error.message || 'Failed to verify OTP');
+        throw new app_error_1.default(http_status_1.default.BAD_REQUEST, error.message || 'Failed to verify OTP');
     }
     finally {
         await session.endSession();
@@ -500,7 +538,7 @@ const verifyParcelOtpFromDB = async (payload) => {
 //     );
 //   }
 // };
-export const DriverServices = {
+exports.DriverServices = {
     addDriverInfoIntoDB,
     updateDriverInfoInDB,
     getAllDriversFromDB,

@@ -1,3 +1,3 @@
-import { Document, Types } from 'mongoose';
-import { NOTIFICATION_TYPE, NOTIFICATION_STATUS, NOTIFICATION_PRIORITY, } from './notification.constant';
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 //# sourceMappingURL=notification.interface.js.map

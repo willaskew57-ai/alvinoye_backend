@@ -1,19 +1,22 @@
-import { Schema, model } from 'mongoose';
-import { PARCEL_STATUS, PRICE_REQUEST_STATUS, PRICE_STATUS, PRICE_TYPE, PROPOSED_BY, } from './parcel.interface';
-const LocationSchema = new Schema({
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ParcelPriceRequest = exports.Parcel = void 0;
+const mongoose_1 = require("mongoose");
+const parcel_interface_1 = require("./parcel.interface");
+const LocationSchema = new mongoose_1.Schema({
     address: { type: String, required: true },
     latitude: { type: Number, required: true },
     longitude: { type: Number, required: true },
 }, { _id: false });
 // --- Parcel Schema ---
-const parcelSchema = new Schema({
+const parcelSchema = new mongoose_1.Schema({
     parcel_id: {
         type: String,
         required: true,
         unique: true,
     },
     user_id: {
-        type: Schema.Types.ObjectId,
+        type: mongoose_1.Schema.Types.ObjectId,
         ref: 'User',
         required: true,
     },
@@ -32,18 +35,18 @@ const parcelSchema = new Schema({
     sender_remarks: { type: String, required: true },
     status: {
         type: String,
-        enum: Object.values(PARCEL_STATUS),
-        default: PARCEL_STATUS.WAITING,
+        enum: Object.values(parcel_interface_1.PARCEL_STATUS),
+        default: parcel_interface_1.PARCEL_STATUS.WAITING,
     },
     final_price: { type: Number, default: null },
     price_status: {
         type: String,
-        enum: Object.values(PRICE_STATUS),
-        default: PRICE_STATUS.NOT_SET,
+        enum: Object.values(parcel_interface_1.PRICE_STATUS),
+        default: parcel_interface_1.PRICE_STATUS.NOT_SET,
     },
     rejection_reason: { type: String, default: null },
     accepted_by: {
-        type: Schema.Types.ObjectId,
+        type: mongoose_1.Schema.Types.ObjectId,
         ref: 'User',
         default: null,
     },
@@ -66,22 +69,22 @@ parcelSchema.virtual('review', {
     foreignField: 'parcel_id',
     justOne: true,
 });
-export const Parcel = model('Parcel', parcelSchema);
+exports.Parcel = (0, mongoose_1.model)('Parcel', parcelSchema);
 // --- Price Request Schema ---
-const priceRequestSchema = new Schema({
+const priceRequestSchema = new mongoose_1.Schema({
     parcel_id: {
-        type: Schema.Types.ObjectId,
+        type: mongoose_1.Schema.Types.ObjectId,
         ref: 'Parcel',
         required: true,
     },
     proposed_by: {
         type: String,
-        enum: Object.values(PROPOSED_BY),
+        enum: Object.values(parcel_interface_1.PROPOSED_BY),
         required: true,
     },
     price_type: {
         type: String,
-        enum: Object.values(PRICE_TYPE),
+        enum: Object.values(parcel_interface_1.PRICE_TYPE),
         required: true,
     },
     proposed_price: { type: Number, required: true },
@@ -93,8 +96,8 @@ const priceRequestSchema = new Schema({
     },
     status: {
         type: String,
-        enum: Object.values(PRICE_REQUEST_STATUS),
-        default: PRICE_REQUEST_STATUS.PENDING,
+        enum: Object.values(parcel_interface_1.PRICE_REQUEST_STATUS),
+        default: parcel_interface_1.PRICE_REQUEST_STATUS.PENDING,
     },
     decided_at: { type: Date },
 }, {
@@ -103,5 +106,5 @@ const priceRequestSchema = new Schema({
         updatedAt: 'updated_at',
     },
 });
-export const ParcelPriceRequest = model('ParcelPriceRequest', priceRequestSchema);
+exports.ParcelPriceRequest = (0, mongoose_1.model)('ParcelPriceRequest', priceRequestSchema);
 //# sourceMappingURL=parcel.model.js.map

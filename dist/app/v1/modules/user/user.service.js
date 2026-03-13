@@ -1,16 +1,22 @@
-import httpStatus from 'http-status';
-import AppError from '../../../../errors/app-error';
-import { User } from './user.model';
-import { USER_ROLE, USER_STATUS, } from './user.interface';
-import { Types } from 'mongoose';
-import QueryBuilder from '../../../../builders/query-builder';
-import { deleteLocalFile } from '../../../../utils/deleteFileHelper';
-import { Parcel } from '../parcel/parcel.model';
-import { PARCEL_STATUS } from '../parcel/parcel.interface';
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.UserServices = void 0;
+const http_status_1 = __importDefault(require("http-status"));
+const app_error_1 = __importDefault(require("../../../../errors/app-error"));
+const user_model_1 = require("./user.model");
+const user_interface_1 = require("./user.interface");
+const mongoose_1 = require("mongoose");
+const query_builder_1 = __importDefault(require("../../../../builders/query-builder"));
+const deleteFileHelper_1 = require("../../../../utils/deleteFileHelper");
+const parcel_model_1 = require("../parcel/parcel.model");
+const parcel_interface_1 = require("../parcel/parcel.interface");
 const createAdminIntoDB = async (payload) => {
-    const isUserExists = await User.isUserExistsByEmail(payload.email);
+    const isUserExists = await user_model_1.User.isUserExistsByEmail(payload.email);
     if (isUserExists) {
-        throw new AppError(httpStatus.CONFLICT, 'User with this email already exists!');
+        throw new app_error_1.default(http_status_1.default.CONFLICT, 'User with this email already exists!');
     }
     const userData = {
         ...payload,
@@ -19,46 +25,46 @@ const createAdminIntoDB = async (payload) => {
         is_profile_completed: true,
         is_verified: true,
     };
-    const result = await User.create(userData);
+    const result = await user_model_1.User.create(userData);
     return result;
 };
 // ** ------------- User Status update Service -------------
 const changeUserStatusInDB = async (targetId, payload, performerId, performerRole) => {
-    const targetUser = await User.findById(targetId);
+    const targetUser = await user_model_1.User.findById(targetId);
     if (!targetUser) {
-        throw new AppError(httpStatus.NOT_FOUND, 'User not found!');
+        throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'User not found!');
     }
-    if (performerRole === USER_ROLE.ADMIN) {
-        const allowedRolesToManage = [USER_ROLE.CUSTOMER, USER_ROLE.DRIVER];
+    if (performerRole === user_interface_1.USER_ROLE.ADMIN) {
+        const allowedRolesToManage = [user_interface_1.USER_ROLE.CUSTOMER, user_interface_1.USER_ROLE.DRIVER];
         if (!allowedRolesToManage.includes(targetUser.role)) {
-            throw new AppError(httpStatus.FORBIDDEN, 'Admins can only manage status for Customers and Drivers');
+            throw new app_error_1.default(http_status_1.default.FORBIDDEN, 'Admins can only manage status for Customers and Drivers');
         }
     }
-    if (targetUser.status === USER_STATUS.ACTIVE &&
-        payload.status === USER_STATUS.PENDING) {
-        throw new AppError(httpStatus.BAD_REQUEST, 'Cannot change status back to PENDING once a user is ACTIVE');
+    if (targetUser.status === user_interface_1.USER_STATUS.ACTIVE &&
+        payload.status === user_interface_1.USER_STATUS.PENDING) {
+        throw new app_error_1.default(http_status_1.default.BAD_REQUEST, 'Cannot change status back to PENDING once a user is ACTIVE');
     }
     const updateData = {
         status: payload.status,
     };
-    const adminObjectId = new Types.ObjectId(performerId);
+    const adminObjectId = new mongoose_1.Types.ObjectId(performerId);
     switch (payload.status) {
-        case USER_STATUS.BLOCKED:
+        case user_interface_1.USER_STATUS.BLOCKED:
             updateData.blocked_by = adminObjectId;
             break;
-        case USER_STATUS.ACTIVE:
+        case user_interface_1.USER_STATUS.ACTIVE:
             updateData.blocked_by = null;
             break;
     }
-    const result = await User.findByIdAndUpdate(targetId, { $set: updateData }, { new: true, runValidators: true });
+    const result = await user_model_1.User.findByIdAndUpdate(targetId, { $set: updateData }, { new: true, runValidators: true });
     return result;
 };
 const getAllUsersFromDB = async (query) => {
     const userSearchableFields = ['full_name', 'email', 'phone_number'];
-    const baseQuery = User.find({
-        role: { $in: [USER_ROLE.CUSTOMER, USER_ROLE.DRIVER] },
+    const baseQuery = user_model_1.User.find({
+        role: { $in: [user_interface_1.USER_ROLE.CUSTOMER, user_interface_1.USER_ROLE.DRIVER] },
     });
-    const userQuery = new QueryBuilder(baseQuery, query)
+    const userQuery = new query_builder_1.default(baseQuery, query)
         .search(userSearchableFields)
         .filter()
         .sort()
@@ -72,15 +78,15 @@ const getAllUsersFromDB = async (query) => {
     };
 };
 const getSingleUserFromDB = async (id) => {
-    const result = await User.findOne({ _id: id });
+    const result = await user_model_1.User.findOne({ _id: id });
     if (!result)
-        throw new AppError(httpStatus.NOT_FOUND, 'User not found!');
+        throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'User not found!');
     return result;
 };
 const getMeFromDB = async (id) => {
-    const result = await User.findById(id);
+    const result = await user_model_1.User.findById(id);
     if (!result) {
-        throw new AppError(httpStatus.NOT_FOUND, 'User not found!');
+        throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'User not found!');
     }
     return result;
 };
@@ -97,47 +103,47 @@ const updateMeIntoDB = async (id, payload) => {
         }
     });
     if (payload.profile_picture) {
-        const existingUser = await User.findById(id);
+        const existingUser = await user_model_1.User.findById(id);
         if (existingUser && existingUser.profile_picture) {
-            deleteLocalFile(existingUser.profile_picture);
+            (0, deleteFileHelper_1.deleteLocalFile)(existingUser.profile_picture);
         }
     }
-    const result = await User.findByIdAndUpdate(id, payload, {
+    const result = await user_model_1.User.findByIdAndUpdate(id, payload, {
         new: true,
         runValidators: true,
     });
     if (!result) {
-        throw new AppError(httpStatus.NOT_FOUND, 'User not found!');
+        throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'User not found!');
     }
     return result;
 };
 const updateUserInDB = async (id, payload) => {
-    const result = await User.findByIdAndUpdate(id, payload, {
+    const result = await user_model_1.User.findByIdAndUpdate(id, payload, {
         new: true,
         runValidators: true,
     });
     if (!result)
-        throw new AppError(httpStatus.NOT_FOUND, 'User not found!');
+        throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'User not found!');
     return result;
 };
 const deleteUserFromDB = async (id) => {
-    const hasOngoingParcel = await Parcel.findOne({
+    const hasOngoingParcel = await parcel_model_1.Parcel.findOne({
         $or: [{ user_id: id }, { accepted_by: id }],
-        status: PARCEL_STATUS.ONGOING,
+        status: parcel_interface_1.PARCEL_STATUS.ONGOING,
     });
     if (hasOngoingParcel) {
-        throw new AppError(httpStatus.BAD_REQUEST, 'Cannot delete user. This account has an ongoing delivery in progress.');
+        throw new app_error_1.default(http_status_1.default.BAD_REQUEST, 'Cannot delete user. This account has an ongoing delivery in progress.');
     }
-    const result = await User.findByIdAndUpdate(id, {
+    const result = await user_model_1.User.findByIdAndUpdate(id, {
         status: 'DELETED',
         deleted_date: new Date(),
     }, { new: true });
     if (!result) {
-        throw new AppError(httpStatus.NOT_FOUND, 'User not found!');
+        throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'User not found!');
     }
     return result;
 };
-export const UserServices = {
+exports.UserServices = {
     createAdminIntoDB,
     changeUserStatusInDB,
     getAllUsersFromDB,

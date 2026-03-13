@@ -1,13 +1,16 @@
-import { Schema, model } from 'mongoose';
-const DriverLocationSchema = new Schema({
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.DriverLocation = void 0;
+const mongoose_1 = require("mongoose");
+const DriverLocationSchema = new mongoose_1.Schema({
     driver_id: {
-        type: Schema.Types.ObjectId,
+        type: mongoose_1.Schema.Types.ObjectId,
         ref: 'User',
         required: [true, 'Driver ID is required'],
         index: true,
     },
     parcel_id: {
-        type: Schema.Types.ObjectId,
+        type: mongoose_1.Schema.Types.ObjectId,
         ref: 'Parcel',
         index: true,
     },
@@ -64,5 +67,5 @@ DriverLocationSchema.index({ driver_id: 1, last_updated: -1 });
 DriverLocationSchema.index({ parcel_id: 1, last_updated: -1 });
 // TTL index - automatically delete documents older than 7 days
 DriverLocationSchema.index({ created_at: 1 }, { expireAfterSeconds: 604800 });
-export const DriverLocation = model('DriverLocation', DriverLocationSchema);
+exports.DriverLocation = (0, mongoose_1.model)('DriverLocation', DriverLocationSchema);
 //# sourceMappingURL=track-driver.model.js.map

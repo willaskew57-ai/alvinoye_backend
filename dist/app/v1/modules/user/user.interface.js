@@ -1,12 +1,14 @@
-import { Model, Types } from 'mongoose';
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.USER_STATUS = exports.USER_ROLE = void 0;
 // Enums as Constants
-export const USER_ROLE = {
+exports.USER_ROLE = {
     SUPER_ADMIN: 'SUPER_ADMIN',
     ADMIN: 'ADMIN',
     CUSTOMER: 'CUSTOMER',
     DRIVER: 'DRIVER',
 };
-export const USER_STATUS = {
+exports.USER_STATUS = {
     PENDING: 'PENDING',
     ACTIVE: 'ACTIVE',
     BLOCKED: 'BLOCKED',
