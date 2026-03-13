@@ -1,4 +1,5 @@
-import { Query } from 'mongoose';
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 class QueryBuilder {
     modelQuery;
     query;
@@ -59,5 +60,5 @@ class QueryBuilder {
         };
     }
 }
-export default QueryBuilder;
+exports.default = QueryBuilder;
 //# sourceMappingURL=query-builder.js.map

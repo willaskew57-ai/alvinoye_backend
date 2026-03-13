@@ -1,20 +1,23 @@
-// ** imports packages
-import { Server } from 'http';
-import colors from 'colors';
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const colors_1 = __importDefault(require("colors"));
 // ** import local files
-import app from './app';
-import configs from './config/env.config';
-import { connectDB } from './db';
-import { initSocket } from './socket';
+const express_app_1 = __importDefault(require("./express-app"));
+const env_config_1 = __importDefault(require("./config/env.config"));
+const db_1 = require("./db");
+const socket_1 = require("./socket");
 let server;
 async function main() {
     try {
-        await connectDB();
-        console.log(colors.blue(`Database is Connected Successfully!!!`).bold);
-        server = app.listen(configs.port, () => {
-            console.log(colors.green(`The Server is running on ${configs.port}`).bold);
+        await (0, db_1.connectDB)();
+        console.log(colors_1.default.blue(`Database is Connected Successfully!!!`).bold);
+        server = express_app_1.default.listen(env_config_1.default.port, () => {
+            console.log(colors_1.default.green(`The Server is running on ${env_config_1.default.port}`).bold);
         });
-        initSocket(server);
+        (0, socket_1.initSocket)(server);
     }
     catch (err) {
         console.log(err);
@@ -23,7 +26,7 @@ async function main() {
 main();
 process.on('unhandledRejection', (reason, promise) => {
     console.log(reason, promise);
-    console.log(colors.red(`Server detected UnHandledRejection 😡`));
+    console.log(colors_1.default.red(`Server detected UnHandledRejection 😡`));
     if (server) {
         server.close(() => {
             process.exit(1);
@@ -32,7 +35,7 @@ process.on('unhandledRejection', (reason, promise) => {
     process.exit(1);
 });
 process.on('uncaughtException', () => {
-    console.log(colors.red(`Server detected unCaughtException 😡`));
+    console.log(colors_1.default.red(`Server detected unCaughtException 😡`));
     process.exit(1);
 });
 //# sourceMappingURL=server.js.map

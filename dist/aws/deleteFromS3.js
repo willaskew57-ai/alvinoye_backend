@@ -1,26 +1,32 @@
-import { S3Client, HeadObjectCommand, DeleteObjectCommand, } from '@aws-sdk/client-s3';
-import dotenv from 'dotenv';
-import configs from '../config/env.config';
-dotenv.config();
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.deleteFileFromS3 = void 0;
+const client_s3_1 = require("@aws-sdk/client-s3");
+const dotenv_1 = __importDefault(require("dotenv"));
+const env_config_1 = __importDefault(require("../config/env.config"));
+dotenv_1.default.config();
 // Initialize the S3 client
-const s3 = new S3Client({
-    region: configs.aws_region,
+const s3 = new client_s3_1.S3Client({
+    region: env_config_1.default.aws_region,
     credentials: {
-        accessKeyId: configs.aws_access_key_id,
-        secretAccessKey: configs.aws_secret_access_key,
+        accessKeyId: env_config_1.default.aws_access_key_id,
+        secretAccessKey: env_config_1.default.aws_secret_access_key,
     },
 });
-export const deleteFileFromS3 = async (fileName) => {
+const deleteFileFromS3 = async (fileName) => {
     const updatedFileName = fileName.split('cloudfront.net/')[1];
     if (!updatedFileName) {
         console.log('Invalid file name format.');
         return;
     }
     const decodedFileName = decodeURIComponent(updatedFileName);
-    const bucket = configs.aws_s3_bucket_name;
+    const bucket = env_config_1.default.aws_s3_bucket_name;
     try {
         // 1. Check if the file exists in S3
-        const headCommand = new HeadObjectCommand({
+        const headCommand = new client_s3_1.HeadObjectCommand({
             Bucket: bucket,
             Key: decodedFileName,
         });
@@ -35,7 +41,7 @@ export const deleteFileFromS3 = async (fileName) => {
             throw err;
         }
         // 2. Delete the file
-        const deleteCommand = new DeleteObjectCommand({
+        const deleteCommand = new client_s3_1.DeleteObjectCommand({
             Bucket: bucket,
             Key: decodedFileName,
         });
@@ -51,4 +57,5 @@ export const deleteFileFromS3 = async (fileName) => {
         }
     }
 };
+exports.deleteFileFromS3 = deleteFileFromS3;
 //# sourceMappingURL=deleteFromS3.js.map

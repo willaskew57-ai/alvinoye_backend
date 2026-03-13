@@ -1,42 +1,45 @@
-import { z } from 'zod/v3';
-const getNearbyDriversQuerySchema = z.object({
-    query: z.object({
-        latitude: z.coerce
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.TrackDriverValidation = void 0;
+const v3_1 = require("zod/v3");
+const getNearbyDriversQuerySchema = v3_1.z.object({
+    query: v3_1.z.object({
+        latitude: v3_1.z.coerce
             .number({ required_error: 'Latitude is required' })
             .min(-90, 'Latitude must be between -90 and 90')
             .max(90, 'Latitude must be between -90 and 90'),
-        longitude: z.coerce
+        longitude: v3_1.z.coerce
             .number({ required_error: 'Longitude is required' })
             .min(-180, 'Longitude must be between -180 and 180')
             .max(180, 'Longitude must be between -180 and 180'),
-        radius: z.coerce
+        radius: v3_1.z.coerce
             .number()
             .positive('Radius must be a positive number')
             .optional()
             .default(10),
     }),
 });
-const updateLocationValidationSchema = z.object({
-    body: z.object({
-        latitude: z
+const updateLocationValidationSchema = v3_1.z.object({
+    body: v3_1.z.object({
+        latitude: v3_1.z
             .number({ required_error: 'Latitude is required' })
             .min(-90, 'Latitude must be between -90 and 90')
             .max(90, 'Latitude must be between -90 and 90'),
-        longitude: z
+        longitude: v3_1.z
             .number({ required_error: 'Longitude is required' })
             .min(-180, 'Longitude must be between -180 and 180')
             .max(180, 'Longitude must be between -180 and 180'),
-        parcel_id: z.string().optional(),
-        heading: z
+        parcel_id: v3_1.z.string().optional(),
+        heading: v3_1.z
             .number()
             .min(0, 'Heading must be at least 0')
             .max(360, 'Heading cannot exceed 360')
             .optional(),
-        speed: z.number().min(0, 'Speed cannot be negative').optional(),
-        accuracy: z.number().min(0, 'Accuracy cannot be negative').optional(),
+        speed: v3_1.z.number().min(0, 'Speed cannot be negative').optional(),
+        accuracy: v3_1.z.number().min(0, 'Accuracy cannot be negative').optional(),
     }),
 });
-export const TrackDriverValidation = {
+exports.TrackDriverValidation = {
     getNearbyDriversQuerySchema,
     updateLocationValidationSchema
 };

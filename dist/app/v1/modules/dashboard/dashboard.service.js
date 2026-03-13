@@ -1,21 +1,27 @@
-import { PARCEL_STATUS } from '../parcel/parcel.interface';
-import { Parcel } from '../parcel/parcel.model';
-import { PAYMENT_STATUS } from '../payment/payment.constants';
-import { Payment } from '../payment/payment.model';
-import { USER_ROLE, USER_STATUS } from '../user/user.interface';
-import User from '../user/user.model';
-export const getDashboardStatsFromDB = async () => {
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getParcelOwnerGrowthFromDB = exports.getParcelMovementStatsFromDB = exports.getDashboardStatsFromDB = void 0;
+const parcel_interface_1 = require("../parcel/parcel.interface");
+const parcel_model_1 = require("../parcel/parcel.model");
+const payment_constants_1 = require("../payment/payment.constants");
+const payment_model_1 = require("../payment/payment.model");
+const user_interface_1 = require("../user/user.interface");
+const user_model_1 = __importDefault(require("../user/user.model"));
+const getDashboardStatsFromDB = async () => {
     const [totalUsers, totalDrivers, incomeData, totalDeliveries] = await Promise.all([
-        User.countDocuments({ deleted_date: { $exists: false } }),
-        User.countDocuments({
-            role: USER_ROLE.DRIVER,
+        user_model_1.default.countDocuments({ deleted_date: { $exists: false } }),
+        user_model_1.default.countDocuments({
+            role: user_interface_1.USER_ROLE.DRIVER,
             deleted_date: { $exists: false },
         }),
-        Payment.aggregate([
-            { $match: { status: PAYMENT_STATUS.SUCCESS } }, // Only count completed payments
+        payment_model_1.Payment.aggregate([
+            { $match: { status: payment_constants_1.PAYMENT_STATUS.SUCCESS } }, // Only count completed payments
             { $group: { _id: null, totalIncome: { $sum: '$transaction_amount' } } },
         ]),
-        Parcel.countDocuments({ status: PARCEL_STATUS.COMPLETED }),
+        parcel_model_1.Parcel.countDocuments({ status: parcel_interface_1.PARCEL_STATUS.COMPLETED }),
     ]);
     return {
         totalUsers,
@@ -24,10 +30,11 @@ export const getDashboardStatsFromDB = async () => {
         totalDeliveries,
     };
 };
-export const getParcelMovementStatsFromDB = async (queryYear) => {
+exports.getDashboardStatsFromDB = getDashboardStatsFromDB;
+const getParcelMovementStatsFromDB = async (queryYear) => {
     const currentYear = new Date().getFullYear();
     const selectedYear = queryYear ? parseInt(queryYear) : currentYear;
-    const availableYears = await Parcel.aggregate([
+    const availableYears = await parcel_model_1.Parcel.aggregate([
         {
             $group: {
                 _id: { $year: '$createdAt' },
@@ -35,7 +42,7 @@ export const getParcelMovementStatsFromDB = async (queryYear) => {
         },
         { $sort: { _id: -1 } },
     ]).then((res) => res.map((item) => item._id).filter(Boolean));
-    const monthlyStats = await Parcel.aggregate([
+    const monthlyStats = await parcel_model_1.Parcel.aggregate([
         {
             $match: {
                 createdAt: {
@@ -79,10 +86,11 @@ export const getParcelMovementStatsFromDB = async (queryYear) => {
         stats: chartData,
     };
 };
-export const getParcelOwnerGrowthFromDB = async (queryYear) => {
+exports.getParcelMovementStatsFromDB = getParcelMovementStatsFromDB;
+const getParcelOwnerGrowthFromDB = async (queryYear) => {
     const currentYear = new Date().getFullYear();
-    const availableYearsResult = await User.aggregate([
-        { $match: { role: USER_ROLE.CUSTOMER } },
+    const availableYearsResult = await user_model_1.default.aggregate([
+        { $match: { role: user_interface_1.USER_ROLE.CUSTOMER } },
         {
             $group: {
                 _id: { $year: '$created_at' },
@@ -96,10 +104,10 @@ export const getParcelOwnerGrowthFromDB = async (queryYear) => {
     const selectedYear = queryYear
         ? parseInt(queryYear)
         : availableYears[0] || currentYear;
-    const growthStats = await User.aggregate([
+    const growthStats = await user_model_1.default.aggregate([
         {
             $match: {
-                role: USER_ROLE.CUSTOMER,
+                role: user_interface_1.USER_ROLE.CUSTOMER,
                 created_at: {
                     $gte: new Date(`${selectedYear}-01-01`),
                     $lte: new Date(`${selectedYear}-12-31T23:59:59`),
@@ -111,7 +119,7 @@ export const getParcelOwnerGrowthFromDB = async (queryYear) => {
                 _id: { $month: '$created_at' },
                 activeCount: {
                     $sum: {
-                        $cond: [{ $eq: ['$status', USER_STATUS.ACTIVE] }, 1, 0],
+                        $cond: [{ $eq: ['$status', user_interface_1.USER_STATUS.ACTIVE] }, 1, 0],
                     },
                 },
                 inactiveCount: {
@@ -121,9 +129,9 @@ export const getParcelOwnerGrowthFromDB = async (queryYear) => {
                                 $in: [
                                     '$status',
                                     [
-                                        USER_STATUS.BLOCKED,
-                                        USER_STATUS.REJECTED,
-                                        USER_STATUS.DELETED,
+                                        user_interface_1.USER_STATUS.BLOCKED,
+                                        user_interface_1.USER_STATUS.REJECTED,
+                                        user_interface_1.USER_STATUS.DELETED,
                                     ],
                                 ],
                             },
@@ -164,4 +172,5 @@ export const getParcelOwnerGrowthFromDB = async (queryYear) => {
         stats,
     };
 };
+exports.getParcelOwnerGrowthFromDB = getParcelOwnerGrowthFromDB;
 //# sourceMappingURL=dashboard.service.js.map

@@ -1,12 +1,14 @@
-import { Server as HttpServer } from 'http';
-import { Server } from 'socket.io';
-import { socketAuth } from './socket-auth';
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getIO = exports.initSocket = void 0;
+const socket_io_1 = require("socket.io");
+const socket_auth_1 = require("./socket-auth");
 let io;
-export const initSocket = (server) => {
-    io = new Server(server, {
+const initSocket = (server) => {
+    io = new socket_io_1.Server(server, {
         cors: { origin: '*' },
     });
-    io.use(socketAuth());
+    io.use((0, socket_auth_1.socketAuth)());
     io.on('connection', (socket) => {
         console.log('Socket connected:', socket.user);
         socket.on('chat message', (msg) => {
@@ -47,7 +49,9 @@ export const initSocket = (server) => {
     });
     return io;
 };
-export const getIO = () => {
+exports.initSocket = initSocket;
+const getIO = () => {
     return io;
 };
+exports.getIO = getIO;
 //# sourceMappingURL=backup.js.map

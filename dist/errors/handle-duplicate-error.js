@@ -1,4 +1,9 @@
-import httpStatus from 'http-status';
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const http_status_1 = __importDefault(require("http-status"));
 const handleDuplicateError = (err) => {
     const keyPattern = err.keyPattern || {};
     const key = Object.keys(keyPattern)[0];
@@ -9,12 +14,12 @@ const handleDuplicateError = (err) => {
             message: `"${keyValue || 'this value'}" already exists`,
         },
     ];
-    const statusCode = httpStatus.BAD_REQUEST;
+    const statusCode = http_status_1.default.BAD_REQUEST;
     return {
         statusCode,
         message: `Duplicate field value: ${key || 'unknown'} already exists`,
         errorSources,
     };
 };
-export default handleDuplicateError;
+exports.default = handleDuplicateError;
 //# sourceMappingURL=handle-duplicate-error.js.map

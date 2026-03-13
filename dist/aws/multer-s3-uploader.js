@@ -1,21 +1,27 @@
-import multer from 'multer';
-import multerS3 from 'multer-s3';
-import { S3Client } from '@aws-sdk/client-s3';
-import configs from '../config/env.config';
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getCloudFrontUrl = exports.uploadFile = void 0;
+const multer_1 = __importDefault(require("multer"));
+const multer_s3_1 = __importDefault(require("multer-s3"));
+const client_s3_1 = require("@aws-sdk/client-s3");
+const env_config_1 = __importDefault(require("../config/env.config"));
 /**
  * Configure and setup AWS S3 client
  */
-const s3 = new S3Client({
-    region: configs.aws_region,
+const s3 = new client_s3_1.S3Client({
+    region: env_config_1.default.aws_region,
     credentials: {
-        accessKeyId: configs.aws_access_key_id,
-        secretAccessKey: configs.aws_secret_access_key,
+        accessKeyId: env_config_1.default.aws_access_key_id,
+        secretAccessKey: env_config_1.default.aws_secret_access_key,
     },
 });
 /**
  * Setup file upload to AWS S3
  */
-export const uploadFile = () => {
+const uploadFile = () => {
     const fileFilter = (req, file, cb) => {
         const allowedFieldNames = [
             'attachments',
@@ -56,10 +62,10 @@ export const uploadFile = () => {
             cb(new Error('Invalid fieldname'));
         }
     };
-    const storage = multerS3({
+    const storage = (0, multer_s3_1.default)({
         s3: s3,
-        bucket: configs.aws_s3_bucket_name,
-        contentType: multerS3.AUTO_CONTENT_TYPE,
+        bucket: env_config_1.default.aws_s3_bucket_name,
+        contentType: multer_s3_1.default.AUTO_CONTENT_TYPE,
         // Removing ACL setting as your bucket doesn't support ACLs
         key: function (req, file, cb) {
             let uploadPath = '';
@@ -95,7 +101,7 @@ export const uploadFile = () => {
             cb(null, fullPath);
         },
     });
-    const upload = multer({
+    const upload = (0, multer_1.default)({
         storage: storage,
         fileFilter: fileFilter,
         limits: {
@@ -112,7 +118,9 @@ export const uploadFile = () => {
     console.log(upload, 'uploaded log');
     return upload;
 };
-export const getCloudFrontUrl = (s3FilePath) => {
-    return `${configs.cloudfront_url}/${s3FilePath}`;
+exports.uploadFile = uploadFile;
+const getCloudFrontUrl = (s3FilePath) => {
+    return `${env_config_1.default.cloudfront_url}/${s3FilePath}`;
 };
+exports.getCloudFrontUrl = getCloudFrontUrl;
 //# sourceMappingURL=multer-s3-uploader.js.map

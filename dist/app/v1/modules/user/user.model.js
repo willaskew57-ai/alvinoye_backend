@@ -1,9 +1,15 @@
-import { Schema, model } from 'mongoose';
-import bcrypt from 'bcrypt';
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.User = void 0;
+const mongoose_1 = require("mongoose");
+const bcrypt_1 = __importDefault(require("bcrypt"));
 // ** import local files
-import { USER_ROLE, USER_STATUS, } from './user.interface';
-import configs from '../../../../config/env.config';
-const UserSchema = new Schema({
+const user_interface_1 = require("./user.interface");
+const env_config_1 = __importDefault(require("../../../../config/env.config"));
+const UserSchema = new mongoose_1.Schema({
     full_name: {
         type: String,
         trim: true,
@@ -19,7 +25,7 @@ const UserSchema = new Schema({
     role: {
         type: String,
         enum: {
-            values: Object.values(USER_ROLE),
+            values: Object.values(user_interface_1.USER_ROLE),
             message: `{VALUE} is not a valid role`,
         },
         required: [true, 'Role is required'],
@@ -27,10 +33,10 @@ const UserSchema = new Schema({
     status: {
         type: String,
         enum: {
-            values: Object.values(USER_STATUS),
+            values: Object.values(user_interface_1.USER_STATUS),
             message: `{VALUE} is not a valid status`,
         },
-        default: USER_STATUS.PENDING,
+        default: user_interface_1.USER_STATUS.PENDING,
         required: [true, 'Status is required'],
     },
     phone_number: {
@@ -66,7 +72,7 @@ const UserSchema = new Schema({
     },
     // Moderation & Deletion
     blocked_by: {
-        type: Schema.Types.ObjectId,
+        type: mongoose_1.Schema.Types.ObjectId,
         ref: 'User',
     },
     deleted_date: {
@@ -127,13 +133,13 @@ UserSchema.statics.isJWTIssuedBeforePasswordChanged = (passwordChangedTimeStamps
     return passwordChangeTime > jwtIssuedTimeStamps;
 };
 UserSchema.statics.compareUserPassword = async function (plainTextPassword, hashedPassword) {
-    return await bcrypt.compare(plainTextPassword, hashedPassword);
+    return await bcrypt_1.default.compare(plainTextPassword, hashedPassword);
 };
 // Password hashing middleware
 UserSchema.pre('save', async function () {
     if (this.isModified('password') && this.password) {
         try {
-            this.password = await bcrypt.hash(this.password, Number(configs.bcrypt_salt_rounds));
+            this.password = await bcrypt_1.default.hash(this.password, Number(env_config_1.default.bcrypt_salt_rounds));
             this.password_changed_at = new Date();
         }
         catch (error) {
@@ -146,6 +152,6 @@ UserSchema.post('save', function (doc) {
     doc.password = undefined;
     doc.__v = undefined;
 });
-export const User = model('User', UserSchema);
-export default User;
+exports.User = (0, mongoose_1.model)('User', UserSchema);
+exports.default = exports.User;
 //# sourceMappingURL=user.model.js.map

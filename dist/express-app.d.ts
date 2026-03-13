@@ -1,4 +1,4 @@
 import { type Application } from 'express';
 declare const app: Application;
 export default app;
-//# sourceMappingURL=app.d.ts.map
+//# sourceMappingURL=express-app.d.ts.map

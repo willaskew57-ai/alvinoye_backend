@@ -1,4 +1,7 @@
-export const registerEmailTemp = (data) => {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.registerEmailTemp = void 0;
+const registerEmailTemp = (data) => {
     const logoUrl = process.env.EMAIL_TEMP_IMAGE || 'https://via.placeholder.com/150';
     return `
   <html>
@@ -86,4 +89,5 @@ export const registerEmailTemp = (data) => {
   </html>
 `;
 };
+exports.registerEmailTemp = registerEmailTemp;
 //# sourceMappingURL=register-email-temp.js.map

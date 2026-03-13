@@ -1,10 +1,16 @@
-import fs from 'fs';
-import path from 'path';
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.deleteLocalFile = void 0;
+const fs_1 = __importDefault(require("fs"));
+const path_1 = __importDefault(require("path"));
 /**
  * Deletes a file from the local storage
  * @param fileUrlOrPath - The full URL or relative path stored in the DB
  */
-export const deleteLocalFile = (fileUrlOrPath) => {
+const deleteLocalFile = (fileUrlOrPath) => {
     try {
         if (!fileUrlOrPath)
             return;
@@ -16,10 +22,10 @@ export const deleteLocalFile = (fileUrlOrPath) => {
         const cleanedPath = relativePath.startsWith('/')
             ? relativePath.substring(1)
             : relativePath;
-        const fullPath = path.join(process.cwd(), cleanedPath);
+        const fullPath = path_1.default.join(process.cwd(), cleanedPath);
         console.log('Attempting to delete file at:', fullPath);
-        if (fs.existsSync(fullPath)) {
-            fs.unlinkSync(fullPath);
+        if (fs_1.default.existsSync(fullPath)) {
+            fs_1.default.unlinkSync(fullPath);
             console.log('File deleted successfully');
         }
         else {
@@ -30,4 +36,5 @@ export const deleteLocalFile = (fileUrlOrPath) => {
         console.error('Error deleting file:', error);
     }
 };
+exports.deleteLocalFile = deleteLocalFile;
 //# sourceMappingURL=deleteFileHelper.js.map

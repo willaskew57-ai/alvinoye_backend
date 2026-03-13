@@ -4,12 +4,12 @@
     "rootDir": "./src",
     "outDir": "./dist",
 
-    "module": "ESNext",
-    "moduleResolution": "bundler",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
     "target": "esnext",
     "types": ["node"],
     "typeRoots": ["./node_modules/@types", "./src/types"],
-    
+
     // Other Outputs
     "sourceMap": true,
     "declaration": true,
@@ -22,17 +22,17 @@
     // Recommended Options
     "strict": true,
     "jsx": "react-jsx",
-    "verbatimModuleSyntax": true,
-    "isolatedModules": true,
+    // verbatimModuleSyntax: true,
+    // isolatedModules: true,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
-    
+
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true
-  },
-  "ts-node": {
-    "esm": true
   }
+  // "ts-node": {
+  //   "esm": true
+  // }
 }

@@ -1,5 +1,7 @@
-import { Parcel } from './../app/v1/modules/parcel/parcel.model';
-export const otpResendTemp = (data) => {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.otpResendTemp = void 0;
+const otpResendTemp = (data) => {
     const logoUrl = process.env.EMAIL_TEMP_IMAGE || 'https://via.placeholder.com/150';
     const displayCode = data.code ?? data.activationCode ?? '000000';
     const displayExpiry = data.expiresIn ?? data.activationCodeExpire ?? '5';
@@ -90,4 +92,5 @@ export const otpResendTemp = (data) => {
   </html>
 `;
 };
+exports.otpResendTemp = otpResendTemp;
 //# sourceMappingURL=otp-resend-temp.js.map

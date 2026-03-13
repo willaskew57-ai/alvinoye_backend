@@ -1,7 +1,10 @@
-import { Schema, model } from 'mongoose';
-const VehicleSchema = new Schema({
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Vehicle = void 0;
+const mongoose_1 = require("mongoose");
+const VehicleSchema = new mongoose_1.Schema({
     user_id: {
-        type: Schema.Types.ObjectId,
+        type: mongoose_1.Schema.Types.ObjectId,
         ref: 'DRIVER',
         required: [true, 'Driver ID (user_id) is required'],
     },
@@ -19,5 +22,5 @@ const VehicleSchema = new Schema({
         virtuals: false,
     },
 });
-export const Vehicle = model('Vehicle', VehicleSchema);
+exports.Vehicle = (0, mongoose_1.model)('Vehicle', VehicleSchema);
 //# sourceMappingURL=vehicle.model.js.map

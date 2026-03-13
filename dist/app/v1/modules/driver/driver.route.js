@@ -1,12 +1,18 @@
-import express, {} from 'express';
-import { DriverValidation } from './driver.validation';
-import { DriverController } from './driver.controller';
-import { USER_ROLE } from '../user/user.interface';
-import { auth } from '../../../../middleware/auth';
-import validateRequest from '../../../../middleware/validate-request';
-import { getLocalFileUrl, upload } from '../../../../utils/fileUploadHelper';
-const router = express.Router();
-router.post('/info', auth(USER_ROLE.DRIVER), upload.fields([
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.DriverRoutes = void 0;
+const express_1 = __importDefault(require("express"));
+const driver_validation_1 = require("./driver.validation");
+const driver_controller_1 = require("./driver.controller");
+const user_interface_1 = require("../user/user.interface");
+const auth_1 = require("../../../../middleware/auth");
+const validate_request_1 = __importDefault(require("../../../../middleware/validate-request"));
+const fileUploadHelper_1 = require("../../../../utils/fileUploadHelper");
+const router = express_1.default.Router();
+router.post('/info', (0, auth_1.auth)(user_interface_1.USER_ROLE.DRIVER), fileUploadHelper_1.upload.fields([
     { name: 'license_image', maxCount: 1 },
     { name: 'number_plate_image', maxCount: 1 },
     { name: 'vehicle_images', maxCount: 5 },
@@ -22,8 +28,8 @@ router.post('/info', auth(USER_ROLE.DRIVER), upload.fields([
         }
     }
     next();
-}, validateRequest(DriverValidation.createDriverWithVehicleValidationSchema), DriverController.registerDriver);
-router.patch('/update-info', auth(USER_ROLE.DRIVER), upload.fields([
+}, (0, validate_request_1.default)(driver_validation_1.DriverValidation.createDriverWithVehicleValidationSchema), driver_controller_1.DriverController.registerDriver);
+router.patch('/update-info', (0, auth_1.auth)(user_interface_1.USER_ROLE.DRIVER), fileUploadHelper_1.upload.fields([
     { name: 'license_image', maxCount: 1 },
     { name: 'number_plate_image', maxCount: 1 },
     { name: 'vehicle_images', maxCount: 5 },
@@ -36,25 +42,25 @@ router.patch('/update-info', auth(USER_ROLE.DRIVER), upload.fields([
     if (files?.license_image?.[0]) {
         if (!req.body.driverInfo)
             req.body.driverInfo = {};
-        req.body.driverInfo.license_image = getLocalFileUrl(files.license_image[0].path);
+        req.body.driverInfo.license_image = (0, fileUploadHelper_1.getLocalFileUrl)(files.license_image[0].path);
     }
     if (files?.number_plate_image?.[0]) {
         if (!req.body.vehicle)
             req.body.vehicle = {};
-        req.body.vehicle.number_plate_image = getLocalFileUrl(files.number_plate_image[0].path);
+        req.body.vehicle.number_plate_image = (0, fileUploadHelper_1.getLocalFileUrl)(files.number_plate_image[0].path);
     }
     if (files?.vehicle_images) {
         if (!req.body.vehicle)
             req.body.vehicle = {};
-        req.body.vehicle.vehicle_images = files.vehicle_images.map((file) => getLocalFileUrl(file.path));
+        req.body.vehicle.vehicle_images = files.vehicle_images.map((file) => (0, fileUploadHelper_1.getLocalFileUrl)(file.path));
     }
     next();
-}, validateRequest(DriverValidation.updateDriverWithVehicleValidationSchema), DriverController.updateDriverInfo);
-router.get('/get-all', auth(USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.DRIVER, USER_ROLE.CUSTOMER), DriverController.getAllDrivers);
-router.get('/get/:id', auth(USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN, USER_ROLE.DRIVER, USER_ROLE.CUSTOMER), DriverController.getDriverById);
-router.get('/get-driver-info', auth(USER_ROLE.DRIVER), DriverController.getSingleDriver);
-router.get('/available-for-driver', auth(USER_ROLE.DRIVER), DriverController.getAvailableParcelsForDriver);
-router.patch('/accept-parcel/:id', auth(USER_ROLE.DRIVER), DriverController.acceptParcel);
-router.post('/parcel/verify-otp', auth(USER_ROLE.DRIVER), validateRequest(DriverValidation.verifyParcelOtpValidationSchema), DriverController.verifyParcelOtp);
-export const DriverRoutes = router;
+}, (0, validate_request_1.default)(driver_validation_1.DriverValidation.updateDriverWithVehicleValidationSchema), driver_controller_1.DriverController.updateDriverInfo);
+router.get('/get-all', (0, auth_1.auth)(user_interface_1.USER_ROLE.ADMIN, user_interface_1.USER_ROLE.SUPER_ADMIN, user_interface_1.USER_ROLE.DRIVER, user_interface_1.USER_ROLE.CUSTOMER), driver_controller_1.DriverController.getAllDrivers);
+router.get('/get/:id', (0, auth_1.auth)(user_interface_1.USER_ROLE.ADMIN, user_interface_1.USER_ROLE.SUPER_ADMIN, user_interface_1.USER_ROLE.DRIVER, user_interface_1.USER_ROLE.CUSTOMER), driver_controller_1.DriverController.getDriverById);
+router.get('/get-driver-info', (0, auth_1.auth)(user_interface_1.USER_ROLE.DRIVER), driver_controller_1.DriverController.getSingleDriver);
+router.get('/available-for-driver', (0, auth_1.auth)(user_interface_1.USER_ROLE.DRIVER), driver_controller_1.DriverController.getAvailableParcelsForDriver);
+router.patch('/accept-parcel/:id', (0, auth_1.auth)(user_interface_1.USER_ROLE.DRIVER), driver_controller_1.DriverController.acceptParcel);
+router.post('/parcel/verify-otp', (0, auth_1.auth)(user_interface_1.USER_ROLE.DRIVER), (0, validate_request_1.default)(driver_validation_1.DriverValidation.verifyParcelOtpValidationSchema), driver_controller_1.DriverController.verifyParcelOtp);
+exports.DriverRoutes = router;
 //# sourceMappingURL=driver.route.js.map

@@ -1,22 +1,25 @@
-import { z } from 'zod/v3';
-const initiateChatValidationSchema = z.object({
-    body: z.object({}),
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ChatValidation = void 0;
+const v3_1 = require("zod/v3");
+const initiateChatValidationSchema = v3_1.z.object({
+    body: v3_1.z.object({}),
 });
-const initiateP2PChatValidationSchema = z.object({
-    body: z.object({
-        recipientId: z.string({ required_error: 'Recipient ID is required' }),
+const initiateP2PChatValidationSchema = v3_1.z.object({
+    body: v3_1.z.object({
+        recipientId: v3_1.z.string({ required_error: 'Recipient ID is required' }),
     }),
 });
-const sendMessageValidationSchema = z.object({
-    body: z.object({
-        chat_id: z.string({
+const sendMessageValidationSchema = v3_1.z.object({
+    body: v3_1.z.object({
+        chat_id: v3_1.z.string({
             required_error: 'Chat ID is required',
         }),
-        content: z.string().optional(),
-        attachments: z.array(z.string()).optional(),
+        content: v3_1.z.string().optional(),
+        attachments: v3_1.z.array(v3_1.z.string()).optional(),
     }),
 });
-export const ChatValidation = {
+exports.ChatValidation = {
     initiateChatValidationSchema,
     initiateP2PChatValidationSchema,
     sendMessageValidationSchema,

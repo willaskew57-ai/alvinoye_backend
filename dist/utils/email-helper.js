@@ -1,54 +1,60 @@
-import httpStatus from 'http-status';
-import AppError from '../errors/app-error';
-import { sendEmail } from './send-email';
-import { otpResendTemp, resetPassEmailTemp, registerEmailTemp } from '../mail';
-import { parcelOtpEmailTemp } from '../mail/parcel-otp-temp';
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.EmailHelpers = void 0;
+const http_status_1 = __importDefault(require("http-status"));
+const app_error_1 = __importDefault(require("../errors/app-error"));
+const send_email_1 = require("./send-email");
+const mail_1 = require("../mail");
+const parcel_otp_temp_1 = require("../mail/parcel-otp-temp");
 // ** --- Helper Functions ---
 const sendOtpResendEmail = async (email, data) => {
     try {
-        await sendEmail({
+        await (0, send_email_1.sendEmail)({
             email,
             subject: 'New Activation Code',
-            html: otpResendTemp(data),
+            html: (0, mail_1.otpResendTemp)(data),
         });
     }
     catch (error) {
         console.error('Email Error:', error);
-        throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to send OTP resend email');
+        throw new app_error_1.default(http_status_1.default.INTERNAL_SERVER_ERROR, 'Failed to send OTP resend email');
     }
 };
 const sendRegisterEmail = async (email, data) => {
     try {
-        await sendEmail({
+        await (0, send_email_1.sendEmail)({
             email,
             subject: 'Welcome to Parcel - Activate Your Account',
-            html: registerEmailTemp(data),
+            html: (0, mail_1.registerEmailTemp)(data),
         });
     }
     catch (error) {
         console.error('Email Error:', error);
-        throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to send sign-up email');
+        throw new app_error_1.default(http_status_1.default.INTERNAL_SERVER_ERROR, 'Failed to send sign-up email');
     }
 };
 const sendResetPasswordEmail = async (email, data) => {
     try {
-        await sendEmail({
+        await (0, send_email_1.sendEmail)({
             email,
             subject: 'Password Reset Request',
-            html: resetPassEmailTemp(data),
+            html: (0, mail_1.resetPassEmailTemp)(data),
         });
     }
     catch (error) {
         console.error('Email Error:', error);
-        throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to send password reset email');
+        throw new app_error_1.default(http_status_1.default.INTERNAL_SERVER_ERROR, 'Failed to send password reset email');
     }
 };
 const sendParcelOtpEmail = async (data) => {
     try {
-        await sendEmail({
+        await (0, send_email_1.sendEmail)({
             email: data.email,
             subject: 'Parcel Pickup Verification Code',
-            html: parcelOtpEmailTemp({
+            html: (0, parcel_otp_temp_1.parcelOtpEmailTemp)({
                 name: data.name,
                 verificationCode: data.verificationCode,
             }),
@@ -56,10 +62,10 @@ const sendParcelOtpEmail = async (data) => {
     }
     catch (error) {
         console.error('Parcel OTP Email Error:', error);
-        throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to send parcel OTP email');
+        throw new app_error_1.default(http_status_1.default.INTERNAL_SERVER_ERROR, 'Failed to send parcel OTP email');
     }
 };
-export const EmailHelpers = {
+exports.EmailHelpers = {
     sendOtpResendEmail,
     sendRegisterEmail,
     sendResetPasswordEmail,

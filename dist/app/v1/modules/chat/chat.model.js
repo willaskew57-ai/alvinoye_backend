@@ -1,10 +1,13 @@
-import { Schema, model } from 'mongoose';
-import { USER_ROLES, } from './chat.interface';
-const chatSchema = new Schema({
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.MessageRead = exports.Message = exports.Chat = void 0;
+const mongoose_1 = require("mongoose");
+const chat_interface_1 = require("./chat.interface");
+const chatSchema = new mongoose_1.Schema({
     participants: [
-        { type: Schema.Types.ObjectId, ref: 'User', required: true },
+        { type: mongoose_1.Schema.Types.ObjectId, ref: 'User', required: true },
     ],
-    participant_roles: [{ type: String, enum: Object.values(USER_ROLES) }],
+    participant_roles: [{ type: String, enum: Object.values(chat_interface_1.USER_ROLES) }],
     is_support_chat: { type: Boolean, default: false },
     last_message: { type: String },
     last_message_at: { type: Date },
@@ -14,9 +17,9 @@ const chatSchema = new Schema({
         updatedAt: 'updated_at',
     }
 });
-const messageSchema = new Schema({
-    chat_id: { type: Schema.Types.ObjectId, ref: 'Chat', required: true },
-    sender_id: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+const messageSchema = new mongoose_1.Schema({
+    chat_id: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Chat', required: true },
+    sender_id: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User', required: true },
     sender_role: { type: String, required: true },
     // CHANGE THIS: 
     // Remove 'required: true' and add 'default: ""'
@@ -30,12 +33,12 @@ const messageSchema = new Schema({
         default: []
     },
 }, { timestamps: true });
-const messageReadSchema = new Schema({
-    message_id: { type: Schema.Types.ObjectId, ref: 'Message', required: true },
-    user_id: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+const messageReadSchema = new mongoose_1.Schema({
+    message_id: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Message', required: true },
+    user_id: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User', required: true },
     read_at: { type: Date, default: Date.now },
 }, { timestamps: false });
-export const Chat = model('Chat', chatSchema);
-export const Message = model('Message', messageSchema);
-export const MessageRead = model('MessageRead', messageReadSchema);
+exports.Chat = (0, mongoose_1.model)('Chat', chatSchema);
+exports.Message = (0, mongoose_1.model)('Message', messageSchema);
+exports.MessageRead = (0, mongoose_1.model)('MessageRead', messageReadSchema);
 //# sourceMappingURL=chat.model.js.map

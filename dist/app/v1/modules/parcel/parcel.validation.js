@@ -1,54 +1,57 @@
-import { z } from 'zod/v3';
-const locationValidationSchema = z.object({
-    address: z.string({ required_error: 'Address is required' }),
-    latitude: z.number({ required_error: 'Latitude is required' }),
-    longitude: z.number({ required_error: 'Longitude is required' }),
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ParcelValidations = exports.updateParcelValidationSchema = exports.createParcelValidationSchema = void 0;
+const v3_1 = require("zod/v3");
+const locationValidationSchema = v3_1.z.object({
+    address: v3_1.z.string({ required_error: 'Address is required' }),
+    latitude: v3_1.z.number({ required_error: 'Latitude is required' }),
+    longitude: v3_1.z.number({ required_error: 'Longitude is required' }),
 });
-import { PARCEL_STATUS, PRICE_STATUS } from './parcel.interface';
+const parcel_interface_1 = require("./parcel.interface");
 // --- Reusable Enum Validations based on your Interface ---
-const ParcelStatusEnum = z.nativeEnum(PARCEL_STATUS);
-const PriceStatusEnum = z.nativeEnum(PRICE_STATUS);
-export const createParcelValidationSchema = z.object({
-    body: z.object({
-        parcel_name: z
+const ParcelStatusEnum = v3_1.z.nativeEnum(parcel_interface_1.PARCEL_STATUS);
+const PriceStatusEnum = v3_1.z.nativeEnum(parcel_interface_1.PRICE_STATUS);
+exports.createParcelValidationSchema = v3_1.z.object({
+    body: v3_1.z.object({
+        parcel_name: v3_1.z
             .string({ required_error: 'Parcel name is required' })
             .min(3)
             .max(100),
-        size: z.string({ required_error: 'Size is required' }),
-        vehicle_type: z.string({ required_error: 'Vehicle type is required' }),
-        weight: z.number({ required_error: 'Weight is required' }).positive(),
+        size: v3_1.z.string({ required_error: 'Size is required' }),
+        vehicle_type: v3_1.z.string({ required_error: 'Vehicle type is required' }),
+        weight: v3_1.z.number({ required_error: 'Weight is required' }).positive(),
         handover_location: locationValidationSchema,
         pickup_location: locationValidationSchema,
-        priority: z.string({ required_error: 'Priority is required' }),
-        date: z.string({ required_error: 'Date is required' }),
-        time: z.string({ required_error: 'Time is required' }),
-        parcel_images: z.array(z.string().url()).optional(),
-        receiver_name: z.string({ required_error: 'Receiver name is required' }),
-        receiver_phone: z.string({ required_error: 'Receiver phone is required' }),
-        sender_remarks: z.string({ required_error: 'Sender remarks is required' }),
+        priority: v3_1.z.string({ required_error: 'Priority is required' }),
+        date: v3_1.z.string({ required_error: 'Date is required' }),
+        time: v3_1.z.string({ required_error: 'Time is required' }),
+        parcel_images: v3_1.z.array(v3_1.z.string().url()).optional(),
+        receiver_name: v3_1.z.string({ required_error: 'Receiver name is required' }),
+        receiver_phone: v3_1.z.string({ required_error: 'Receiver phone is required' }),
+        sender_remarks: v3_1.z.string({ required_error: 'Sender remarks is required' }),
     }),
 });
-export const updateParcelValidationSchema = z.object({
-    body: z.object({
-        parcel_name: z.string().optional(),
-        size: z.string().optional(),
-        vehicle_type: z.string().optional(),
-        weight: z.number().positive().optional(),
+exports.updateParcelValidationSchema = v3_1.z.object({
+    body: v3_1.z.object({
+        parcel_name: v3_1.z.string().optional(),
+        size: v3_1.z.string().optional(),
+        vehicle_type: v3_1.z.string().optional(),
+        weight: v3_1.z.number().positive().optional(),
         handover_location: locationValidationSchema.partial().optional(),
         pickup_location: locationValidationSchema.partial().optional(),
-        priority: z.string().optional(),
-        date: z.string().optional(),
-        time: z.string().optional(),
-        parcel_images: z.array(z.string().url()).optional(),
-        receiver_name: z.string().optional(),
-        receiver_phone: z.string().optional(),
-        sender_remarks: z.string().optional(),
-        existing_parcel_images: z.array(z.string()).optional(),
+        priority: v3_1.z.string().optional(),
+        date: v3_1.z.string().optional(),
+        time: v3_1.z.string().optional(),
+        parcel_images: v3_1.z.array(v3_1.z.string().url()).optional(),
+        receiver_name: v3_1.z.string().optional(),
+        receiver_phone: v3_1.z.string().optional(),
+        sender_remarks: v3_1.z.string().optional(),
+        existing_parcel_images: v3_1.z.array(v3_1.z.string()).optional(),
     }),
 });
-const rejectParcelValidationSchema = z.object({
-    body: z.object({
-        rejection_reason: z
+const rejectParcelValidationSchema = v3_1.z.object({
+    body: v3_1.z.object({
+        rejection_reason: v3_1.z
             .string({
             required_error: 'Rejection reason is required',
             invalid_type_error: 'Rejection reason must be a string',
@@ -57,45 +60,45 @@ const rejectParcelValidationSchema = z.object({
             .min(1, 'Rejection reason cannot be empty'),
     }),
 });
-const createPriceRequestValidationSchema = z.object({
-    body: z.object({
-        parcel_id: z.string({ required_error: 'Parcel ID (ObjectId) is required' }),
-        proposed_price: z
+const createPriceRequestValidationSchema = v3_1.z.object({
+    body: v3_1.z.object({
+        parcel_id: v3_1.z.string({ required_error: 'Parcel ID (ObjectId) is required' }),
+        proposed_price: v3_1.z
             .number({ required_error: 'Proposed price is required' })
             .positive(),
-        message: z.string().max(500).optional(),
+        message: v3_1.z.string().max(500).optional(),
     }),
 });
-const customerRejectAndCounterValidationSchema = z.object({
-    body: z.object({
-        parcel_id: z.string({ required_error: 'Parcel ID is required' }),
-        rejection_reason: z.string({
+const customerRejectAndCounterValidationSchema = v3_1.z.object({
+    body: v3_1.z.object({
+        parcel_id: v3_1.z.string({ required_error: 'Parcel ID is required' }),
+        rejection_reason: v3_1.z.string({
             required_error: 'Rejection reason is required',
         }),
-        suggested_price: z
+        suggested_price: v3_1.z
             .number({ required_error: 'Suggested price is required' })
             .positive(),
     }),
 });
-const adminRejectAndFinalOfferValidationSchema = z.object({
-    body: z.object({
-        parcel_id: z.string({ required_error: 'Parcel ID is required' }),
-        final_price: z
+const adminRejectAndFinalOfferValidationSchema = v3_1.z.object({
+    body: v3_1.z.object({
+        parcel_id: v3_1.z.string({ required_error: 'Parcel ID is required' }),
+        final_price: v3_1.z
             .number({ required_error: 'Final price is required' })
             .positive(),
-        message: z.string().optional(),
+        message: v3_1.z.string().optional(),
     }),
 });
-const adminUpdateParcelValidationSchema = z.object({
-    body: z.object({
+const adminUpdateParcelValidationSchema = v3_1.z.object({
+    body: v3_1.z.object({
         status: ParcelStatusEnum.optional(),
-        final_price: z.number().positive().optional(),
+        final_price: v3_1.z.number().positive().optional(),
         price_status: PriceStatusEnum.optional(),
     }),
 });
-export const ParcelValidations = {
-    createParcelValidationSchema,
-    updateParcelValidationSchema,
+exports.ParcelValidations = {
+    createParcelValidationSchema: exports.createParcelValidationSchema,
+    updateParcelValidationSchema: exports.updateParcelValidationSchema,
     rejectParcelValidationSchema,
     createPriceRequestValidationSchema,
     customerRejectAndCounterValidationSchema,

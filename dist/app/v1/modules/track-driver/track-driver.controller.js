@@ -1,21 +1,27 @@
-import httpStatus from 'http-status';
-import catchAsync from '../../../../utils/catch-async';
-import sendResponse from '../../../../utils/send-response';
-import { TrackDriverServices } from './track-driver.service';
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.TrackDriverControllers = void 0;
+const http_status_1 = __importDefault(require("http-status"));
+const catch_async_1 = __importDefault(require("../../../../utils/catch-async"));
+const send_response_1 = __importDefault(require("../../../../utils/send-response"));
+const track_driver_service_1 = require("./track-driver.service");
 /**
  * @route POST /api/v1/track-driver/update-location
  * @desc Update driver's current location
  * @access Private - Driver only
  */
-const updateLocation = catchAsync(async (req, res) => {
+const updateLocation = (0, catch_async_1.default)(async (req, res) => {
     const driverId = req.user?.user_id;
     const payload = {
         ...req.body,
         driver_id: driverId,
     };
-    const result = await TrackDriverServices.updateDriverLocationInDB(payload);
-    sendResponse(res, {
-        statusCode: httpStatus.OK,
+    const result = await track_driver_service_1.TrackDriverServices.updateDriverLocationInDB(payload);
+    (0, send_response_1.default)(res, {
+        statusCode: http_status_1.default.OK,
         success: true,
         message: 'Location updated successfully',
         data: result,
@@ -26,11 +32,11 @@ const updateLocation = catchAsync(async (req, res) => {
  * @desc Get driver's current location
  * @access Private
  */
-const getDriverLocation = catchAsync(async (req, res) => {
+const getDriverLocation = (0, catch_async_1.default)(async (req, res) => {
     const { driverId } = req.params;
-    const result = await TrackDriverServices.getDriverLocationFromDB(driverId);
-    sendResponse(res, {
-        statusCode: httpStatus.OK,
+    const result = await track_driver_service_1.TrackDriverServices.getDriverLocationFromDB(driverId);
+    (0, send_response_1.default)(res, {
+        statusCode: http_status_1.default.OK,
         success: true,
         message: 'Driver location retrieved successfully',
         data: result,
@@ -41,12 +47,12 @@ const getDriverLocation = catchAsync(async (req, res) => {
  * @desc Get driver's location history
  * @access Private
  */
-const getLocationHistory = catchAsync(async (req, res) => {
+const getLocationHistory = (0, catch_async_1.default)(async (req, res) => {
     const { driverId } = req.params;
     const limit = req.query.limit ? parseInt(req.query.limit) : 50;
-    const result = await TrackDriverServices.getLocationHistoryFromDB(driverId, limit);
-    sendResponse(res, {
-        statusCode: httpStatus.OK,
+    const result = await track_driver_service_1.TrackDriverServices.getLocationHistoryFromDB(driverId, limit);
+    (0, send_response_1.default)(res, {
+        statusCode: http_status_1.default.OK,
         success: true,
         message: 'Location history retrieved successfully',
         data: result,
@@ -57,11 +63,11 @@ const getLocationHistory = catchAsync(async (req, res) => {
  * @desc Get driver location for a specific parcel
  * @access Private
  */
-const getParcelDriverLocation = catchAsync(async (req, res) => {
+const getParcelDriverLocation = (0, catch_async_1.default)(async (req, res) => {
     const { parcelId } = req.params;
-    const result = await TrackDriverServices.getParcelDriverLocationFromDB(parcelId);
-    sendResponse(res, {
-        statusCode: httpStatus.OK,
+    const result = await track_driver_service_1.TrackDriverServices.getParcelDriverLocationFromDB(parcelId);
+    (0, send_response_1.default)(res, {
+        statusCode: http_status_1.default.OK,
         success: true,
         message: 'Parcel driver location retrieved successfully',
         data: result,
@@ -72,11 +78,11 @@ const getParcelDriverLocation = catchAsync(async (req, res) => {
  * @desc Mark driver as offline
  * @access Private - Driver only
  */
-const markOffline = catchAsync(async (req, res) => {
+const markOffline = (0, catch_async_1.default)(async (req, res) => {
     const driverId = req.user?.user_id;
-    const result = await TrackDriverServices.markDriverOfflineInDB(driverId);
-    sendResponse(res, {
-        statusCode: httpStatus.OK,
+    const result = await track_driver_service_1.TrackDriverServices.markDriverOfflineInDB(driverId);
+    (0, send_response_1.default)(res, {
+        statusCode: http_status_1.default.OK,
         success: true,
         message: 'Driver marked as offline',
         data: result,
@@ -87,20 +93,20 @@ const markOffline = catchAsync(async (req, res) => {
  * @desc Get nearby online drivers
  * @access Private
  */
-const getNearbyDrivers = catchAsync(async (req, res) => {
+const getNearbyDrivers = (0, catch_async_1.default)(async (req, res) => {
     const { latitude, longitude, radius } = req.query;
     if (!latitude || !longitude) {
         throw new Error('Latitude and longitude are required');
     }
-    const result = await TrackDriverServices.getNearbyDriversFromDB(parseFloat(latitude), parseFloat(longitude), radius ? parseFloat(radius) : 10);
-    sendResponse(res, {
-        statusCode: httpStatus.OK,
+    const result = await track_driver_service_1.TrackDriverServices.getNearbyDriversFromDB(parseFloat(latitude), parseFloat(longitude), radius ? parseFloat(radius) : 10);
+    (0, send_response_1.default)(res, {
+        statusCode: http_status_1.default.OK,
         success: true,
         message: 'Nearby drivers retrieved successfully',
         data: result,
     });
 });
-export const TrackDriverControllers = {
+exports.TrackDriverControllers = {
     updateLocation,
     getDriverLocation,
     getLocationHistory,
