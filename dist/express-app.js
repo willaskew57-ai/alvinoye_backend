@@ -24,7 +24,6 @@ app.use((0, cors_1.default)({
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
 }));
-app.options("*", (0, cors_1.default)());
 // For local file
 app.use('/uploads', express_1.default.static(path_1.default.join(process.cwd(), 'uploads')));
 // test route:
