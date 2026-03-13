@@ -29,8 +29,6 @@ app.use(
   })
 );
 
-app.options("*", cors());
-
 // For local file
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
