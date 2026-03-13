@@ -13,7 +13,7 @@ import { OtpServices } from '../otp/otp.services';
 import Otp from '../otp/otp.model';
 import { EmailHelpers } from '../../../../utils/email-helper';
 import { sendSms } from '../../../../utils/send-sms';
-import { deleteLocalFile } from '../../../../utils/deleteFileHelper';
+import { deleteFileFromS3 } from '../../../../aws/deleteFromS3';
 import configs from '../../../../config/env.config';
 import axios from 'axios';
 import { NotificationServices } from '../notification/notification.service';
@@ -89,7 +89,7 @@ const updateDriverInfoInDB = async (
     if (driverInfo) {
       const existingDriver = await Driver.findOne({ user_id: userId });
       if (driverInfo.license_image && existingDriver?.license_image) {
-        deleteLocalFile(existingDriver.license_image);
+        deleteFileFromS3(existingDriver.license_image);
       }
       await Driver.findOneAndUpdate({ user_id: userId }, driverInfo, {
         session,
@@ -106,7 +106,7 @@ const updateDriverInfoInDB = async (
         const toDelete = existingVehicle.vehicle_images.filter(
           (img: string) => !vehicle.existing_vehicle_images.includes(img)
         );
-        toDelete.forEach((img: string) => deleteLocalFile(img));
+        toDelete.forEach((img: string) => deleteFileFromS3(img));
         finalImages = vehicle.existing_vehicle_images;
       }
 
@@ -115,7 +115,7 @@ const updateDriverInfoInDB = async (
       }
 
       if (vehicle.number_plate_image && existingVehicle.number_plate_image) {
-        deleteLocalFile(existingVehicle.number_plate_image);
+        deleteFileFromS3(existingVehicle.number_plate_image);
       }
 
       const vehicleData = { ...vehicle, vehicle_images: finalImages };

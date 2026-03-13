@@ -3,34 +3,34 @@ import httpStatus from 'http-status';
 import catchAsync from '../../../../utils/catch-async';
 import sendResponse from '../../../../utils/send-response';
 import { DriverServices } from './driver.service';
-import { getLocalFileUrl } from '../../../../utils/fileUploadHelper';
+import { getCloudFrontUrl, S3File } from '../../../../aws/multer-s3-uploader';
 
 const registerDriver = catchAsync(async (req: Request, res: Response) => {
   const user_id = req.user.user_id;
 
   const files = req.files as {
-    [fieldname: string]: Express.Multer.File[] | undefined;
+    [fieldname: string]: S3File[] | undefined;
   };
 
   if (!req.body.driverInfo) req.body.driverInfo = {};
   if (!req.body.vehicle) req.body.vehicle = {};
 
   if (files?.license_image?.[0]) {
-    req.body.driverInfo.license_image = getLocalFileUrl(
-      files.license_image[0].path
+    req.body.driverInfo.license_image = getCloudFrontUrl(
+      files.license_image[0].key
     );
   }
 
   if (files?.number_plate_image?.[0]) {
-    req.body.vehicle.number_plate_image = getLocalFileUrl(
-      files.number_plate_image[0].path
+    req.body.vehicle.number_plate_image = getCloudFrontUrl(
+      files.number_plate_image[0].key
     );
   }
 
   // 3. Handle Multiple Vehicle Images (Array)
   if (files?.vehicle_images) {
-    req.body.vehicle.vehicle_images = files.vehicle_images.map((file) =>
-      getLocalFileUrl(file.path)
+    req.body.vehicle.vehicle_images = files.vehicle_images.map((file: S3File) =>
+      getCloudFrontUrl(file.key)
     );
   }
 

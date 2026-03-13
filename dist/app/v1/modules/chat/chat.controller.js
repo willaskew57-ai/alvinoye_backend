@@ -8,7 +8,7 @@ const http_status_1 = __importDefault(require("http-status"));
 const chat_service_1 = require("./chat.service");
 const catch_async_1 = __importDefault(require("../../../../utils/catch-async"));
 const send_response_1 = __importDefault(require("../../../../utils/send-response"));
-const fileUploadHelper_1 = require("../../../../utils/fileUploadHelper");
+const multer_s3_uploader_1 = require("../../../../aws/multer-s3-uploader");
 const initiateChat = (0, catch_async_1.default)(async (req, res) => {
     const result = await chat_service_1.ChatService.initiateChat(req.user.user_id, req.user.role);
     (0, send_response_1.default)(res, {
@@ -31,7 +31,7 @@ const initiateP2PChat = (0, catch_async_1.default)(async (req, res) => {
 exports.sendMessage = (0, catch_async_1.default)(async (req, res) => {
     let attachmentUrls = [];
     if (req.files && Array.isArray(req.files)) {
-        attachmentUrls = req.files.map((file) => (0, fileUploadHelper_1.getLocalFileUrl)(file.path));
+        attachmentUrls = req.files.map((file) => (0, multer_s3_uploader_1.getCloudFrontUrl)(file.key));
     }
     const result = await chat_service_1.ChatService.sendMessage(req.user.user_id, req.user.role, {
         ...req.body,

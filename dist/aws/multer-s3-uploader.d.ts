@@ -1,4 +1,12 @@
 /**
+ * Extended file type with S3-specific properties from multer-s3
+ */
+export interface S3File extends Express.Multer.File {
+    key: string;
+    bucket?: string;
+    contentType?: string;
+}
+/**
  * Setup file upload to AWS S3
  */
 export declare const uploadFile: () => import("express").RequestHandler<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>>;

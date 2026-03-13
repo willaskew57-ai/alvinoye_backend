@@ -10,7 +10,7 @@ const user_model_1 = require("./user.model");
 const user_interface_1 = require("./user.interface");
 const mongoose_1 = require("mongoose");
 const query_builder_1 = __importDefault(require("../../../../builders/query-builder"));
-const deleteFileHelper_1 = require("../../../../utils/deleteFileHelper");
+const deleteFromS3_1 = require("../../../../aws/deleteFromS3");
 const parcel_model_1 = require("../parcel/parcel.model");
 const parcel_interface_1 = require("../parcel/parcel.interface");
 const createAdminIntoDB = async (payload) => {
@@ -105,7 +105,7 @@ const updateMeIntoDB = async (id, payload) => {
     if (payload.profile_picture) {
         const existingUser = await user_model_1.User.findById(id);
         if (existingUser && existingUser.profile_picture) {
-            (0, deleteFileHelper_1.deleteLocalFile)(existingUser.profile_picture);
+            (0, deleteFromS3_1.deleteFileFromS3)(existingUser.profile_picture);
         }
     }
     const result = await user_model_1.User.findByIdAndUpdate(id, payload, {

@@ -8,25 +8,29 @@ import validateRequest from '../../../../middleware/validate-request';
 import { USER_ROLE } from '../user/user.interface';
 import { ParcelControllers } from './parcel.controller';
 import { ParcelValidations } from './parcel.validation';
-import { getLocalFileUrl, upload } from '../../../../utils/fileUploadHelper';
+import {
+  getCloudFrontUrl,
+  uploadFile,
+  S3File,
+} from '../../../../aws/multer-s3-uploader';
 
 const router = express.Router();
 
 router.post(
   '/create',
   auth(USER_ROLE.CUSTOMER),
-  upload.fields([{ name: 'parcel_images', maxCount: 5 }]),
+  uploadFile(),
   (req: Request, res: Response, next: NextFunction) => {
     if (req.body.data) {
       req.body = JSON.parse(req.body.data);
     }
 
     const files = req.files as {
-      [fieldname: string]: Express.Multer.File[] | undefined;
+      [fieldname: string]: S3File[] | undefined;
     };
     if (files?.parcel_images) {
-      req.body.parcel_images = files.parcel_images.map((file) =>
-        getLocalFileUrl(file.path)
+      req.body.parcel_images = files.parcel_images.map((file: S3File) =>
+        getCloudFrontUrl(file.key)
       );
     }
 
@@ -39,18 +43,18 @@ router.post(
 router.patch(
   '/update/:id',
   auth(USER_ROLE.CUSTOMER),
-  upload.fields([{ name: 'parcel_images', maxCount: 5 }]),
+  uploadFile(),
   (req: Request, res: Response, next: NextFunction) => {
     if (req.body.data) {
       req.body = JSON.parse(req.body.data);
     }
 
     const files = req.files as {
-      [fieldname: string]: Express.Multer.File[] | undefined;
+      [fieldname: string]: S3File[] | undefined;
     };
     if (files?.parcel_images) {
-      req.body.parcel_images = files.parcel_images.map((file) =>
-        getLocalFileUrl(file.path)
+      req.body.parcel_images = files.parcel_images.map((file: S3File) =>
+        getCloudFrontUrl(file.key)
       );
     }
     next();

@@ -1,10 +1,15 @@
-import { Router, type NextFunction, type Request, type Response } from 'express';
+import {
+  Router,
+  type NextFunction,
+  type Request,
+  type Response,
+} from 'express';
 import { ChatController } from './chat.controller';
 import { auth } from '../../../../middleware/auth';
 import validateRequest from '../../../../middleware/validate-request';
 import { ChatValidation } from './chat.validation';
 import { USER_ROLES } from './chat.interface';
-import { upload } from '../../../../utils/fileUploadHelper';
+import { uploadFile } from '../../../../aws/multer-s3-uploader';
 
 const router = Router();
 
@@ -45,11 +50,7 @@ router.get(
  * @route GET /api/v1/chat/messages/:id
  * @desc Get message history for a specific chat
  */
-router.get(
-  '/messages/:id',
-  auth(),
-  ChatController.getMessages
-);
+router.get('/messages/:id', auth(), ChatController.getMessages);
 
 /**
  * @route POST /api/v1/chat/send
@@ -58,7 +59,7 @@ router.get(
 router.post(
   '/send',
   auth(),
-  upload.array('attachments', 5), 
+  uploadFile(),
   (req: Request, res: Response, next: NextFunction) => {
     // If files are sent, field values often end up in req.body.data
     if (req.body.data) req.body = JSON.parse(req.body.data);
@@ -70,10 +71,6 @@ router.post(
  * @route PATCH /api/v1/chat/mark-as-read/:id
  * @desc Mark all unread messages in a chat as read
  */
-router.patch(
-  '/mark-as-read/:id',
-  auth(), 
-  ChatController.markAsRead
-);
+router.patch('/mark-as-read/:id', auth(), ChatController.markAsRead);
 
 export const ChatRoutes = router;

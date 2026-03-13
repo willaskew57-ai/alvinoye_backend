@@ -10,13 +10,9 @@ const driver_controller_1 = require("./driver.controller");
 const user_interface_1 = require("../user/user.interface");
 const auth_1 = require("../../../../middleware/auth");
 const validate_request_1 = __importDefault(require("../../../../middleware/validate-request"));
-const fileUploadHelper_1 = require("../../../../utils/fileUploadHelper");
+const multer_s3_uploader_1 = require("../../../../aws/multer-s3-uploader");
 const router = express_1.default.Router();
-router.post('/info', (0, auth_1.auth)(user_interface_1.USER_ROLE.DRIVER), fileUploadHelper_1.upload.fields([
-    { name: 'license_image', maxCount: 1 },
-    { name: 'number_plate_image', maxCount: 1 },
-    { name: 'vehicle_images', maxCount: 5 },
-]), (req, res, next) => {
+router.post('/info', (0, auth_1.auth)(user_interface_1.USER_ROLE.DRIVER), (0, multer_s3_uploader_1.uploadFile)(), (req, res, next) => {
     if (req.body.data) {
         try {
             req.body = JSON.parse(req.body.data);
@@ -29,11 +25,7 @@ router.post('/info', (0, auth_1.auth)(user_interface_1.USER_ROLE.DRIVER), fileUp
     }
     next();
 }, (0, validate_request_1.default)(driver_validation_1.DriverValidation.createDriverWithVehicleValidationSchema), driver_controller_1.DriverController.registerDriver);
-router.patch('/update-info', (0, auth_1.auth)(user_interface_1.USER_ROLE.DRIVER), fileUploadHelper_1.upload.fields([
-    { name: 'license_image', maxCount: 1 },
-    { name: 'number_plate_image', maxCount: 1 },
-    { name: 'vehicle_images', maxCount: 5 },
-]), (req, res, next) => {
+router.patch('/update-info', (0, auth_1.auth)(user_interface_1.USER_ROLE.DRIVER), (0, multer_s3_uploader_1.uploadFile)(), (req, res, next) => {
     if (req.body.data) {
         req.body = JSON.parse(req.body.data);
     }
@@ -42,17 +34,17 @@ router.patch('/update-info', (0, auth_1.auth)(user_interface_1.USER_ROLE.DRIVER)
     if (files?.license_image?.[0]) {
         if (!req.body.driverInfo)
             req.body.driverInfo = {};
-        req.body.driverInfo.license_image = (0, fileUploadHelper_1.getLocalFileUrl)(files.license_image[0].path);
+        req.body.driverInfo.license_image = (0, multer_s3_uploader_1.getCloudFrontUrl)(files.license_image[0].key);
     }
     if (files?.number_plate_image?.[0]) {
         if (!req.body.vehicle)
             req.body.vehicle = {};
-        req.body.vehicle.number_plate_image = (0, fileUploadHelper_1.getLocalFileUrl)(files.number_plate_image[0].path);
+        req.body.vehicle.number_plate_image = (0, multer_s3_uploader_1.getCloudFrontUrl)(files.number_plate_image[0].key);
     }
     if (files?.vehicle_images) {
         if (!req.body.vehicle)
             req.body.vehicle = {};
-        req.body.vehicle.vehicle_images = files.vehicle_images.map((file) => (0, fileUploadHelper_1.getLocalFileUrl)(file.path));
+        req.body.vehicle.vehicle_images = files.vehicle_images.map((file) => (0, multer_s3_uploader_1.getCloudFrontUrl)(file.key));
     }
     next();
 }, (0, validate_request_1.default)(driver_validation_1.DriverValidation.updateDriverWithVehicleValidationSchema), driver_controller_1.DriverController.updateDriverInfo);
