@@ -12,7 +12,7 @@ const user_interface_1 = require("../user/user.interface");
 const parcel_model_1 = require("./parcel.model");
 const parcel_interface_1 = require("./parcel.interface");
 const parcel_utils_1 = require("./parcel.utils");
-const deleteFileHelper_1 = require("../../../../utils/deleteFileHelper");
+const deleteFromS3_1 = require("../../../../aws/deleteFromS3");
 const notification_service_1 = require("../notification/notification.service");
 const notification_constant_1 = require("../notification/notification.constant");
 // ** ----- create parcel -----
@@ -125,7 +125,7 @@ const updateParcelInDB = async (id, payload) => {
         // Identify images that were in the DB but are NOT in the 'keep' list
         const imagesToDelete = existingParcel.parcel_images.filter((img) => !payload.existing_parcel_images?.includes(img));
         // Physically delete them from the local folder
-        imagesToDelete.forEach((img) => (0, deleteFileHelper_1.deleteLocalFile)(img));
+        imagesToDelete.forEach((img) => (0, deleteFromS3_1.deleteFileFromS3)(img));
         // Update our array to contain only the kept images
         finalParcelImages = payload.existing_parcel_images;
     }

@@ -4,7 +4,7 @@ import { ChatService } from './chat.service';
 import { USER_ROLES } from './chat.interface';
 import catchAsync from '../../../../utils/catch-async';
 import sendResponse from '../../../../utils/send-response';
-import { getLocalFileUrl } from '../../../../utils/fileUploadHelper';
+import { getCloudFrontUrl, S3File } from '../../../../aws/multer-s3-uploader';
 
 const initiateChat = catchAsync(async (req: Request, res: Response) => {
   const result = await ChatService.initiateChat(
@@ -26,7 +26,7 @@ const initiateP2PChat = catchAsync(async (req: Request, res: Response) => {
   const result = await ChatService.initiateChat(
     req.user.user_id,
     req.user.role as USER_ROLES,
-    recipientId 
+    recipientId
   );
 
   sendResponse(res, {
@@ -40,8 +40,8 @@ const initiateP2PChat = catchAsync(async (req: Request, res: Response) => {
 export const sendMessage = catchAsync(async (req: Request, res: Response) => {
   let attachmentUrls: string[] = [];
   if (req.files && Array.isArray(req.files)) {
-    attachmentUrls = (req.files as Express.Multer.File[]).map((file) =>
-      getLocalFileUrl(file.path)
+    attachmentUrls = (req.files as S3File[]).map((file) =>
+      getCloudFrontUrl(file.key)
     );
   }
 
@@ -80,7 +80,6 @@ const getMyChats = catchAsync(async (req: Request, res: Response) => {
 const getMessages = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
 
-  
   const result = await ChatService.getMessages(
     id as string,
     req.user.user_id,
@@ -98,7 +97,7 @@ const getMessages = catchAsync(async (req: Request, res: Response) => {
 });
 
 const markAsRead = catchAsync(async (req: Request, res: Response) => {
-  const { id } = req.params; 
+  const { id } = req.params;
   const userId = req.user.user_id;
 
   const result = await ChatService.markAsRead(id as string, userId);

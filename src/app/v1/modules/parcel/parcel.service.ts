@@ -16,7 +16,7 @@ import {
 } from './parcel.interface';
 import type { TUserPayload } from '../../../../interfaces';
 import { generateParcelId } from './parcel.utils';
-import { deleteLocalFile } from '../../../../utils/deleteFileHelper';
+import { deleteFileFromS3 } from '../../../../aws/deleteFromS3';
 import { NotificationServices } from '../notification/notification.service';
 import { NOTIFICATION_TYPE } from '../notification/notification.constant';
 
@@ -175,7 +175,7 @@ const updateParcelInDB = async (
     );
 
     // Physically delete them from the local folder
-    imagesToDelete.forEach((img: string) => deleteLocalFile(img));
+    imagesToDelete.forEach((img: string) => deleteFileFromS3(img));
 
     // Update our array to contain only the kept images
     finalParcelImages = payload.existing_parcel_images;

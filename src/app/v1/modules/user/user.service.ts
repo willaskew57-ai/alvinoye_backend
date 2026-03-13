@@ -9,7 +9,7 @@ import {
 } from './user.interface';
 import { Types } from 'mongoose';
 import QueryBuilder from '../../../../builders/query-builder';
-import { deleteLocalFile } from '../../../../utils/deleteFileHelper';
+import { deleteFileFromS3 } from '../../../../aws/deleteFromS3';
 import { Parcel } from '../parcel/parcel.model';
 import { PARCEL_STATUS } from '../parcel/parcel.interface';
 
@@ -150,7 +150,7 @@ const updateMeIntoDB = async (id: string, payload: Partial<TUser>) => {
     const existingUser = await User.findById(id);
 
     if (existingUser && existingUser.profile_picture) {
-      deleteLocalFile(existingUser.profile_picture);
+      deleteFileFromS3(existingUser.profile_picture);
     }
   }
 

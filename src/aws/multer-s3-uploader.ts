@@ -7,6 +7,15 @@ import { S3Client } from '@aws-sdk/client-s3';
 import configs from '../config/env.config';
 
 /**
+ * Extended file type with S3-specific properties from multer-s3
+ */
+export interface S3File extends Express.Multer.File {
+  key: string;
+  bucket?: string;
+  contentType?: string;
+}
+
+/**
  * Configure and setup AWS S3 client
  */
 const s3 = new S3Client({
