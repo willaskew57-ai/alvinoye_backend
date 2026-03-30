@@ -81,6 +81,8 @@ const loginServices = async (payload: ILoginUser) => {
   // Use the static method from User model
   const user = await User.isUserExistsByEmail(payload.email);
 
+  console.log(user, 'user');
+
   if (!user) {
     throw new AppError(
       httpStatus.NOT_FOUND,
