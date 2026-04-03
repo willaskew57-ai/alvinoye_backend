@@ -109,6 +109,21 @@ const verifyParcelOtp = (0, catch_async_1.default)(async (req, res) => {
         data: result,
     });
 });
+const selectParcel = (0, catch_async_1.default)(async (req, res) => {
+    const driverId = req.user.user_id;
+    const { parcel_id, routeContext } = req.body;
+    const result = await driver_service_1.DriverServices.selectParcelFromDB({
+        parcel_id,
+        driverId,
+        routeContext,
+    });
+    (0, send_response_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: 'Parcel selected successfully',
+        data: result,
+    });
+});
 exports.DriverController = {
     registerDriver,
     updateDriverInfo,
@@ -118,5 +133,6 @@ exports.DriverController = {
     verifyParcelOtp,
     getAvailableParcelsForDriver,
     getDriverById,
+    selectParcel,
 };
 //# sourceMappingURL=driver.controller.js.map

@@ -62,9 +62,59 @@ const verifyParcelOtpValidationSchema = v3_1.z.object({
             .length(6, 'OTP must be exactly 6 digits'),
     }),
 });
+const getAvailableParcelsValidationSchema = v3_1.z.object({
+    query: v3_1.z.object({
+        currentLat: v3_1.z
+            .string({ required_error: 'currentLat is required' })
+            .refine((val) => !isNaN(Number(val)) && Number(val) >= -90 && Number(val) <= 90, {
+            message: 'currentLat must be a valid latitude (-90 to 90)',
+        }),
+        currentLng: v3_1.z
+            .string({ required_error: 'currentLng is required' })
+            .refine((val) => !isNaN(Number(val)) && Number(val) >= -180 && Number(val) <= 180, {
+            message: 'currentLng must be a valid longitude (-180 to 180)',
+        }),
+        heading: v3_1.z
+            .string()
+            .refine((val) => !val || (!isNaN(Number(val)) && Number(val) >= 0 && Number(val) < 360), { message: 'heading must be a number between 0-360' })
+            .optional(),
+        radiusMeters: v3_1.z
+            .string()
+            .refine((val) => !val || (!isNaN(Number(val)) && Number(val) > 0), {
+            message: 'radiusMeters must be a positive number',
+        })
+            .optional(),
+        page: v3_1.z
+            .string()
+            .refine((val) => !val || (!isNaN(Number(val)) && Number(val) > 0), {
+            message: 'page must be a positive number',
+        })
+            .optional(),
+        limit: v3_1.z
+            .string()
+            .refine((val) => !val || (!isNaN(Number(val)) && Number(val) > 0), {
+            message: 'limit must be a positive number',
+        })
+            .optional(),
+    }),
+});
+const selectParcelValidationSchema = v3_1.z.object({
+    body: v3_1.z.object({
+        parcel_id: v3_1.z.string({ required_error: 'Parcel ID is required' }),
+        routeContext: v3_1.z.object({
+            fromLat: v3_1.z.number(),
+            fromLng: v3_1.z.number(),
+            toLat: v3_1.z.number().optional(),
+            toLng: v3_1.z.number().optional(),
+            routePolyline: v3_1.z.string().optional(),
+        }).optional(),
+    }),
+});
 exports.DriverValidation = {
     createDriverWithVehicleValidationSchema,
     updateDriverWithVehicleValidationSchema,
     verifyParcelOtpValidationSchema,
+    getAvailableParcelsValidationSchema,
+    selectParcelValidationSchema,
 };
 //# sourceMappingURL=driver.validation.js.map

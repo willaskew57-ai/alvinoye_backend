@@ -457,5 +457,111 @@ export declare const DriverValidation: {
             otp: string;
         };
     }>;
+    getAvailableParcelsValidationSchema: z.ZodObject<{
+        query: z.ZodObject<{
+            currentLat: z.ZodEffects<z.ZodString, string, string>;
+            currentLng: z.ZodEffects<z.ZodString, string, string>;
+            heading: z.ZodOptional<z.ZodEffects<z.ZodString, string, string>>;
+            radiusMeters: z.ZodOptional<z.ZodEffects<z.ZodString, string, string>>;
+            page: z.ZodOptional<z.ZodEffects<z.ZodString, string, string>>;
+            limit: z.ZodOptional<z.ZodEffects<z.ZodString, string, string>>;
+        }, "strip", z.ZodTypeAny, {
+            currentLat: string;
+            currentLng: string;
+            limit?: string | undefined;
+            page?: string | undefined;
+            heading?: string | undefined;
+            radiusMeters?: string | undefined;
+        }, {
+            currentLat: string;
+            currentLng: string;
+            limit?: string | undefined;
+            page?: string | undefined;
+            heading?: string | undefined;
+            radiusMeters?: string | undefined;
+        }>;
+    }, "strip", z.ZodTypeAny, {
+        query: {
+            currentLat: string;
+            currentLng: string;
+            limit?: string | undefined;
+            page?: string | undefined;
+            heading?: string | undefined;
+            radiusMeters?: string | undefined;
+        };
+    }, {
+        query: {
+            currentLat: string;
+            currentLng: string;
+            limit?: string | undefined;
+            page?: string | undefined;
+            heading?: string | undefined;
+            radiusMeters?: string | undefined;
+        };
+    }>;
+    selectParcelValidationSchema: z.ZodObject<{
+        body: z.ZodObject<{
+            parcel_id: z.ZodString;
+            routeContext: z.ZodOptional<z.ZodObject<{
+                fromLat: z.ZodNumber;
+                fromLng: z.ZodNumber;
+                toLat: z.ZodOptional<z.ZodNumber>;
+                toLng: z.ZodOptional<z.ZodNumber>;
+                routePolyline: z.ZodOptional<z.ZodString>;
+            }, "strip", z.ZodTypeAny, {
+                fromLat: number;
+                fromLng: number;
+                toLat?: number | undefined;
+                toLng?: number | undefined;
+                routePolyline?: string | undefined;
+            }, {
+                fromLat: number;
+                fromLng: number;
+                toLat?: number | undefined;
+                toLng?: number | undefined;
+                routePolyline?: string | undefined;
+            }>>;
+        }, "strip", z.ZodTypeAny, {
+            parcel_id: string;
+            routeContext?: {
+                fromLat: number;
+                fromLng: number;
+                toLat?: number | undefined;
+                toLng?: number | undefined;
+                routePolyline?: string | undefined;
+            } | undefined;
+        }, {
+            parcel_id: string;
+            routeContext?: {
+                fromLat: number;
+                fromLng: number;
+                toLat?: number | undefined;
+                toLng?: number | undefined;
+                routePolyline?: string | undefined;
+            } | undefined;
+        }>;
+    }, "strip", z.ZodTypeAny, {
+        body: {
+            parcel_id: string;
+            routeContext?: {
+                fromLat: number;
+                fromLng: number;
+                toLat?: number | undefined;
+                toLng?: number | undefined;
+                routePolyline?: string | undefined;
+            } | undefined;
+        };
+    }, {
+        body: {
+            parcel_id: string;
+            routeContext?: {
+                fromLat: number;
+                fromLng: number;
+                toLat?: number | undefined;
+                toLng?: number | undefined;
+                routePolyline?: string | undefined;
+            } | undefined;
+        };
+    }>;
 };
 //# sourceMappingURL=driver.validation.d.ts.map

@@ -1,1 +1,1 @@
-{"version":3,"file":"driver.controller.d.ts","sourceRoot":"","sources":["../../../../../src/app/v1/modules/driver/driver.controller.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,OAAO,EAAE,QAAQ,EAAE,MAAM,SAAS,CAAC;AAgJjD,eAAO,MAAM,gBAAgB;;;;;;;;;CAS5B,CAAC"}
+{"version":3,"file":"driver.controller.d.ts","sourceRoot":"","sources":["../../../../../src/app/v1/modules/driver/driver.controller.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,OAAO,EAAE,QAAQ,EAAE,MAAM,SAAS,CAAC;AAkKjD,eAAO,MAAM,gBAAgB;;;;;;;;;;CAU5B,CAAC"}
