@@ -8,6 +8,7 @@ const socket_io_1 = require("socket.io");
 const colors_1 = __importDefault(require("colors"));
 const socket_auth_1 = require("./socket-auth");
 const track_service_v2_1 = require("../app/v1/modules/track-driver-v2/track.service-v2");
+const driver_service_1 = require("../app/v1/modules/driver/driver.service");
 let io;
 exports.onlineUsers = new Set();
 const initSocket = (server) => {
@@ -109,7 +110,50 @@ const initSocket = (server) => {
             }
         });
         // ==========================================
-        // 4. DISCONNECT
+        // 4. PARCEL DISCOVERY EVENTS
+        // ==========================================
+        const parcelThrottle = new Map();
+        const THROTTLE_MS = 2000;
+        socket.on('driver:location-update', async (data) => {
+            if (userRole !== 'DRIVER') {
+                socket.emit('error', { message: 'Only drivers can update location for parcel discovery' });
+                return;
+            }
+            const now = Date.now();
+            const lastUpdate = parcelThrottle.get(userId) || 0;
+            if (now - lastUpdate < THROTTLE_MS) {
+                return;
+            }
+            parcelThrottle.set(userId, now);
+            try {
+                const query = {
+                    currentLat: data.currentLat.toString(),
+                    currentLng: data.currentLng.toString(),
+                    heading: data.heading?.toString(),
+                    destinationLat: data.destinationLat?.toString(),
+                    destinationLng: data.destinationLng?.toString(),
+                    savedRoutePolyline: data.savedRoutePolyline,
+                    routeBufferMeters: data.routeBufferMeters?.toString(),
+                    directionAngleThreshold: data.directionAngleThreshold?.toString(),
+                    radiusMeters: data.radiusMeters?.toString() || '1500',
+                    limit: '10',
+                    page: '1',
+                };
+                const parcels = await driver_service_1.DriverServices.getAvailableParcelsFromDB(userId, query);
+                socket.emit('driver:available-parcels', {
+                    success: true,
+                    data: parcels.data,
+                    meta: parcels.meta,
+                    timestamp: now,
+                });
+            }
+            catch (error) {
+                const msg = error instanceof Error ? error.message : 'Unknown error';
+                socket.emit('error', { message: 'Failed to get available parcels', detail: msg });
+            }
+        });
+        // ==========================================
+        // 5. DISCONNECT
         // ==========================================
         socket.on('disconnect', () => {
             exports.onlineUsers.delete(userId);

@@ -142,6 +142,24 @@ const verifyParcelOtp = catchAsync(async (req, res) => {
   });
 });
 
+const selectParcel = catchAsync(async (req: Request, res: Response) => {
+  const driverId = req.user.user_id;
+  const { parcel_id, routeContext } = req.body;
+
+  const result = await DriverServices.selectParcelFromDB({
+    parcel_id,
+    driverId,
+    routeContext,
+  });
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Parcel selected successfully',
+    data: result,
+  });
+});
+
 export const DriverController = {
   registerDriver,
   updateDriverInfo,
@@ -151,4 +169,5 @@ export const DriverController = {
   verifyParcelOtp,
   getAvailableParcelsForDriver,
   getDriverById,
+  selectParcel,
 };

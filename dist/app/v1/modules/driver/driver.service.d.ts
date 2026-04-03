@@ -72,86 +72,54 @@ export declare const DriverServices: {
             page: number;
             limit: number;
             totalPages: number;
+            discoveryMode: string;
+            distanceToSavedRoute?: never;
+            isOnRoute?: never;
         };
-        data: ({
-            distance_info: {
-                parcel_actual_distance: string;
-                detour_km?: never;
+        data: never[];
+    } | {
+        meta: {
+            total: number;
+            page: number;
+            limit: number;
+            totalPages: number;
+            discoveryMode: string;
+            distanceToSavedRoute: number;
+            isOnRoute: boolean;
+        };
+        data: any[];
+    }>;
+    selectParcelFromDB: (payload: {
+        parcel_id: string;
+        driverId: string;
+        routeContext?: {
+            fromLat: number;
+            fromLng: number;
+            toLat?: number;
+            toLng?: number;
+            routePolyline?: string;
+        };
+    }) => Promise<{
+        parcel_id: Types.ObjectId;
+        status: "ONGOING";
+        pickup_location: import("../parcel/parcel.interface").TLocation;
+        dropoff_location: import("../parcel/parcel.interface").TLocation;
+        routeInjectionPoints: {
+            pickup: {
+                location: import("../parcel/parcel.interface").TLocation;
+                type: string;
             };
-            parcel_id: string;
-            user_id: Types.ObjectId;
-            parcel_name: string;
-            size: string;
-            vehicle_type: string;
-            weight: number;
-            pickup_location: import("../parcel/parcel.interface").TLocation;
-            handover_location: import("../parcel/parcel.interface").TLocation;
-            priority: string;
-            date: string;
-            time: string;
-            parcel_images: string[];
-            receiver_name: string;
-            receiver_phone: string;
-            sender_remarks: string;
-            status: import("../parcel/parcel.interface").TParcelStatus;
-            final_price: number | null;
-            price_status: import("../parcel/parcel.interface").TPriceStatus;
-            rejection_reason?: string;
-            accepted_by: Types.ObjectId | null;
-            accepted_at: Date | null;
-            completed_at: Date | null;
-            stripe_checkout_session_id?: string | null;
-            _id: Types.ObjectId;
-            $locals: Record<string, unknown>;
-            $op: "save" | "validate" | "remove" | null;
-            $where: Record<string, unknown>;
-            baseModelName?: string;
-            collection: mongoose.Collection;
-            db: mongoose.Connection;
-            errors?: mongoose.Error.ValidationError;
-            isNew: boolean;
-            schema: mongoose.Schema;
-            __v: number;
-        } | {
-            distance_info: {
-                parcel_actual_distance: any;
-                detour_km: number;
+            dropoff: {
+                location: import("../parcel/parcel.interface").TLocation;
+                type: string;
             };
-            parcel_id: string;
-            user_id: Types.ObjectId;
-            parcel_name: string;
-            size: string;
-            vehicle_type: string;
-            weight: number;
-            pickup_location: import("../parcel/parcel.interface").TLocation;
-            handover_location: import("../parcel/parcel.interface").TLocation;
-            priority: string;
-            date: string;
-            time: string;
-            parcel_images: string[];
-            receiver_name: string;
-            receiver_phone: string;
-            sender_remarks: string;
-            status: import("../parcel/parcel.interface").TParcelStatus;
-            final_price: number | null;
-            price_status: import("../parcel/parcel.interface").TPriceStatus;
-            rejection_reason?: string;
-            accepted_by: Types.ObjectId | null;
-            accepted_at: Date | null;
-            completed_at: Date | null;
-            stripe_checkout_session_id?: string | null;
-            _id: Types.ObjectId;
-            $locals: Record<string, unknown>;
-            $op: "save" | "validate" | "remove" | null;
-            $where: Record<string, unknown>;
-            baseModelName?: string;
-            collection: mongoose.Collection;
-            db: mongoose.Connection;
-            errors?: mongoose.Error.ValidationError;
-            isNew: boolean;
-            schema: mongoose.Schema;
-            __v: number;
-        })[];
+            originalRoute: {
+                fromLat: number;
+                fromLng: number;
+                toLat: number | undefined;
+                toLng: number | undefined;
+            };
+        } | null;
     }>;
 };
 //# sourceMappingURL=driver.service.d.ts.map

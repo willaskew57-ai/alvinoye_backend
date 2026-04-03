@@ -108,6 +108,7 @@ router.get(
 router.get(
   '/available-for-driver',
   auth(USER_ROLE.DRIVER),
+  validateRequest(DriverValidation.getAvailableParcelsValidationSchema),
   DriverController.getAvailableParcelsForDriver
 );
 
@@ -122,6 +123,13 @@ router.post(
   auth(USER_ROLE.DRIVER),
   validateRequest(DriverValidation.verifyParcelOtpValidationSchema),
   DriverController.verifyParcelOtp
+);
+
+router.post(
+  '/parcel/select',
+  auth(USER_ROLE.DRIVER),
+  validateRequest(DriverValidation.selectParcelValidationSchema),
+  DriverController.selectParcel
 );
 
 export const DriverRoutes = router;

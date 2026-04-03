@@ -4,6 +4,7 @@ import colors from 'colors';
 import { socketAuth } from './socket-auth';
 import { TrackDriverServices } from '../app/v1/modules/track-driver-v2/track.service-v2';
 import type { IUpdateLocation } from '../app/v1/modules/track-driver-v2/track-driver.interface';
+import { DriverServices } from '../app/v1/modules/driver/driver.service';
 
 // --- Interfaces ---
 export interface IUpdateLocationPayload {
@@ -143,7 +144,65 @@ export const initSocket = (server: HttpServer): Server => {
     });
 
     // ==========================================
-    // 4. DISCONNECT
+    // 4. PARCEL DISCOVERY EVENTS
+    // ==========================================
+
+    const parcelThrottle = new Map<string, number>();
+    const THROTTLE_MS = 2000;
+
+    socket.on('driver:location-update', async (data: {
+      currentLat: number;
+      currentLng: number;
+      heading?: number;
+      destinationLat?: number;
+      destinationLng?: number;
+      savedRoutePolyline?: string;
+      routeBufferMeters?: number;
+      directionAngleThreshold?: number;
+      radiusMeters?: number;
+    }) => {
+      if (userRole !== 'DRIVER') {
+        socket.emit('error', { message: 'Only drivers can update location for parcel discovery' });
+        return;
+      }
+
+      const now = Date.now();
+      const lastUpdate = parcelThrottle.get(userId) || 0;
+      if (now - lastUpdate < THROTTLE_MS) {
+        return;
+      }
+      parcelThrottle.set(userId, now);
+
+      try {
+        const query = {
+          currentLat: data.currentLat.toString(),
+          currentLng: data.currentLng.toString(),
+          heading: data.heading?.toString(),
+          destinationLat: data.destinationLat?.toString(),
+          destinationLng: data.destinationLng?.toString(),
+          savedRoutePolyline: data.savedRoutePolyline,
+          routeBufferMeters: data.routeBufferMeters?.toString(),
+          directionAngleThreshold: data.directionAngleThreshold?.toString(),
+          radiusMeters: data.radiusMeters?.toString() || '1500',
+          limit: '10',
+          page: '1',
+        };
+
+        const parcels = await DriverServices.getAvailableParcelsFromDB(userId, query);
+        socket.emit('driver:available-parcels', {
+          success: true,
+          data: parcels.data,
+          meta: parcels.meta,
+          timestamp: now,
+        });
+      } catch (error: unknown) {
+        const msg = error instanceof Error ? error.message : 'Unknown error';
+        socket.emit('error', { message: 'Failed to get available parcels', detail: msg });
+      }
+    });
+
+    // ==========================================
+    // 5. DISCONNECT
     // ==========================================
     socket.on('disconnect', () => {
       onlineUsers.delete(userId);
