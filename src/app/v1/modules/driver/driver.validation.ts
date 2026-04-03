@@ -65,8 +65,63 @@ const verifyParcelOtpValidationSchema = z.object({
   }),
 });
 
+const getAvailableParcelsValidationSchema = z.object({
+  query: z.object({
+    currentLat: z
+      .string({ required_error: 'currentLat is required' })
+      .refine((val) => !isNaN(Number(val)) && Number(val) >= -90 && Number(val) <= 90, {
+        message: 'currentLat must be a valid latitude (-90 to 90)',
+      }),
+    currentLng: z
+      .string({ required_error: 'currentLng is required' })
+      .refine((val) => !isNaN(Number(val)) && Number(val) >= -180 && Number(val) <= 180, {
+        message: 'currentLng must be a valid longitude (-180 to 180)',
+      }),
+    heading: z
+      .string()
+      .refine(
+        (val) => !val || (!isNaN(Number(val)) && Number(val) >= 0 && Number(val) < 360),
+        { message: 'heading must be a number between 0-360' }
+      )
+      .optional(),
+    radiusMeters: z
+      .string()
+      .refine((val) => !val || (!isNaN(Number(val)) && Number(val) > 0), {
+        message: 'radiusMeters must be a positive number',
+      })
+      .optional(),
+    page: z
+      .string()
+      .refine((val) => !val || (!isNaN(Number(val)) && Number(val) > 0), {
+        message: 'page must be a positive number',
+      })
+      .optional(),
+    limit: z
+      .string()
+      .refine((val) => !val || (!isNaN(Number(val)) && Number(val) > 0), {
+        message: 'limit must be a positive number',
+      })
+      .optional(),
+  }),
+});
+
+const selectParcelValidationSchema = z.object({
+  body: z.object({
+    parcel_id: z.string({ required_error: 'Parcel ID is required' }),
+    routeContext: z.object({
+      fromLat: z.number(),
+      fromLng: z.number(),
+      toLat: z.number().optional(),
+      toLng: z.number().optional(),
+      routePolyline: z.string().optional(),
+    }).optional(),
+  }),
+});
+
 export const DriverValidation = {
   createDriverWithVehicleValidationSchema,
   updateDriverWithVehicleValidationSchema,
   verifyParcelOtpValidationSchema,
+  getAvailableParcelsValidationSchema,
+  selectParcelValidationSchema,
 };

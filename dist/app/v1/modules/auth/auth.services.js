@@ -58,6 +58,7 @@ const registerUser = async (payload) => {
 const loginServices = async (payload) => {
     // Use the static method from User model
     const user = await user_model_1.default.isUserExistsByEmail(payload.email);
+    console.log(user, 'user');
     if (!user) {
         throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'User does not exist with these credentials!');
     }

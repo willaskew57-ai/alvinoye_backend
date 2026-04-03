@@ -8,5 +8,6 @@ export declare const DriverController: {
     verifyParcelOtp: (req: Request, res: Response, next: import("express").NextFunction) => void;
     getAvailableParcelsForDriver: (req: Request, res: Response, next: import("express").NextFunction) => void;
     getDriverById: (req: Request, res: Response, next: import("express").NextFunction) => void;
+    selectParcel: (req: Request, res: Response, next: import("express").NextFunction) => void;
 };
 //# sourceMappingURL=driver.controller.d.ts.map
