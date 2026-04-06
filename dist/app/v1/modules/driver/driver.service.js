@@ -238,8 +238,6 @@ const haversineDistanceKm = (lat1, lon1, lat2, lon2) => {
             Math.sin(dLon / 2);
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 };
-const DISTANCE_TO_ROUTE_BUFFER = 500;
-const DEFAULT_DIRECTION_ANGLE_THRESHOLD = 90;
 const calculateDistanceToRouteLine = (pointLat, pointLng, routeFromLat, routeFromLng, routeToLat, routeToLng) => {
     const distToStart = haversineDistanceKm(pointLat, pointLng, routeFromLat, routeFromLng);
     const distToEnd = haversineDistanceKm(pointLat, pointLng, routeToLat, routeToLng);
@@ -265,7 +263,6 @@ const calculateAngleDifference = (angle1, angle2) => {
         diff = 360 - diff;
     return diff;
 };
-const MAX_DETOUR_CALCULATION = 20;
 const ROUTE_BUFFER_KM = 0.5;
 const DIRECTION_ANGLE_THRESHOLD = 90;
 const getAvailableParcelsFromDB = async (userId, query) => {
@@ -274,31 +271,25 @@ const getAvailableParcelsFromDB = async (userId, query) => {
     const skip = (page - 1) * limit;
     const currentLat = Number(query.currentLat);
     const currentLng = Number(query.currentLng);
-    if (isNaN(currentLat)) {
-        throw new app_error_1.default(http_status_1.default.BAD_REQUEST, 'Invalid currentLat');
-    }
-    if (isNaN(currentLng)) {
-        throw new app_error_1.default(http_status_1.default.BAD_REQUEST, 'Invalid currentLng');
+    if (isNaN(currentLat) || isNaN(currentLng)) {
+        throw new app_error_1.default(http_status_1.default.BAD_REQUEST, 'Invalid current coordinates');
     }
     const heading = query.heading ? Number(query.heading) : undefined;
     const radiusMeters = Number(query.radiusMeters) || 1500;
     const driver = await driver_model_1.Driver.findOne({ user_id: userId });
     const vehicle = await vehicle_model_1.Vehicle.findOne({ user_id: userId });
-    if (!driver) {
-        throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'Driver profile not found!');
-    }
-    if (!vehicle) {
-        throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'Vehicle profile not found!');
+    if (!driver || !vehicle) {
+        throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'Driver or Vehicle profile not found!');
     }
     const savedRouteFromLat = driver.from?.latitude ?? 0;
     const savedRouteFromLng = driver.from?.longitude ?? 0;
     const savedRouteToLat = driver.to?.latitude ?? 0;
     const savedRouteToLng = driver.to?.longitude ?? 0;
-    const distanceToSavedRoute = calculateDistanceToRouteLine(currentLat, currentLng, savedRouteFromLat ?? 0, savedRouteFromLng ?? 0, savedRouteToLat ?? 0, savedRouteToLng ?? 0);
+    // 1. Calculate if driver is currently on their saved route
+    const distanceToSavedRoute = calculateDistanceToRouteLine(currentLat, currentLng, savedRouteFromLat, savedRouteFromLng, savedRouteToLat, savedRouteToLng);
     let isOnRoute = distanceToSavedRoute <= ROUTE_BUFFER_KM;
-    if (heading !== undefined &&
-        savedRouteToLat != null &&
-        savedRouteToLng != null) {
+    // 2. Check heading/direction if available
+    if (isOnRoute && heading !== undefined && savedRouteToLat && savedRouteToLng) {
         const routeDirection = calculateDirectionAngle(currentLat, currentLng, savedRouteToLat, savedRouteToLng);
         const angleDifference = calculateAngleDifference(heading, routeDirection);
         if (angleDifference > DIRECTION_ANGLE_THRESHOLD) {
@@ -306,16 +297,17 @@ const getAvailableParcelsFromDB = async (userId, query) => {
         }
     }
     const discoveryMode = isOnRoute ? 'route-based' : 'nearby-fallback';
+    // 3. THE FIXED GEO-QUERY
     const geoQuery = {
         status: parcel_interface_1.PARCEL_STATUS.PENDING,
         vehicle_type: vehicle.vehicle_type,
         price_status: parcel_interface_1.PRICE_STATUS.ACCEPTED,
         accepted_by: null,
-        pickup_location: {
+        'pickup_location.coordinates': {
             $near: {
                 $geometry: {
                     type: 'Point',
-                    coordinates: [currentLng, currentLat],
+                    coordinates: [currentLng, currentLat], // [Longitude, Latitude]
                 },
                 $maxDistance: radiusMeters,
             },
@@ -330,23 +322,22 @@ const getAvailableParcelsFromDB = async (userId, query) => {
             data: [],
         };
     }
+    // 4. Scoring and Filtering
     const scoredParcels = potentialParcels.map((parcel) => {
         const pickupLoc = parcel.pickup_location;
         const dropoffLoc = parcel.handover_location;
-        const distanceToPickup = haversineDistanceKm(currentLat, currentLng, pickupLoc?.latitude ?? 0, pickupLoc?.longitude ?? 0);
-        const distanceToDropoff = haversineDistanceKm(currentLat, currentLng, dropoffLoc?.latitude ?? 0, dropoffLoc?.longitude ?? 0);
+        const distanceToPickup = haversineDistanceKm(currentLat, currentLng, pickupLoc.latitude, pickupLoc.longitude);
+        const distanceToDropoff = haversineDistanceKm(currentLat, currentLng, dropoffLoc.latitude, dropoffLoc.longitude);
         let ahead = true;
         let inRouteScore = 0;
         let distanceToRoute = distanceToPickup;
-        if (isOnRoute && savedRouteToLat != null && savedRouteToLng != null) {
+        if (isOnRoute && savedRouteToLat && savedRouteToLng) {
             const totalTripDist = haversineDistanceKm(currentLat, currentLng, savedRouteToLat, savedRouteToLng);
-            const pickupAlongRoute = haversineDistanceKm(currentLat, currentLng, pickupLoc?.latitude ?? 0, pickupLoc?.longitude ?? 0);
-            ahead = pickupAlongRoute <= totalTripDist * 1.2 && pickupAlongRoute > 0;
-            inRouteScore =
-                totalTripDist > 0
-                    ? 1 -
-                        Math.min(1, (pickupAlongRoute + distanceToDropoff) / (totalTripDist * 2))
-                    : 0;
+            const pickupAlongRoute = haversineDistanceKm(currentLat, currentLng, pickupLoc.latitude, pickupLoc.longitude);
+            ahead = pickupAlongRoute <= totalTripDist * 1.2;
+            inRouteScore = totalTripDist > 0
+                ? 1 - Math.min(1, (pickupAlongRoute + distanceToDropoff) / (totalTripDist * 2))
+                : 0;
             distanceToRoute = Math.min(distanceToPickup, distanceToDropoff);
         }
         return {
@@ -362,39 +353,33 @@ const getAvailableParcelsFromDB = async (userId, query) => {
             ahead,
         };
     });
+    // 5. Sorting
     const sortedParcels = scoredParcels
         .sort((a, b) => {
         if (isOnRoute) {
             if (a.ahead !== b.ahead)
                 return a.ahead ? -1 : 1;
-            if (Math.abs(a.distanceToRoute - b.distanceToRoute) > 1) {
+            if (Math.abs(a.distanceToRoute - b.distanceToRoute) > 100) { // 100m diff threshold
                 return a.distanceToRoute - b.distanceToRoute;
             }
             return (b.inRouteScore || 0) - (a.inRouteScore || 0);
         }
         else {
-            if (Math.abs(a.distanceToPickup - b.distanceToPickup) > 1) {
-                return a.distanceToPickup - b.distanceToPickup;
-            }
-            return (b.reward || 0) - (a.reward || 0);
+            return a.distanceToPickup - b.distanceToPickup;
         }
-    })
-        .slice(0, limit);
+    });
+    // 6. Detour Calculation (Google Maps API)
     const apiKey = env_config_1.default.google_maps_api_key;
     const allMatchedParcels = [];
     const driverOrigin = `${currentLat},${currentLng}`;
-    const driverDestination = savedRouteToLat != null && savedRouteToLng != null
-        ? `${savedRouteToLat},${savedRouteToLng}`
-        : null;
+    const driverDestination = (savedRouteToLat && savedRouteToLng) ? `${savedRouteToLat},${savedRouteToLng}` : null;
     let originalDistance = 0;
     let baselineAvailable = false;
-    const topNForDetour = sortedParcels.slice(0, MAX_DETOUR_CALCULATION);
     if (driverDestination && apiKey && isOnRoute) {
         try {
             const originalRouteRes = await axios_1.default.get(`https://maps.googleapis.com/maps/api/directions/json?origin=${driverOrigin}&destination=${driverDestination}&key=${apiKey}`);
             if (originalRouteRes.data.status === 'OK') {
-                originalDistance =
-                    originalRouteRes.data.routes[0].legs[0].distance.value;
+                originalDistance = originalRouteRes.data.routes[0].legs[0].distance.value;
                 baselineAvailable = true;
             }
         }
@@ -405,57 +390,20 @@ const getAvailableParcelsFromDB = async (userId, query) => {
     const DETOUR_THRESHOLD_KM = 20;
     for (const parcel of sortedParcels) {
         if (!isOnRoute || !driverDestination || !apiKey || !baselineAvailable) {
-            allMatchedParcels.push({
-                id: parcel._id,
-                pickup_location: parcel.pickup_location,
-                dropoff_location: parcel.dropoff_location,
-                size: parcel.size,
-                reward: parcel.reward,
-                distanceToRoute: parcel.distanceToRoute,
-                inRouteScore: parcel.inRouteScore,
-                ahead: parcel.ahead,
-                discoveryMode,
-            });
-            continue;
-        }
-        const pickup = parcel.pickup_location;
-        const handover = parcel.dropoff_location;
-        if (!pickup?.latitude ||
-            !pickup?.longitude ||
-            !handover?.latitude ||
-            !handover?.longitude) {
-            allMatchedParcels.push({
-                id: parcel._id,
-                pickup_location: parcel.pickup_location,
-                dropoff_location: parcel.dropoff_location,
-                size: parcel.size,
-                reward: parcel.reward,
-                distanceToRoute: parcel.distanceToRoute,
-                inRouteScore: parcel.inRouteScore,
-                ahead: parcel.ahead,
-                discoveryMode,
-            });
+            allMatchedParcels.push({ ...parcel, discoveryMode });
             continue;
         }
         try {
-            const pickupCoord = `${pickup.latitude},${pickup.longitude}`;
-            const handoverCoord = `${handover.latitude},${handover.longitude}`;
-            const googleUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${currentLat},${currentLng}&destination=${savedRouteToLat},${savedRouteToLng}&waypoints=${pickupCoord}|${handoverCoord}&key=${apiKey}`;
+            const pickupCoord = `${parcel.pickup_location.latitude},${parcel.pickup_location.longitude}`;
+            const handoverCoord = `${parcel.dropoff_location.latitude},${parcel.dropoff_location.longitude}`;
+            const googleUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${driverOrigin}&destination=${driverDestination}&waypoints=${pickupCoord}|${handoverCoord}&key=${apiKey}`;
             const response = await axios_1.default.get(googleUrl);
             if (response.data.status === 'OK') {
-                const legs = response.data.routes[0].legs;
-                const totalDistanceWithParcel = legs.reduce((acc, leg) => acc + leg.distance.value, 0);
+                const totalDistanceWithParcel = response.data.routes[0].legs.reduce((acc, leg) => acc + leg.distance.value, 0);
                 const detourKm = (totalDistanceWithParcel - originalDistance) / 1000;
                 if (detourKm <= DETOUR_THRESHOLD_KM) {
                     allMatchedParcels.push({
-                        id: parcel._id,
-                        pickup_location: parcel.pickup_location,
-                        dropoff_location: parcel.dropoff_location,
-                        size: parcel.size,
-                        reward: parcel.reward,
-                        distanceToRoute: parcel.distanceToRoute,
-                        inRouteScore: parcel.inRouteScore,
-                        ahead: parcel.ahead,
+                        ...parcel,
                         detour_km: Math.round(detourKm * 10) / 10,
                         discoveryMode,
                     });
@@ -463,29 +411,17 @@ const getAvailableParcelsFromDB = async (userId, query) => {
             }
         }
         catch (error) {
-            console.error('Error calculating route for parcel:', parcel._id);
-            allMatchedParcels.push({
-                id: parcel._id,
-                pickup_location: parcel.pickup_location,
-                dropoff_location: parcel.dropoff_location,
-                size: parcel.size,
-                reward: parcel.reward,
-                distanceToRoute: parcel.distanceToRoute,
-                inRouteScore: parcel.inRouteScore,
-                ahead: parcel.ahead,
-                discoveryMode,
-            });
+            allMatchedParcels.push({ ...parcel, discoveryMode });
         }
     }
     const total = allMatchedParcels.length;
-    const totalPages = Math.ceil(total / limit);
     const paginatedData = allMatchedParcels.slice(skip, skip + limit);
     return {
         meta: {
             total,
             page,
             limit,
-            totalPages,
+            totalPages: Math.ceil(total / limit),
             discoveryMode,
             distanceToSavedRoute: Math.round(distanceToSavedRoute * 1000),
             isOnRoute,

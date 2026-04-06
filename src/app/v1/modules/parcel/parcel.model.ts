@@ -9,11 +9,30 @@ import {
   type TParcelPriceRequest,
 } from './parcel.interface';
 
+// const LocationSchema = new Schema(
+//   {
+//     address: { type: String, required: true },
+//     latitude: { type: Number, required: true },
+//     longitude: { type: Number, required: true },
+//   },
+//   { _id: false }
+// );
+
 const LocationSchema = new Schema(
   {
     address: { type: String, required: true },
     latitude: { type: Number, required: true },
     longitude: { type: Number, required: true },
+    // Add this field for GeoSpatial queries
+    type: {
+      type: String,
+      enum: ['Point'],
+      default: 'Point',
+    },
+    coordinates: {
+      type: [Number], // This will store [longitude, latitude]
+      required: true,
+    },
   },
   { _id: false }
 );
@@ -86,6 +105,9 @@ parcelSchema.virtual('review', {
   foreignField: 'parcel_id',
   justOne: true,
 });
+
+// Add this line after your parcelSchema definition
+parcelSchema.index({ 'pickup_location.coordinates': '2dsphere' });
 
 export const Parcel = model<TParcel>('Parcel', parcelSchema);
 
