@@ -13,6 +13,7 @@ import { notFound } from './middleware/notFound';
 import healthCheck from './app/v1/modules/health-check';
 import router from './app/v1/routes';
 import globalErrorHandler from './middleware/global-error-handler';
+import { sendSms } from './utils/send-sms';
 
 // ** create application :
 const app: Application = express();
@@ -37,6 +38,34 @@ app.get('/health', healthCheck);
 
 // application routes:
 app.use('/api/v1', router);
+
+// test send sms:
+// app.post('/test/send-sms', async (req: Request, res: Response) => {
+//   const { to, message } = req.body;
+  
+//   if (!to || !message) {
+//     return res.status(400).json({ 
+//       success: false, 
+//       message: 'Please provide "to" and "message" parameters' 
+//     });
+//   }
+  
+//   const result = await sendSms(to, message);
+  
+//   if (result.success) {
+//     res.json({ 
+//       success: true, 
+//       message: `SMS sent successfully to ${to}`,
+//       sid: result.sid 
+//     });
+//   } else {
+//     res.status(500).json({ 
+//       success: false, 
+//       message: 'Failed to send SMS',
+//       error: result.error 
+//     });
+//   }
+// });
 
 // main route:
 app.get('/', (req: Request, res: Response) => {
