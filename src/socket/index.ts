@@ -154,8 +154,6 @@ export const initSocket = (server: HttpServer): Server => {
       currentLat: number;
       currentLng: number;
       heading?: number;
-      destinationLat?: number;
-      destinationLng?: number;
       savedRoutePolyline?: string;
       routeBufferMeters?: number;
       directionAngleThreshold?: number;
@@ -178,8 +176,6 @@ export const initSocket = (server: HttpServer): Server => {
           currentLat: data.currentLat.toString(),
           currentLng: data.currentLng.toString(),
           heading: data.heading?.toString(),
-          destinationLat: data.destinationLat?.toString(),
-          destinationLng: data.destinationLng?.toString(),
           savedRoutePolyline: data.savedRoutePolyline,
           routeBufferMeters: data.routeBufferMeters?.toString(),
           directionAngleThreshold: data.directionAngleThreshold?.toString(),

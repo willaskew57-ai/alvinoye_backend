@@ -130,8 +130,6 @@ const initSocket = (server) => {
                     currentLat: data.currentLat.toString(),
                     currentLng: data.currentLng.toString(),
                     heading: data.heading?.toString(),
-                    destinationLat: data.destinationLat?.toString(),
-                    destinationLng: data.destinationLng?.toString(),
                     savedRoutePolyline: data.savedRoutePolyline,
                     routeBufferMeters: data.routeBufferMeters?.toString(),
                     directionAngleThreshold: data.directionAngleThreshold?.toString(),
