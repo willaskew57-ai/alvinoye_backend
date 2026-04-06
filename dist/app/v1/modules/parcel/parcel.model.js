@@ -3,10 +3,28 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ParcelPriceRequest = exports.Parcel = void 0;
 const mongoose_1 = require("mongoose");
 const parcel_interface_1 = require("./parcel.interface");
+// const LocationSchema = new Schema(
+//   {
+//     address: { type: String, required: true },
+//     latitude: { type: Number, required: true },
+//     longitude: { type: Number, required: true },
+//   },
+//   { _id: false }
+// );
 const LocationSchema = new mongoose_1.Schema({
     address: { type: String, required: true },
     latitude: { type: Number, required: true },
     longitude: { type: Number, required: true },
+    // Add this field for GeoSpatial queries
+    type: {
+        type: String,
+        enum: ['Point'],
+        default: 'Point',
+    },
+    coordinates: {
+        type: [Number], // This will store [longitude, latitude]
+        required: true,
+    },
 }, { _id: false });
 // --- Parcel Schema ---
 const parcelSchema = new mongoose_1.Schema({
@@ -69,6 +87,8 @@ parcelSchema.virtual('review', {
     foreignField: 'parcel_id',
     justOne: true,
 });
+// Add this line after your parcelSchema definition
+parcelSchema.index({ 'pickup_location.coordinates': '2dsphere' });
 exports.Parcel = (0, mongoose_1.model)('Parcel', parcelSchema);
 // --- Price Request Schema ---
 const priceRequestSchema = new mongoose_1.Schema({
