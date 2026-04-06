@@ -30,6 +30,30 @@ app.use('/uploads', express_1.default.static(path_1.default.join(process.cwd(), 
 app.get('/health', health_check_1.default);
 // application routes:
 app.use('/api/v1', routes_1.default);
+// test send sms:
+// app.post('/test/send-sms', async (req: Request, res: Response) => {
+//   const { to, message } = req.body;
+//   if (!to || !message) {
+//     return res.status(400).json({ 
+//       success: false, 
+//       message: 'Please provide "to" and "message" parameters' 
+//     });
+//   }
+//   const result = await sendSms(to, message);
+//   if (result.success) {
+//     res.json({ 
+//       success: true, 
+//       message: `SMS sent successfully to ${to}`,
+//       sid: result.sid 
+//     });
+//   } else {
+//     res.status(500).json({ 
+//       success: false, 
+//       message: 'Failed to send SMS',
+//       error: result.error 
+//     });
+//   }
+// });
 // main route:
 app.get('/', (req, res) => {
     res.send('Yah!!! our server is running now.......');
