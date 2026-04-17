@@ -4,6 +4,7 @@ import { AuthControllers } from './auth.controller';
 import { auth } from '../../../../middleware/auth';
 import validateRequest from '../../../../middleware/validate-request';
 import { USER_ROLE } from '../user/user.interface';
+import { authLimiter } from '../../../../middleware/rate-limiter';
 
 const router = express.Router();
 
@@ -23,7 +24,9 @@ router.route('/logout').post(AuthControllers.logout);
 
 router
   .route('/verify-otp')
+
   .post(
+    authLimiter,
     auth(
       USER_ROLE.SUPER_ADMIN,
       USER_ROLE.ADMIN,
@@ -37,6 +40,7 @@ router
 router
   .route('/resend-otp')
   .post(
+    authLimiter,
     validateRequest(AuthValidations.resendOtpValidationSchema),
     AuthControllers.resendOtp
   );
