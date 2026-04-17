@@ -13,7 +13,8 @@ import { notFound } from './middleware/notFound';
 import healthCheck from './app/v1/modules/health-check';
 import router from './app/v1/routes';
 import globalErrorHandler from './middleware/global-error-handler';
-import { sendSms } from './utils/send-sms';
+import { globalLimiter } from './middleware/rate-limiter';
+// import { sendSms } from './utils/send-sms';
 
 // ** create application :
 const app: Application = express();
@@ -29,6 +30,9 @@ app.use(
     credentials: true,
   })
 );
+
+// Apply the global rate limiting middleware to all requests.
+app.use('/api', globalLimiter);
 
 // For local file
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
