@@ -13,6 +13,9 @@ const notFound_1 = require("./middleware/notFound");
 const health_check_1 = __importDefault(require("./app/v1/modules/health-check"));
 const routes_1 = __importDefault(require("./app/v1/routes"));
 const global_error_handler_1 = __importDefault(require("./middleware/global-error-handler"));
+const rate_limiter_1 = require("./middleware/rate-limiter");
+const send_sms_1 = require("./utils/send-sms");
+// import { sendSms } from './utils/send-sms';
 // ** create application :
 const app = (0, express_1.default)();
 // ** parsers :
@@ -24,6 +27,8 @@ app.use((0, cors_1.default)({
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
 }));
+// Apply the global rate limiting middleware to all requests.
+app.use('/api', rate_limiter_1.globalLimiter);
 // For local file
 app.use('/uploads', express_1.default.static(path_1.default.join(process.cwd(), 'uploads')));
 // test route:
@@ -31,29 +36,30 @@ app.get('/health', health_check_1.default);
 // application routes:
 app.use('/api/v1', routes_1.default);
 // test send sms:
-// app.post('/test/send-sms', async (req: Request, res: Response) => {
-//   const { to, message } = req.body;
-//   if (!to || !message) {
-//     return res.status(400).json({ 
-//       success: false, 
-//       message: 'Please provide "to" and "message" parameters' 
-//     });
-//   }
-//   const result = await sendSms(to, message);
-//   if (result.success) {
-//     res.json({ 
-//       success: true, 
-//       message: `SMS sent successfully to ${to}`,
-//       sid: result.sid 
-//     });
-//   } else {
-//     res.status(500).json({ 
-//       success: false, 
-//       message: 'Failed to send SMS',
-//       error: result.error 
-//     });
-//   }
-// });
+app.post('/test/send-sms', async (req, res) => {
+    const { to, message } = req.body;
+    if (!to || !message) {
+        return res.status(400).json({
+            success: false,
+            message: 'Please provide "to" and "message" parameters'
+        });
+    }
+    const result = await (0, send_sms_1.sendSms)(to, message);
+    if (result.success) {
+        res.json({
+            success: true,
+            message: `SMS sent successfully to ${to}`,
+            sid: result.sid
+        });
+    }
+    else {
+        res.status(500).json({
+            success: false,
+            message: 'Failed to send SMS',
+            error: result.error
+        });
+    }
+});
 // main route:
 app.get('/', (req, res) => {
     res.send('Yah!!! our server is running now.......');

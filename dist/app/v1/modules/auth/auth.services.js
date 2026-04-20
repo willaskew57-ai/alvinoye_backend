@@ -10,7 +10,8 @@ const app_error_1 = __importDefault(require("../../../../errors/app-error"));
 const auth_utils_1 = require("./auth.utils");
 const user_model_1 = __importDefault(require("../user/user.model"));
 const otp_services_1 = require("../otp/otp.services");
-const email_helper_1 = require("../../../../utils/email-helper");
+const email_queue_1 = require("../../../queues/email.queue");
+const email_job_1 = require("../../../jobs/email.job");
 // ** ------- Register User Service -------
 const registerUser = async (payload) => {
     const isUserExists = await user_model_1.default.isUserExistsByEmail(payload.email);
@@ -35,12 +36,14 @@ const registerUser = async (payload) => {
         purpose: 'REGISTER',
     });
     console.log(otp, 'register Otp');
-    // Send registration email
-    await email_helper_1.EmailHelpers.sendRegisterEmail(newUser.email, {
-        user: newUser.full_name || 'User',
-        activationCode: otp,
-        activationCodeExpire: env_config_1.default.otp_expiry_minutes || 5,
-    });
+    // Push registration email to background queue
+    const emailPayload = {
+        email: newUser.email,
+        userName: newUser.full_name || 'User',
+        otp,
+        expiry: env_config_1.default.otp_expiry_minutes || 5,
+    };
+    await (0, email_queue_1.pushEmailJob)(() => (0, email_job_1.sendRegisterEmailJob)(emailPayload.email, emailPayload), emailPayload.email);
     const jwtPayload = {
         user_id: newUser._id.toString(),
         role: newUser.role,
@@ -159,12 +162,14 @@ const resendOtp = async (payload) => {
         purpose,
     });
     console.log(otp);
-    // Send resend OTP email
-    await email_helper_1.EmailHelpers.sendOtpResendEmail(email, {
-        user: user.full_name || 'User',
-        code: otp,
-        expiresIn: env_config_1.default.otp_expiry_minutes || 5,
-    });
+    // Push resend OTP email to background queue
+    const emailPayload = {
+        email,
+        userName: user.full_name || 'User',
+        otp,
+        expiry: env_config_1.default.otp_expiry_minutes || 5,
+    };
+    await (0, email_queue_1.pushEmailJob)(() => (0, email_job_1.sendResendOtpEmailJob)(emailPayload.email, emailPayload), emailPayload.email);
     return null;
 };
 /**
@@ -210,12 +215,14 @@ const forgetPassword = async (email) => {
         purpose: 'RESET_PASSWORD',
     });
     console.log(otp);
-    // Send reset password email
-    await email_helper_1.EmailHelpers.sendResetPasswordEmail(email, {
-        name: user.full_name || 'User',
-        verificationCode: otp,
-        verificationCodeExpire: env_config_1.default.otp_expiry_minutes || 5,
-    });
+    // Push reset password email to background queue
+    const emailPayload = {
+        email,
+        userName: user.full_name || 'User',
+        otp,
+        expiry: env_config_1.default.otp_expiry_minutes || 5,
+    };
+    await (0, email_queue_1.pushEmailJob)(() => (0, email_job_1.sendResetPasswordEmailJob)(emailPayload.email, emailPayload), emailPayload.email);
     const jwtPayload = {
         user_id: user_id.toString(),
         role: user.role,
