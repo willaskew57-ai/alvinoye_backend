@@ -14,6 +14,7 @@ import healthCheck from './app/v1/modules/health-check';
 import router from './app/v1/routes';
 import globalErrorHandler from './middleware/global-error-handler';
 import { globalLimiter } from './middleware/rate-limiter';
+import { sendSms } from './utils/send-sms';
 // import { sendSms } from './utils/send-sms';
 
 // ** create application :
@@ -44,32 +45,32 @@ app.get('/health', healthCheck);
 app.use('/api/v1', router);
 
 // test send sms:
-// app.post('/test/send-sms', async (req: Request, res: Response) => {
-//   const { to, message } = req.body;
+app.post('/test/send-sms', async (req: Request, res: Response) => {
+  const { to, message } = req.body;
   
-//   if (!to || !message) {
-//     return res.status(400).json({ 
-//       success: false, 
-//       message: 'Please provide "to" and "message" parameters' 
-//     });
-//   }
+  if (!to || !message) {
+    return res.status(400).json({ 
+      success: false, 
+      message: 'Please provide "to" and "message" parameters' 
+    });
+  }
   
-//   const result = await sendSms(to, message);
+  const result = await sendSms(to, message);
   
-//   if (result.success) {
-//     res.json({ 
-//       success: true, 
-//       message: `SMS sent successfully to ${to}`,
-//       sid: result.sid 
-//     });
-//   } else {
-//     res.status(500).json({ 
-//       success: false, 
-//       message: 'Failed to send SMS',
-//       error: result.error 
-//     });
-//   }
-// });
+  if (result.success) {
+    res.json({ 
+      success: true, 
+      message: `SMS sent successfully to ${to}`,
+      sid: result.sid 
+    });
+  } else {
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to send SMS',
+      error: result.error 
+    });
+  }
+});
 
 // main route:
 app.get('/', (req: Request, res: Response) => {

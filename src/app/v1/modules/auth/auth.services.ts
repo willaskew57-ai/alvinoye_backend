@@ -9,6 +9,15 @@ import type { TUser } from '../user/user.interface';
 import { OtpServices } from '../otp/otp.services';
 import type { Types } from 'mongoose';
 import { EmailHelpers } from '../../../../utils/email-helper';
+import { emailQueue, pushEmailJob } from '../../../queues/email.queue';
+import {
+  sendRegisterEmailJob,
+  sendResendOtpEmailJob,
+  sendResetPasswordEmailJob,
+  type RegisterEmailPayload,
+  type ResendOtpEmailPayload,
+  type ResetPasswordEmailPayload,
+} from '../../../jobs/email.job';
 
 // ** ------- Register User Service -------
 const registerUser = async (payload: TUser) => {
@@ -43,12 +52,18 @@ const registerUser = async (payload: TUser) => {
   });
   console.log(otp, 'register Otp');
 
-  // Send registration email
-  await EmailHelpers.sendRegisterEmail(newUser.email, {
-    user: newUser.full_name || 'User',
-    activationCode: otp,
-    activationCodeExpire: configs.otp_expiry_minutes || 5,
-  });
+  // Push registration email to background queue
+  const emailPayload: RegisterEmailPayload = {
+    email: newUser.email,
+    userName: newUser.full_name || 'User',
+    otp,
+    expiry: configs.otp_expiry_minutes || 5,
+  };
+
+  await pushEmailJob(
+    () => sendRegisterEmailJob(emailPayload.email, emailPayload),
+    emailPayload.email
+  );
 
   const jwtPayload = {
     user_id: newUser._id.toString(),
@@ -253,12 +268,18 @@ const resendOtp = async (payload: {
 
   console.log(otp);
 
-  // Send resend OTP email
-  await EmailHelpers.sendOtpResendEmail(email, {
-    user: user.full_name || 'User',
-    code: otp,
-    expiresIn: configs.otp_expiry_minutes || 5,
-  });
+  // Push resend OTP email to background queue
+  const emailPayload: ResendOtpEmailPayload = {
+    email,
+    userName: user.full_name || 'User',
+    otp,
+    expiry: configs.otp_expiry_minutes || 5,
+  };
+
+  await pushEmailJob(
+    () => sendResendOtpEmailJob(emailPayload.email, emailPayload),
+    emailPayload.email
+  );
 
   return null;
 };
@@ -339,12 +360,18 @@ const forgetPassword = async (email: string) => {
 
   console.log(otp);
 
-  // Send reset password email
-  await EmailHelpers.sendResetPasswordEmail(email, {
-    name: user.full_name || 'User',
-    verificationCode: otp,
-    verificationCodeExpire: configs.otp_expiry_minutes || 5,
-  });
+  // Push reset password email to background queue
+  const emailPayload: ResetPasswordEmailPayload = {
+    email,
+    userName: user.full_name || 'User',
+    otp,
+    expiry: configs.otp_expiry_minutes || 5,
+  };
+
+  await pushEmailJob(
+    () => sendResetPasswordEmailJob(emailPayload.email, emailPayload),
+    emailPayload.email
+  );
 
   const jwtPayload = {
     user_id: user_id.toString(),

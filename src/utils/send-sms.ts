@@ -1,5 +1,3 @@
-// utils/sendSms.ts
-
 import twilio from 'twilio';
 import configs from '../config/env.config';
 
