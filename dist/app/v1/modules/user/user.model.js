@@ -140,7 +140,11 @@ UserSchema.pre('save', async function () {
     if (this.isModified('password') && this.password) {
         try {
             this.password = await bcrypt_1.default.hash(this.password, Number(env_config_1.default.bcrypt_salt_rounds));
-            this.password_changed_at = new Date();
+            // Only set password_changed_at for existing documents (not new registrations)
+            // This prevents the JWT verification issue during registration
+            if (!this.isNew) {
+                this.password_changed_at = new Date();
+            }
         }
         catch (error) {
             throw error;

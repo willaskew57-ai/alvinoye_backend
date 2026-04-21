@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.otpResendTemp = void 0;
 const otpResendTemp = (data) => {
-    const logoUrl = process.env.EMAIL_TEMP_IMAGE || 'https://via.placeholder.com/150';
+    const logoUrl = 'https://d24oxldi0g2xgi.cloudfront.net/uploads/logo.png';
     const displayCode = data.code ?? data.activationCode ?? '000000';
     const displayExpiry = data.expiresIn ?? data.activationCodeExpire ?? '5';
     return `
@@ -25,7 +25,7 @@ const otpResendTemp = (data) => {
         }
         h1 {
           text-align: center;
-          color: #022C22;
+          color: #28638B;
           font-size: 26px;
           font-weight: bold;
           margin-bottom: 20px;
@@ -49,7 +49,7 @@ const otpResendTemp = (data) => {
           padding: 14px 24px;
           font-size: 24px;
           font-weight: bold;
-          color: #022C22;
+          color: #28638B;
           border-radius: 6px;
           letter-spacing: 4px;
           margin: 20px 0;
@@ -61,7 +61,7 @@ const otpResendTemp = (data) => {
           text-align: center;
         }
         a {
-          color: #022C22;
+          color: #28638B;
           text-decoration: none;
         }
       </style>

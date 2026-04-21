@@ -20,6 +20,8 @@ import { sendSms } from './utils/send-sms';
 // ** create application :
 const app: Application = express();
 
+app.set('trust proxy', 1);
+
 // ** parsers :
 app.use(express.json());
 app.use(cookieParser());
