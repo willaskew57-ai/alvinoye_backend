@@ -459,42 +459,42 @@ export declare const DriverValidation: {
     }>;
     getAvailableParcelsValidationSchema: z.ZodObject<{
         query: z.ZodObject<{
-            currentLat: z.ZodEffects<z.ZodString, string, string>;
-            currentLng: z.ZodEffects<z.ZodString, string, string>;
+            currentLat: z.ZodOptional<z.ZodEffects<z.ZodString, string, string>>;
+            currentLng: z.ZodOptional<z.ZodEffects<z.ZodString, string, string>>;
             heading: z.ZodOptional<z.ZodEffects<z.ZodString, string, string>>;
             radiusMeters: z.ZodOptional<z.ZodEffects<z.ZodString, string, string>>;
             page: z.ZodOptional<z.ZodEffects<z.ZodString, string, string>>;
             limit: z.ZodOptional<z.ZodEffects<z.ZodString, string, string>>;
         }, "strip", z.ZodTypeAny, {
-            currentLat: string;
-            currentLng: string;
             limit?: string | undefined;
             page?: string | undefined;
+            currentLat?: string | undefined;
+            currentLng?: string | undefined;
             heading?: string | undefined;
             radiusMeters?: string | undefined;
         }, {
-            currentLat: string;
-            currentLng: string;
             limit?: string | undefined;
             page?: string | undefined;
+            currentLat?: string | undefined;
+            currentLng?: string | undefined;
             heading?: string | undefined;
             radiusMeters?: string | undefined;
         }>;
     }, "strip", z.ZodTypeAny, {
         query: {
-            currentLat: string;
-            currentLng: string;
             limit?: string | undefined;
             page?: string | undefined;
+            currentLat?: string | undefined;
+            currentLng?: string | undefined;
             heading?: string | undefined;
             radiusMeters?: string | undefined;
         };
     }, {
         query: {
-            currentLat: string;
-            currentLng: string;
             limit?: string | undefined;
             page?: string | undefined;
+            currentLat?: string | undefined;
+            currentLng?: string | undefined;
             heading?: string | undefined;
             radiusMeters?: string | undefined;
         };
