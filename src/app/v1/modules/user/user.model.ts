@@ -165,7 +165,11 @@ UserSchema.pre('save', async function () {
         Number(configs.bcrypt_salt_rounds)
       );
 
-      this.password_changed_at = new Date();
+      // Only set password_changed_at for existing documents (not new registrations)
+      // This prevents the JWT verification issue during registration
+      if (!this.isNew) {
+        this.password_changed_at = new Date();
+      }
     } catch (error) {
       throw error;
     }

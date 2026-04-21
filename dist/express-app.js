@@ -18,6 +18,7 @@ const send_sms_1 = require("./utils/send-sms");
 // import { sendSms } from './utils/send-sms';
 // ** create application :
 const app = (0, express_1.default)();
+app.set('trust proxy', 1);
 // ** parsers :
 app.use(express_1.default.json());
 app.use((0, cookie_parser_1.default)());
