@@ -95,6 +95,7 @@ const getDriverById = catchAsync(async (req: Request, res: Response) => {
 
 const getAvailableParcelsForDriver = catchAsync(
   async (req: Request, res: Response) => {
+    console.log(req.query, 'the query...');
     const user_id = req.user.user_id;
 
     const result = await DriverServices.getAvailableParcelsFromDB(

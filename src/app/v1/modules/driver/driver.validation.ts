@@ -68,15 +68,19 @@ const verifyParcelOtpValidationSchema = z.object({
 const getAvailableParcelsValidationSchema = z.object({
   query: z.object({
     currentLat: z
-      .string({ required_error: 'currentLat is required' })
-      .refine((val) => !isNaN(Number(val)) && Number(val) >= -90 && Number(val) <= 90, {
-        message: 'currentLat must be a valid latitude (-90 to 90)',
-      }),
+      .string()
+      .refine(
+        (val) => !val || (!isNaN(Number(val)) && Number(val) >= -90 && Number(val) <= 90),
+        { message: 'currentLat must be a valid latitude (-90 to 90)' }
+      )
+      .optional(),
     currentLng: z
-      .string({ required_error: 'currentLng is required' })
-      .refine((val) => !isNaN(Number(val)) && Number(val) >= -180 && Number(val) <= 180, {
-        message: 'currentLng must be a valid longitude (-180 to 180)',
-      }),
+      .string()
+      .refine(
+        (val) => !val || (!isNaN(Number(val)) && Number(val) >= -180 && Number(val) <= 180),
+        { message: 'currentLng must be a valid longitude (-180 to 180)' }
+      )
+      .optional(),
     heading: z
       .string()
       .refine(
