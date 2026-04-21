@@ -8,7 +8,6 @@ import User from '../user/user.model';
 import type { TUser } from '../user/user.interface';
 import { OtpServices } from '../otp/otp.services';
 import type { Types } from 'mongoose';
-import { EmailHelpers } from '../../../../utils/email-helper';
 import { emailQueue, pushEmailJob } from '../../../queues/email.queue';
 import {
   sendRegisterEmailJob,

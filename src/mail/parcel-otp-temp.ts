@@ -4,8 +4,7 @@ interface IParcelOtpData {
 }
 
 export const parcelOtpEmailTemp = (data: IParcelOtpData): string => {
-  const logoUrl =
-    process.env.EMAIL_TEMP_IMAGE || 'https://via.placeholder.com/150';
+  const logoUrl = 'https://d24oxldi0g2xgi.cloudfront.net/uploads/logo.png';
 
   return `
   <html>
@@ -27,7 +26,7 @@ export const parcelOtpEmailTemp = (data: IParcelOtpData): string => {
         }
         h1 {
           text-align: center;
-          color: #022C22;
+          color: #28638B;
           font-size: 26px;
           font-weight: bold;
           margin-bottom: 20px;
@@ -51,7 +50,7 @@ export const parcelOtpEmailTemp = (data: IParcelOtpData): string => {
           padding: 14px 24px;
           font-size: 24px;
           font-weight: bold;
-          color: #022C22;
+          color: #28638B;
           border-radius: 6px;
           letter-spacing: 4px;
           margin: 20px 0;
@@ -66,7 +65,7 @@ export const parcelOtpEmailTemp = (data: IParcelOtpData): string => {
           margin: 5px 0;
         }
         a {
-          color: #022C22;
+          color: #28638B;
           text-decoration: none;
           font-weight: bold;
         }

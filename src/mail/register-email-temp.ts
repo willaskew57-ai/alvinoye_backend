@@ -5,8 +5,7 @@ interface ISignUpData {
 }
 
 export const registerEmailTemp = (data: ISignUpData): string => {
-  const logoUrl =
-    process.env.EMAIL_TEMP_IMAGE || 'https://via.placeholder.com/150';
+  const logoUrl = 'https://d24oxldi0g2xgi.cloudfront.net/uploads/logo.png';
 
   return `
   <html>
@@ -27,7 +26,7 @@ export const registerEmailTemp = (data: ISignUpData): string => {
           box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
         }
         h1 {
-          color: #022C22;
+          color: #28638B;
           font-size: 26px;
           margin-bottom: 20px;
           font-weight: bold;
@@ -52,7 +51,7 @@ export const registerEmailTemp = (data: ISignUpData): string => {
           padding: 14px 24px;
           font-size: 24px;
           font-weight: bold;
-          color: #022C22;
+          color: #28638B;
           border-radius: 6px;
           letter-spacing: 4px;
           margin: 20px 0;
@@ -67,7 +66,7 @@ export const registerEmailTemp = (data: ISignUpData): string => {
           margin: 5px 0;
         }
         a {
-          color: #022C22;
+          color: #28638B;
           text-decoration: none;
           font-weight: bold;
         }
@@ -83,7 +82,7 @@ export const registerEmailTemp = (data: ISignUpData): string => {
         <p>Thank you for registering with Parcel Delivery. To activate your account, please use the following activation code:</p>
         <div class="code">${data.activationCode}</div>
         <p>Please enter this code on the activation page within the next <strong>${data.activationCodeExpire} minutes</strong>.</p>
-        <p>If you have any questions, please contact us at <a href="mailto:arifishtiaque.sparktech@gmail.com">arifishtiaque.sparktech@gmail.com</a>.</p>
+        <p>If you have any questions, please contact us at <a href="mailto:ntsamaela98@gmail.com">ntsamaela98@gmail.com</a>.</p>
         <p>Thank you,<br>The Parcel Delivery Team</p>
       </div>
       <div class="footer">

@@ -1,1 +1,1 @@
-{"version":3,"file":"parcel-otp-temp.d.ts","sourceRoot":"","sources":["../../src/mail/parcel-otp-temp.ts"],"names":[],"mappings":"AAAA,UAAU,cAAc;IACtB,IAAI,EAAE,MAAM,CAAC;IACb,gBAAgB,EAAE,MAAM,CAAC;CAC1B;AAED,eAAO,MAAM,kBAAkB,GAAI,MAAM,cAAc,KAAG,MA6FzD,CAAC"}
+{"version":3,"file":"parcel-otp-temp.d.ts","sourceRoot":"","sources":["../../src/mail/parcel-otp-temp.ts"],"names":[],"mappings":"AAAA,UAAU,cAAc;IACtB,IAAI,EAAE,MAAM,CAAC;IACb,gBAAgB,EAAE,MAAM,CAAC;CAC1B;AAED,eAAO,MAAM,kBAAkB,GAAI,MAAM,cAAc,KAAG,MA4FzD,CAAC"}
