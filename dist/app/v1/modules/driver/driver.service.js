@@ -269,11 +269,6 @@ const getAvailableParcelsFromDB = async (userId, query) => {
     const page = Number(query.page) || 1;
     const limit = Number(query.limit) || 10;
     const skip = (page - 1) * limit;
-    const currentLat = Number(query.currentLat);
-    const currentLng = Number(query.currentLng);
-    if (isNaN(currentLat) || isNaN(currentLng)) {
-        throw new app_error_1.default(http_status_1.default.BAD_REQUEST, 'Invalid current coordinates');
-    }
     const heading = query.heading ? Number(query.heading) : undefined;
     const radiusMeters = Number(query.radiusMeters) || 1500;
     const driver = await driver_model_1.Driver.findOne({ user_id: userId });
@@ -281,10 +276,28 @@ const getAvailableParcelsFromDB = async (userId, query) => {
     if (!driver || !vehicle) {
         throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'Driver or Vehicle profile not found!');
     }
-    const savedRouteFromLat = driver.from?.latitude ?? 0;
-    const savedRouteFromLng = driver.from?.longitude ?? 0;
-    const savedRouteToLat = driver.to?.latitude ?? 0;
-    const savedRouteToLng = driver.to?.longitude ?? 0;
+    const savedRouteFromLat = driver.from?.latitude ? Number(driver.from.latitude) : 0;
+    const savedRouteFromLng = driver.from?.longitude ? Number(driver.from.longitude) : 0;
+    const savedRouteToLat = driver.to?.latitude ? Number(driver.to.latitude) : 0;
+    const savedRouteToLng = driver.to?.longitude ? Number(driver.to.longitude) : 0;
+    const queryLat = Number(query.currentLat);
+    const queryLng = Number(query.currentLng);
+    let currentLat;
+    let currentLng;
+    let locationSource;
+    if (!isNaN(queryLat) && !isNaN(queryLng)) {
+        currentLat = queryLat;
+        currentLng = queryLng;
+        locationSource = 'driver_input';
+    }
+    else if (savedRouteFromLat && savedRouteFromLng) {
+        currentLat = savedRouteFromLat;
+        currentLng = savedRouteFromLng;
+        locationSource = 'saved_from_location';
+    }
+    else {
+        throw new app_error_1.default(http_status_1.default.BAD_REQUEST, 'Current coordinates or driver from location is required');
+    }
     // 1. Calculate if driver is currently on their saved route
     const distanceToSavedRoute = calculateDistanceToRouteLine(currentLat, currentLng, savedRouteFromLat, savedRouteFromLng, savedRouteToLat, savedRouteToLng);
     let isOnRoute = distanceToSavedRoute <= ROUTE_BUFFER_KM;
@@ -297,43 +310,56 @@ const getAvailableParcelsFromDB = async (userId, query) => {
         }
     }
     const discoveryMode = isOnRoute ? 'route-based' : 'nearby-fallback';
-    // 3. THE FIXED GEO-QUERY
-    const geoQuery = {
-        status: parcel_interface_1.PARCEL_STATUS.PENDING,
-        vehicle_type: vehicle.vehicle_type,
-        price_status: parcel_interface_1.PRICE_STATUS.ACCEPTED,
-        accepted_by: null,
-        'pickup_location.coordinates': {
-            $near: {
-                $geometry: {
-                    type: 'Point',
-                    coordinates: [currentLng, currentLat], // [Longitude, Latitude]
+    // Helper function to fetch parcels with geo-query
+    const fetchParcelsByLocation = async (lat, lng, maxDist) => {
+        const geoQuery = {
+            status: parcel_interface_1.PARCEL_STATUS.PENDING,
+            vehicle_type: vehicle.vehicle_type,
+            price_status: parcel_interface_1.PRICE_STATUS.ACCEPTED,
+            accepted_by: null,
+            'pickup_location.coordinates': {
+                $near: {
+                    $geometry: {
+                        type: 'Point',
+                        coordinates: [lng, lat],
+                    },
+                    $maxDistance: maxDist,
                 },
-                $maxDistance: radiusMeters,
             },
-        },
-    };
-    let potentialParcels = await parcel_model_1.Parcel.find(geoQuery)
-        .limit(limit * 3)
-        .lean();
-    if (!potentialParcels || potentialParcels.length === 0) {
-        return {
-            meta: { total: 0, page, limit, totalPages: 0, discoveryMode },
-            data: [],
         };
-    }
-    // 4. Scoring and Filtering
-    const scoredParcels = potentialParcels.map((parcel) => {
+        return parcel_model_1.Parcel.find(geoQuery).limit(limit * 5).lean();
+    };
+    // Helper function to fetch parcels along the route (using from/to coordinates as bounds)
+    const fetchParcelsAlongRoute = async () => {
+        const minLat = Math.min(savedRouteFromLat, savedRouteToLat) - 0.05;
+        const maxLat = Math.max(savedRouteFromLat, savedRouteToLat) + 0.05;
+        const minLng = Math.min(savedRouteFromLng, savedRouteToLng) - 0.05;
+        const maxLng = Math.max(savedRouteFromLng, savedRouteToLng) + 0.05;
+        const routeQuery = {
+            status: parcel_interface_1.PARCEL_STATUS.PENDING,
+            vehicle_type: vehicle.vehicle_type,
+            price_status: parcel_interface_1.PRICE_STATUS.ACCEPTED,
+            accepted_by: null,
+            'pickup_location.latitude': { $gte: minLat, $lte: maxLat },
+            'pickup_location.longitude': { $gte: minLng, $lte: maxLng },
+        };
+        return parcel_model_1.Parcel.find(routeQuery).limit(limit * 5).lean();
+    };
+    // Helper function to score a parcel
+    const scoreParcel = (parcel, lat, lng, onRoute) => {
         const pickupLoc = parcel.pickup_location;
         const dropoffLoc = parcel.handover_location;
-        const distanceToPickup = haversineDistanceKm(currentLat, currentLng, pickupLoc.latitude, pickupLoc.longitude);
-        const distanceToDropoff = haversineDistanceKm(currentLat, currentLng, dropoffLoc.latitude, dropoffLoc.longitude);
+        const distanceToPickup = haversineDistanceKm(lat, lng, pickupLoc.latitude, pickupLoc.longitude);
+        const distanceToDropoff = haversineDistanceKm(lat, lng, dropoffLoc.latitude, dropoffLoc.longitude);
+        const parcelActualDistance = savedRouteToLat && savedRouteToLng
+            ? haversineDistanceKm(savedRouteFromLat, savedRouteFromLng, pickupLoc.latitude, pickupLoc.longitude)
+            : 0;
         let ahead = true;
         let inRouteScore = 0;
         let distanceToRoute = distanceToPickup;
-        if (isOnRoute && savedRouteToLat && savedRouteToLng) {
-            const totalTripDist = haversineDistanceKm(currentLat, currentLng, savedRouteToLat, savedRouteToLng);
-            const pickupAlongRoute = haversineDistanceKm(currentLat, currentLng, pickupLoc.latitude, pickupLoc.longitude);
+        if (onRoute && savedRouteToLat && savedRouteToLng) {
+            const totalTripDist = haversineDistanceKm(lat, lng, savedRouteToLat, savedRouteToLng);
+            const pickupAlongRoute = haversineDistanceKm(lat, lng, pickupLoc.latitude, pickupLoc.longitude);
             ahead = pickupAlongRoute <= totalTripDist * 1.2;
             inRouteScore = totalTripDist > 0
                 ? 1 - Math.min(1, (pickupAlongRoute + distanceToDropoff) / (totalTripDist * 2))
@@ -341,32 +367,89 @@ const getAvailableParcelsFromDB = async (userId, query) => {
             distanceToRoute = Math.min(distanceToPickup, distanceToDropoff);
         }
         return {
-            _id: parcel._id,
-            pickup_location: pickupLoc,
-            dropoff_location: dropoffLoc,
-            size: parcel.size,
-            reward: parcel.final_price,
-            distanceToPickup: Math.round(distanceToPickup * 1000),
-            distanceToDropoff: Math.round(distanceToDropoff * 1000),
-            distanceToRoute: Math.round(distanceToRoute * 1000),
-            inRouteScore: Math.round(inRouteScore * 100) / 100,
-            ahead,
+            ...parcel,
+            distance_info: {
+                parcel_actual_distance: `${parcelActualDistance.toFixed(1)} km`,
+            },
+        };
+    };
+    let potentialParcels = [];
+    // Always fetch route parcels when using saved from location (driver starting journey)
+    const isUsingSavedLocation = locationSource === 'saved_from_location';
+    if (isOnRoute && !isUsingSavedLocation) {
+        // Driver is on route and provided coordinates - use nearby query from current position
+        potentialParcels = await fetchParcelsByLocation(currentLat, currentLng, radiusMeters);
+    }
+    else {
+        // Driver is OFF route OR using saved from location - fetch BOTH route-based and nearby parcels
+        const [routeParcels, nearbyParcels] = await Promise.all([
+            fetchParcelsAlongRoute(),
+            fetchParcelsByLocation(currentLat, currentLng, radiusMeters),
+        ]);
+        // Combine and deduplicate by _id
+        const parcelMap = new Map();
+        for (const parcel of routeParcels) {
+            const scored = scoreParcel(parcel, currentLat, currentLng, true);
+            parcelMap.set(parcel._id.toString(), { ...scored, source: 'route' });
+        }
+        for (const parcel of nearbyParcels) {
+            if (!parcelMap.has(parcel._id.toString())) {
+                const scored = scoreParcel(parcel, currentLat, currentLng, false);
+                parcelMap.set(parcel._id.toString(), { ...scored, source: 'nearby' });
+            }
+        }
+        const combinedParcels = Array.from(parcelMap.values());
+        if (combinedParcels.length === 0) {
+            return {
+                meta: { total: 0, page, limit, totalPages: 0, discoveryMode: isUsingSavedLocation ? 'combined' : discoveryMode, isOnRoute, locationSource, distanceToSavedRoute: Math.round(distanceToSavedRoute * 1000) },
+                data: [],
+            };
+        }
+        // Sort combined parcels
+        const sortedCombined = combinedParcels.sort((a, b) => {
+            // Prioritize route parcels
+            if (a.source !== b.source) {
+                return a.source === 'route' ? -1 : 1;
+            }
+            const aDist = a.distance_info?.parcel_actual_distance ? parseFloat(a.distance_info.parcel_actual_distance) : 0;
+            const bDist = b.distance_info?.parcel_actual_distance ? parseFloat(b.distance_info.parcel_actual_distance) : 0;
+            return aDist - bDist;
+        });
+        const total = sortedCombined.length;
+        const paginatedData = sortedCombined.slice(skip, skip + limit);
+        return {
+            meta: {
+                total,
+                page,
+                limit,
+                totalPages: Math.ceil(total / limit),
+                discoveryMode: 'combined',
+                isOnRoute,
+                locationSource,
+                distanceToSavedRoute: Math.round(distanceToSavedRoute * 1000),
+            },
+            data: paginatedData,
+        };
+    }
+    if (!potentialParcels || potentialParcels.length === 0) {
+        return {
+            meta: { total: 0, page, limit, totalPages: 0, discoveryMode, isOnRoute, locationSource },
+            data: [],
+        };
+    }
+    // 4. Scoring and Filtering
+    const scoredParcels = potentialParcels.map((parcel) => {
+        return {
+            ...scoreParcel(parcel, currentLat, currentLng, isOnRoute),
+            source: 'nearby',
         };
     });
-    // 5. Sorting
+    // 5. Sorting by parcel_actual_distance
     const sortedParcels = scoredParcels
         .sort((a, b) => {
-        if (isOnRoute) {
-            if (a.ahead !== b.ahead)
-                return a.ahead ? -1 : 1;
-            if (Math.abs(a.distanceToRoute - b.distanceToRoute) > 100) { // 100m diff threshold
-                return a.distanceToRoute - b.distanceToRoute;
-            }
-            return (b.inRouteScore || 0) - (a.inRouteScore || 0);
-        }
-        else {
-            return a.distanceToPickup - b.distanceToPickup;
-        }
+        const aDist = a.distance_info?.parcel_actual_distance ? parseFloat(a.distance_info.parcel_actual_distance) : 0;
+        const bDist = b.distance_info?.parcel_actual_distance ? parseFloat(b.distance_info.parcel_actual_distance) : 0;
+        return aDist - bDist;
     });
     // 6. Detour Calculation (Google Maps API)
     const apiKey = env_config_1.default.google_maps_api_key;
@@ -414,17 +497,14 @@ const getAvailableParcelsFromDB = async (userId, query) => {
             allMatchedParcels.push({ ...parcel, discoveryMode });
         }
     }
-    const total = allMatchedParcels.length;
-    const paginatedData = allMatchedParcels.slice(skip, skip + limit);
+    const total = scoredParcels.length;
+    const paginatedData = scoredParcels.slice(skip, skip + limit);
     return {
         meta: {
             total,
             page,
             limit,
             totalPages: Math.ceil(total / limit),
-            discoveryMode,
-            distanceToSavedRoute: Math.round(distanceToSavedRoute * 1000),
-            isOnRoute,
         },
         data: paginatedData,
     };

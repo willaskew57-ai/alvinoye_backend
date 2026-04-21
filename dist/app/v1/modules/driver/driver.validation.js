@@ -65,15 +65,13 @@ const verifyParcelOtpValidationSchema = v3_1.z.object({
 const getAvailableParcelsValidationSchema = v3_1.z.object({
     query: v3_1.z.object({
         currentLat: v3_1.z
-            .string({ required_error: 'currentLat is required' })
-            .refine((val) => !isNaN(Number(val)) && Number(val) >= -90 && Number(val) <= 90, {
-            message: 'currentLat must be a valid latitude (-90 to 90)',
-        }),
+            .string()
+            .refine((val) => !val || (!isNaN(Number(val)) && Number(val) >= -90 && Number(val) <= 90), { message: 'currentLat must be a valid latitude (-90 to 90)' })
+            .optional(),
         currentLng: v3_1.z
-            .string({ required_error: 'currentLng is required' })
-            .refine((val) => !isNaN(Number(val)) && Number(val) >= -180 && Number(val) <= 180, {
-            message: 'currentLng must be a valid longitude (-180 to 180)',
-        }),
+            .string()
+            .refine((val) => !val || (!isNaN(Number(val)) && Number(val) >= -180 && Number(val) <= 180), { message: 'currentLng must be a valid longitude (-180 to 180)' })
+            .optional(),
         heading: v3_1.z
             .string()
             .refine((val) => !val || (!isNaN(Number(val)) && Number(val) >= 0 && Number(val) < 360), { message: 'heading must be a number between 0-360' })

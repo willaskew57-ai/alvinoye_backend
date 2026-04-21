@@ -73,8 +73,21 @@ export declare const DriverServices: {
             limit: number;
             totalPages: number;
             discoveryMode: string;
+            isOnRoute: boolean;
+            locationSource: "driver_input" | "saved_from_location";
+            distanceToSavedRoute: number;
+        };
+        data: any[];
+    } | {
+        meta: {
+            total: number;
+            page: number;
+            limit: number;
+            totalPages: number;
+            discoveryMode: string;
+            isOnRoute: true;
+            locationSource: "driver_input" | "saved_from_location";
             distanceToSavedRoute?: never;
-            isOnRoute?: never;
         };
         data: never[];
     } | {
@@ -83,9 +96,10 @@ export declare const DriverServices: {
             page: number;
             limit: number;
             totalPages: number;
-            discoveryMode: string;
-            distanceToSavedRoute: number;
-            isOnRoute: boolean;
+            discoveryMode?: never;
+            isOnRoute?: never;
+            locationSource?: never;
+            distanceToSavedRoute?: never;
         };
         data: any[];
     }>;

@@ -77,6 +77,7 @@ const getDriverById = (0, catch_async_1.default)(async (req, res) => {
 });
 // ** ------------- parcel related api ------------- ** //
 const getAvailableParcelsForDriver = (0, catch_async_1.default)(async (req, res) => {
+    console.log(req.query, 'the query...');
     const user_id = req.user.user_id;
     const result = await driver_service_1.DriverServices.getAvailableParcelsFromDB(user_id, req.query);
     (0, send_response_1.default)(res, {
