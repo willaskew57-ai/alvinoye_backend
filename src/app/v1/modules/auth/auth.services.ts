@@ -115,13 +115,13 @@ const loginServices = async (payload: ILoginUser) => {
     );
   }
 
-  const isVerified = await User.isUserVerified(user);
-  if (!isVerified) {
-    throw new AppError(
-      httpStatus.UNAUTHORIZED,
-      'Your email is not verified. Please verify your OTP first.'
-    );
-  }
+  // const isVerified = await User.isUserVerified(user);
+  // if (!isVerified) {
+  //   throw new AppError(
+  //     httpStatus.UNAUTHORIZED,
+  //     'Your email is not verified. Please verify your OTP first.'
+  //   );
+  // }
 
   // const isActive = await User.isUserActive(user);
   // if (!isActive) {
@@ -147,6 +147,7 @@ const loginServices = async (payload: ILoginUser) => {
     email: user.email,
     role: user.role,
     status: user.status,
+    is_verified: user.is_verified,
     is_profile_completed: user.is_profile_completed,
   };
 
@@ -240,7 +241,11 @@ const verifyOtp = async (
   });
 
   if (purpose === 'REGISTER') {
-    await User.findByIdAndUpdate(decoded.user_id, { is_verified: true });
+    const user = await User.findByIdAndUpdate(decoded.user_id, {
+      is_verified: true,
+    });
+
+    return user;
   }
 
   return null;

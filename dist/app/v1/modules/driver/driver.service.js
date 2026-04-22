@@ -74,7 +74,7 @@ const addDriverInfoIntoDB = async (payload, userIdFromToken) => {
             user_id: finalUserId,
         };
         const newVehicle = await vehicle_model_1.Vehicle.create([vehicleData], { session });
-        const updatedUser = await user_model_1.default.findByIdAndUpdate(finalUserId, { is_profile_completed: true, status: 'ACTIVE' }, { session, new: true });
+        const updatedUser = await user_model_1.default.findByIdAndUpdate(finalUserId, { is_profile_completed: true }, { session, new: true });
         if (!updatedUser) {
             throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'User not found');
         }

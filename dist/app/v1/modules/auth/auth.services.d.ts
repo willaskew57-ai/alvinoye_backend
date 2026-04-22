@@ -23,13 +23,20 @@ export declare const AuthServices: {
             email: string;
             role: "SUPER_ADMIN" | "ADMIN" | "CUSTOMER" | "DRIVER";
             status: "PENDING" | "ACTIVE" | "BLOCKED" | "REJECTED" | "DELETED";
+            is_verified: boolean;
             is_profile_completed: boolean;
         };
     }>;
     verifyOtp: (payload: {
         otp: string;
         purpose: "REGISTER" | "RESET_PASSWORD";
-    }, token: string) => Promise<null>;
+    }, token: string) => Promise<(import("mongoose").Document<unknown, {}, TUser, {}, import("mongoose").DefaultSchemaOptions> & TUser & Required<{
+        _id: Types.ObjectId;
+    }> & {
+        __v: number;
+    } & {
+        id: string;
+    }) | null>;
     resendOtp: (payload: {
         email: string;
         purpose: "REGISTER" | "RESET_PASSWORD";
