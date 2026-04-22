@@ -26,7 +26,7 @@ router
   .route('/verify-otp')
 
   .post(
-    authLimiter,
+    // authLimiter,
     auth(
       USER_ROLE.SUPER_ADMIN,
       USER_ROLE.ADMIN,
@@ -40,7 +40,7 @@ router
 router
   .route('/resend-otp')
   .post(
-    authLimiter,
+    // authLimiter,
     validateRequest(AuthValidations.resendOtpValidationSchema),
     AuthControllers.resendOtp
   );

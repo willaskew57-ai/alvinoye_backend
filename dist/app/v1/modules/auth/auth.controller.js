@@ -68,12 +68,12 @@ const logout = (0, catch_async_1.default)(async (req, res) => {
 });
 const verifyOtp = (0, catch_async_1.default)(async (req, res) => {
     const token = req.headers.authorization?.split(' ')[1];
-    await auth_services_1.AuthServices.verifyOtp(req.body, token);
+    const result = await auth_services_1.AuthServices.verifyOtp(req.body, token);
     (0, send_response_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
         message: 'OTP Verified Successfully!',
-        data: null,
+        data: result,
     });
 });
 const resendOtp = (0, catch_async_1.default)(async (req, res) => {

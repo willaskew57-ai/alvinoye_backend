@@ -73,13 +73,13 @@ const verifyOtp = catchAsync(async (req, res) => {
   const token = req.headers.authorization?.split(' ')[1];
 
   
-  await AuthServices.verifyOtp(req.body, token as string);
+  const result = await AuthServices.verifyOtp(req.body, token as string);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
     message: 'OTP Verified Successfully!',
-    data: null,
+    data: result,
   });
 });
 
