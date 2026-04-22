@@ -71,10 +71,13 @@ const loginServices = async (payload) => {
     if (await user_model_1.default.isUserBlocked(user)) {
         throw new app_error_1.default(http_status_1.default.FORBIDDEN, 'This account is currently blocked!');
     }
-    const isVerified = await user_model_1.default.isUserVerified(user);
-    if (!isVerified) {
-        throw new app_error_1.default(http_status_1.default.UNAUTHORIZED, 'Your email is not verified. Please verify your OTP first.');
-    }
+    // const isVerified = await User.isUserVerified(user);
+    // if (!isVerified) {
+    //   throw new AppError(
+    //     httpStatus.UNAUTHORIZED,
+    //     'Your email is not verified. Please verify your OTP first.'
+    //   );
+    // }
     // const isActive = await User.isUserActive(user);
     // if (!isActive) {
     //   throw new AppError(
@@ -93,6 +96,7 @@ const loginServices = async (payload) => {
         email: user.email,
         role: user.role,
         status: user.status,
+        is_verified: user.is_verified,
         is_profile_completed: user.is_profile_completed,
     };
     // JWT Payload including the role
@@ -144,7 +148,10 @@ const verifyOtp = async (payload, token) => {
         purpose,
     });
     if (purpose === 'REGISTER') {
-        await user_model_1.default.findByIdAndUpdate(decoded.user_id, { is_verified: true });
+        const user = await user_model_1.default.findByIdAndUpdate(decoded.user_id, {
+            is_verified: true,
+        });
+        return user;
     }
     return null;
 };

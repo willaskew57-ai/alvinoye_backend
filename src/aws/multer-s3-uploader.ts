@@ -39,7 +39,7 @@ export const uploadFile = () => {
       'vehicle_images',
       'parcel_images',
     ];
-    console.log('we get the file', file);
+    // console.log('we get the file', file);
     if (file.fieldname === undefined) {
       // Allow requests without any files
       cb(null, true);

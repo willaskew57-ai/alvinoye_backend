@@ -10,7 +10,6 @@ const auth_controller_1 = require("./auth.controller");
 const auth_1 = require("../../../../middleware/auth");
 const validate_request_1 = __importDefault(require("../../../../middleware/validate-request"));
 const user_interface_1 = require("../user/user.interface");
-const rate_limiter_1 = require("../../../../middleware/rate-limiter");
 const router = express_1.default.Router();
 router
     .route('/register')
@@ -21,10 +20,14 @@ router
 router.route('/logout').post(auth_controller_1.AuthControllers.logout);
 router
     .route('/verify-otp')
-    .post(rate_limiter_1.authLimiter, (0, auth_1.auth)(user_interface_1.USER_ROLE.SUPER_ADMIN, user_interface_1.USER_ROLE.ADMIN, user_interface_1.USER_ROLE.DRIVER, user_interface_1.USER_ROLE.CUSTOMER), (0, validate_request_1.default)(auth_validation_1.AuthValidations.verifyOtpValidationSchema), auth_controller_1.AuthControllers.verifyOtp);
+    .post(
+// authLimiter,
+(0, auth_1.auth)(user_interface_1.USER_ROLE.SUPER_ADMIN, user_interface_1.USER_ROLE.ADMIN, user_interface_1.USER_ROLE.DRIVER, user_interface_1.USER_ROLE.CUSTOMER), (0, validate_request_1.default)(auth_validation_1.AuthValidations.verifyOtpValidationSchema), auth_controller_1.AuthControllers.verifyOtp);
 router
     .route('/resend-otp')
-    .post(rate_limiter_1.authLimiter, (0, validate_request_1.default)(auth_validation_1.AuthValidations.resendOtpValidationSchema), auth_controller_1.AuthControllers.resendOtp);
+    .post(
+// authLimiter,
+(0, validate_request_1.default)(auth_validation_1.AuthValidations.resendOtpValidationSchema), auth_controller_1.AuthControllers.resendOtp);
 router
     .route('/change-password')
     .post((0, auth_1.auth)(user_interface_1.USER_ROLE.SUPER_ADMIN, user_interface_1.USER_ROLE.ADMIN, user_interface_1.USER_ROLE.DRIVER, user_interface_1.USER_ROLE.CUSTOMER), (0, validate_request_1.default)(auth_validation_1.AuthValidations.changePasswordValidationSchema), auth_controller_1.AuthControllers.changePassword);

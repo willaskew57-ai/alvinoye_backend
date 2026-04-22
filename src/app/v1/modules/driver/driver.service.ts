@@ -50,7 +50,7 @@ const addDriverInfoIntoDB = async (
 
     const updatedUser = await User.findByIdAndUpdate(
       finalUserId,
-      { is_profile_completed: true, status: 'ACTIVE' },
+      { is_profile_completed: true },
       { session, new: true }
     );
 
