@@ -10,12 +10,15 @@ import User from '../user/user.model';
 import { Parcel } from '../parcel/parcel.model';
 import { PARCEL_STATUS, PRICE_STATUS } from '../parcel/parcel.interface';
 import { OtpServices } from '../otp/otp.services';
-import { EmailHelpers } from '../../../../utils/email-helper';
-import { sendSms } from '../../../../utils/send-sms';
+
 import { deleteFileFromS3 } from '../../../../aws/deleteFromS3';
 import configs from '../../../../config/env.config';
 import axios from 'axios';
 import { NotificationServices } from '../notification/notification.service';
+import { pushEmailJob } from '../../../queues/email.queue';
+import { sendParcelOtpEmailJob } from '../../../jobs/email.job';
+import { pushSmsJob } from '../../../queues/sms.queue';
+import { sendSmsJob } from '../../../jobs/sms.job';
 import { NOTIFICATION_TYPE } from '../notification/notification.constant';
 
 const addDriverInfoIntoDB = async (
@@ -262,7 +265,6 @@ const haversineDistanceKm = (
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 };
 
-
 const calculateDistanceToRouteLine = (
   pointLat: number,
   pointLng: number,
@@ -337,13 +339,22 @@ const getAvailableParcelsFromDB = async (
   const vehicle = await Vehicle.findOne({ user_id: userId });
 
   if (!driver || !vehicle) {
-    throw new AppError(httpStatus.NOT_FOUND, 'Driver or Vehicle profile not found!');
+    throw new AppError(
+      httpStatus.NOT_FOUND,
+      'Driver or Vehicle profile not found!'
+    );
   }
 
-  const savedRouteFromLat = driver.from?.latitude ? Number(driver.from.latitude) : 0;
-  const savedRouteFromLng = driver.from?.longitude ? Number(driver.from.longitude) : 0;
+  const savedRouteFromLat = driver.from?.latitude
+    ? Number(driver.from.latitude)
+    : 0;
+  const savedRouteFromLng = driver.from?.longitude
+    ? Number(driver.from.longitude)
+    : 0;
   const savedRouteToLat = driver.to?.latitude ? Number(driver.to.latitude) : 0;
-  const savedRouteToLng = driver.to?.longitude ? Number(driver.to.longitude) : 0;
+  const savedRouteToLng = driver.to?.longitude
+    ? Number(driver.to.longitude)
+    : 0;
 
   const queryLat = Number(query.currentLat);
   const queryLng = Number(query.currentLng);
@@ -361,7 +372,10 @@ const getAvailableParcelsFromDB = async (
     currentLng = savedRouteFromLng;
     locationSource = 'saved_from_location';
   } else {
-    throw new AppError(httpStatus.BAD_REQUEST, 'Current coordinates or driver from location is required');
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      'Current coordinates or driver from location is required'
+    );
   }
 
   // 1. Calculate if driver is currently on their saved route
@@ -377,7 +391,12 @@ const getAvailableParcelsFromDB = async (
   let isOnRoute = distanceToSavedRoute <= ROUTE_BUFFER_KM;
 
   // 2. Check heading/direction if available
-  if (isOnRoute && heading !== undefined && savedRouteToLat && savedRouteToLng) {
+  if (
+    isOnRoute &&
+    heading !== undefined &&
+    savedRouteToLat &&
+    savedRouteToLng
+  ) {
     const routeDirection = calculateDirectionAngle(
       currentLat,
       currentLng,
@@ -393,7 +412,11 @@ const getAvailableParcelsFromDB = async (
   const discoveryMode = isOnRoute ? 'route-based' : 'nearby-fallback';
 
   // Helper function to fetch parcels with geo-query
-  const fetchParcelsByLocation = async (lat: number, lng: number, maxDist: number) => {
+  const fetchParcelsByLocation = async (
+    lat: number,
+    lng: number,
+    maxDist: number
+  ) => {
     const geoQuery = {
       status: PARCEL_STATUS.PENDING,
       vehicle_type: vehicle.vehicle_type,
@@ -410,7 +433,9 @@ const getAvailableParcelsFromDB = async (
       },
     };
 
-    return Parcel.find(geoQuery).limit(limit * 5).lean();
+    return Parcel.find(geoQuery)
+      .limit(limit * 5)
+      .lean();
   };
 
   // Helper function to fetch parcels along the route (using from/to coordinates as bounds)
@@ -429,33 +454,71 @@ const getAvailableParcelsFromDB = async (
       'pickup_location.longitude': { $gte: minLng, $lte: maxLng },
     };
 
-    return Parcel.find(routeQuery).limit(limit * 5).lean();
+    return Parcel.find(routeQuery)
+      .limit(limit * 5)
+      .lean();
   };
 
   // Helper function to score a parcel
-  const scoreParcel = (parcel: any, lat: number, lng: number, onRoute: boolean) => {
+  const scoreParcel = (
+    parcel: any,
+    lat: number,
+    lng: number,
+    onRoute: boolean
+  ) => {
     const pickupLoc = parcel.pickup_location;
     const dropoffLoc = parcel.handover_location;
 
-    const distanceToPickup = haversineDistanceKm(lat, lng, pickupLoc.latitude, pickupLoc.longitude);
-    const distanceToDropoff = haversineDistanceKm(lat, lng, dropoffLoc.latitude, dropoffLoc.longitude);
-    
-    const parcelActualDistance = savedRouteToLat && savedRouteToLng
-      ? haversineDistanceKm(savedRouteFromLat, savedRouteFromLng, pickupLoc.latitude, pickupLoc.longitude)
-      : 0;
+    const distanceToPickup = haversineDistanceKm(
+      lat,
+      lng,
+      pickupLoc.latitude,
+      pickupLoc.longitude
+    );
+    const distanceToDropoff = haversineDistanceKm(
+      lat,
+      lng,
+      dropoffLoc.latitude,
+      dropoffLoc.longitude
+    );
+
+    const parcelActualDistance =
+      savedRouteToLat && savedRouteToLng
+        ? haversineDistanceKm(
+            savedRouteFromLat,
+            savedRouteFromLng,
+            pickupLoc.latitude,
+            pickupLoc.longitude
+          )
+        : 0;
 
     let ahead = true;
     let inRouteScore = 0;
     let distanceToRoute = distanceToPickup;
 
     if (onRoute && savedRouteToLat && savedRouteToLng) {
-      const totalTripDist = haversineDistanceKm(lat, lng, savedRouteToLat, savedRouteToLng);
-      const pickupAlongRoute = haversineDistanceKm(lat, lng, pickupLoc.latitude, pickupLoc.longitude);
+      const totalTripDist = haversineDistanceKm(
+        lat,
+        lng,
+        savedRouteToLat,
+        savedRouteToLng
+      );
+      const pickupAlongRoute = haversineDistanceKm(
+        lat,
+        lng,
+        pickupLoc.latitude,
+        pickupLoc.longitude
+      );
 
       ahead = pickupAlongRoute <= totalTripDist * 1.2;
-      inRouteScore = totalTripDist > 0
-        ? 1 - Math.min(1, (pickupAlongRoute + distanceToDropoff) / (totalTripDist * 2))
-        : 0;
+      inRouteScore =
+        totalTripDist > 0
+          ? 1 -
+            Math.min(
+              1,
+              (pickupAlongRoute + distanceToDropoff) / (totalTripDist * 2)
+            )
+          : 0;
       distanceToRoute = Math.min(distanceToPickup, distanceToDropoff);
     }
 
@@ -474,7 +537,11 @@ const getAvailableParcelsFromDB = async (
 
   if (isOnRoute && !isUsingSavedLocation) {
     // Driver is on route and provided coordinates - use nearby query from current position
-    potentialParcels = await fetchParcelsByLocation(currentLat, currentLng, radiusMeters);
+    potentialParcels = await fetchParcelsByLocation(
+      currentLat,
+      currentLng,
+      radiusMeters
+    );
   } else {
     // Driver is OFF route OR using saved from location - fetch BOTH route-based and nearby parcels
     const [routeParcels, nearbyParcels] = await Promise.all([
@@ -484,12 +551,12 @@ const getAvailableParcelsFromDB = async (
 
     // Combine and deduplicate by _id
     const parcelMap = new Map<string, any>();
-    
+
     for (const parcel of routeParcels) {
       const scored = scoreParcel(parcel, currentLat, currentLng, true);
       parcelMap.set(parcel._id.toString(), { ...scored, source: 'route' });
     }
-    
+
     for (const parcel of nearbyParcels) {
       if (!parcelMap.has(parcel._id.toString())) {
         const scored = scoreParcel(parcel, currentLat, currentLng, false);
@@ -498,10 +565,19 @@ const getAvailableParcelsFromDB = async (
     }
 
     const combinedParcels = Array.from(parcelMap.values());
-    
+
     if (combinedParcels.length === 0) {
       return {
-        meta: { total: 0, page, limit, totalPages: 0, discoveryMode: isUsingSavedLocation ? 'combined' : discoveryMode, isOnRoute, locationSource, distanceToSavedRoute: Math.round(distanceToSavedRoute * 1000) },
+        meta: {
+          total: 0,
+          page,
+          limit,
+          totalPages: 0,
+          discoveryMode: isUsingSavedLocation ? 'combined' : discoveryMode,
+          isOnRoute,
+          locationSource,
+          distanceToSavedRoute: Math.round(distanceToSavedRoute * 1000),
+        },
         data: [],
       };
     }
@@ -512,8 +588,12 @@ const getAvailableParcelsFromDB = async (
       if (a.source !== b.source) {
         return a.source === 'route' ? -1 : 1;
       }
-      const aDist = a.distance_info?.parcel_actual_distance ? parseFloat(a.distance_info.parcel_actual_distance) : 0;
-      const bDist = b.distance_info?.parcel_actual_distance ? parseFloat(b.distance_info.parcel_actual_distance) : 0;
+      const aDist = a.distance_info?.parcel_actual_distance
+        ? parseFloat(a.distance_info.parcel_actual_distance)
+        : 0;
+      const bDist = b.distance_info?.parcel_actual_distance
+        ? parseFloat(b.distance_info.parcel_actual_distance)
+        : 0;
       return aDist - bDist;
     });
 
@@ -537,7 +617,15 @@ const getAvailableParcelsFromDB = async (
 
   if (!potentialParcels || potentialParcels.length === 0) {
     return {
-      meta: { total: 0, page, limit, totalPages: 0, discoveryMode, isOnRoute, locationSource },
+      meta: {
+        total: 0,
+        page,
+        limit,
+        totalPages: 0,
+        discoveryMode,
+        isOnRoute,
+        locationSource,
+      },
       data: [],
     };
   }
@@ -551,18 +639,24 @@ const getAvailableParcelsFromDB = async (
   });
 
   // 5. Sorting by parcel_actual_distance
-  const sortedParcels = scoredParcels
-    .sort((a: any, b: any) => {
-      const aDist = a.distance_info?.parcel_actual_distance ? parseFloat(a.distance_info.parcel_actual_distance) : 0;
-      const bDist = b.distance_info?.parcel_actual_distance ? parseFloat(b.distance_info.parcel_actual_distance) : 0;
-      return aDist - bDist;
-    });
+  const sortedParcels = scoredParcels.sort((a: any, b: any) => {
+    const aDist = a.distance_info?.parcel_actual_distance
+      ? parseFloat(a.distance_info.parcel_actual_distance)
+      : 0;
+    const bDist = b.distance_info?.parcel_actual_distance
+      ? parseFloat(b.distance_info.parcel_actual_distance)
+      : 0;
+    return aDist - bDist;
+  });
 
   // 6. Detour Calculation (Google Maps API)
   const apiKey = configs.google_maps_api_key;
   const allMatchedParcels: any[] = [];
   const driverOrigin = `${currentLat},${currentLng}`;
-  const driverDestination = (savedRouteToLat && savedRouteToLng) ? `${savedRouteToLat},${savedRouteToLng}` : null;
+  const driverDestination =
+    savedRouteToLat && savedRouteToLng
+      ? `${savedRouteToLat},${savedRouteToLng}`
+      : null;
 
   let originalDistance = 0;
   let baselineAvailable = false;
@@ -573,7 +667,8 @@ const getAvailableParcelsFromDB = async (
         `https://maps.googleapis.com/maps/api/directions/json?origin=${driverOrigin}&destination=${driverDestination}&key=${apiKey}`
       );
       if (originalRouteRes.data.status === 'OK') {
-        originalDistance = originalRouteRes.data.routes[0].legs[0].distance.value;
+        originalDistance =
+          originalRouteRes.data.routes[0].legs[0].distance.value;
         baselineAvailable = true;
       }
     } catch (error) {
@@ -598,7 +693,8 @@ const getAvailableParcelsFromDB = async (
 
       if (response.data.status === 'OK') {
         const totalDistanceWithParcel = response.data.routes[0].legs.reduce(
-          (acc: number, leg: any) => acc + leg.distance.value, 0
+          (acc: number, leg: any) => acc + leg.distance.value,
+          0
         );
         const detourKm = (totalDistanceWithParcel - originalDistance) / 1000;
 
@@ -669,24 +765,29 @@ const acceptParcelFromDB = async (
 
     console.log(otp);
 
-    await EmailHelpers.sendParcelOtpEmail({
-      email: parcelOwner.email,
-      name: parcelOwner.full_name,
-      verificationCode: otp,
-    });
+    // Queue email to parcel owner
+    await pushEmailJob(
+      () =>
+        sendParcelOtpEmailJob(parcelOwner.email, {
+          email: parcelOwner.email,
+          name: parcelOwner.full_name,
+          verificationCode: otp,
+        }),
+      parcelOwner.email
+    );
 
     await session.commitTransaction();
 
-    // Send SMS to receiver with parcel OTP (after transaction commits)
+    // Send SMS to receiver with parcel OTP (queued, after transaction commits)
     if (parcel.receiver_phone) {
       const smsMessage = `Your parcel "${parcel.parcel_name}" has been picked up. Your verification OTP is: ${otp}. Please share this OTP with the driver for delivery confirmation.`;
       try {
-        const smsResult = await sendSms(parcel.receiver_phone, smsMessage);
-        if (!smsResult.success) {
-          console.error('Failed to send SMS to receiver:', smsResult.error);
-        }
-      } catch (smsError) {
-        console.error('Error sending SMS to receiver:', smsError);
+        await pushSmsJob(
+          () => sendSmsJob({ to: parcel.receiver_phone, body: smsMessage }),
+          parcel.receiver_phone
+        );
+      } catch (error) {
+        console.error('Failed to queue SMS to receiver:', error);
       }
     }
 
@@ -706,6 +807,8 @@ const acceptParcelFromDB = async (
     } catch (error) {
       console.error('Failed to create notification:', error);
     }
+
+    console.log('Parcel accepted successfully', parcel);
 
     return {
       message: 'Parcel accepted successfully',
