@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendResetPasswordEmailJob = exports.sendResendOtpEmailJob = exports.sendRegisterEmailJob = void 0;
+exports.sendParcelOtpEmailJob = exports.sendResetPasswordEmailJob = exports.sendResendOtpEmailJob = exports.sendRegisterEmailJob = void 0;
 const email_helper_1 = require("../../utils/email-helper");
 const sendRegisterEmailJob = async (email, data) => {
     try {
@@ -47,4 +47,19 @@ const sendResetPasswordEmailJob = async (email, data) => {
     }
 };
 exports.sendResetPasswordEmailJob = sendResetPasswordEmailJob;
+const sendParcelOtpEmailJob = async (email, data) => {
+    try {
+        await email_helper_1.EmailHelpers.sendParcelOtpEmail({
+            email: data.email,
+            name: data.name,
+            verificationCode: data.verificationCode,
+        });
+        console.log(`[email.job] Parcel OTP email sent successfully to ${email}`);
+    }
+    catch (error) {
+        console.error(`[email.job] Failed to send parcel OTP email to ${email}:`, error);
+        throw error;
+    }
+};
+exports.sendParcelOtpEmailJob = sendParcelOtpEmailJob;
 //# sourceMappingURL=email.job.js.map
