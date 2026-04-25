@@ -15,6 +15,9 @@ const sendEmail = async (options) => {
         host: env_config_1.default.smtp_host || 'smtp.gmail.com',
         port: env_config_1.default.smtp_port ? parseInt(env_config_1.default.smtp_port) : 587,
         secure: env_config_1.default.smtp_port === '465',
+        pool: true, // <--- Add this
+        maxConnections: 5, // Max simultaneous connections
+        maxMessages: 100, // Max messages per connection
         auth: {
             user: env_config_1.default.smtp_mail,
             pass: env_config_1.default.smtp_password,
