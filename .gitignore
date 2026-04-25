@@ -16,5 +16,8 @@ node_modules
 #!.yarn/cache
 .pnp.*
 
-
+.env.local
+.env.development.local
+.env
+.env.*
 uploads
