@@ -1,9 +1,19 @@
-import Queue from 'queue';
+import Queue from 'better-queue';
 
-const smsQueue = new Queue({
-  concurrency: 2,
-  autostart: true,
-});
+const smsQueue = new Queue(
+  async (task: () => Promise<void>, cb: (err?: any) => void) => {
+    try {
+      await task();
+      cb();
+    } catch (err) {
+      cb(err);
+    }
+  },
+  {
+    concurrent: 2,
+    // autostart: true,
+  }
+);
 
 const MAX_RETRIES = 3;
 

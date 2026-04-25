@@ -4,10 +4,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.pushEmailJob = exports.emailQueue = void 0;
-const queue_1 = __importDefault(require("queue"));
-const emailQueue = new queue_1.default({
-    concurrency: 2,
-    autostart: true,
+const better_queue_1 = __importDefault(require("better-queue"));
+const emailQueue = new better_queue_1.default(async (task, cb) => {
+    try {
+        await task();
+        cb();
+    }
+    catch (err) {
+        cb(err);
+    }
+}, {
+    concurrent: 2,
+    // autostart: true,
 });
 exports.emailQueue = emailQueue;
 const MAX_RETRIES = 3;
