@@ -11,17 +11,7 @@ export declare const RefundRequest: import("mongoose").Model<TRefundRequest, {},
     __v: number;
 }, "id"> & {
     id: string;
-}, Schema<TRefundRequest, import("mongoose").Model<TRefundRequest, any, any, any, (import("mongoose").Document<unknown, any, TRefundRequest, any, import("mongoose").DefaultSchemaOptions> & TRefundRequest & {
-    _id: import("mongoose").Types.ObjectId;
-} & {
-    __v: number;
-} & {
-    id: string;
-}) | (import("mongoose").Document<unknown, any, TRefundRequest, any, import("mongoose").DefaultSchemaOptions> & TRefundRequest & {
-    _id: import("mongoose").Types.ObjectId;
-} & {
-    __v: number;
-}), any, TRefundRequest>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, TRefundRequest, import("mongoose").Document<unknown, {}, TRefundRequest, {
+}, Schema<TRefundRequest, import("mongoose").Model<TRefundRequest, any, any, any, any, any, TRefundRequest>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, TRefundRequest, import("mongoose").Document<unknown, {}, TRefundRequest, {
     id: string;
 }, import("mongoose").DefaultSchemaOptions> & Omit<TRefundRequest & {
     _id: import("mongoose").Types.ObjectId;
