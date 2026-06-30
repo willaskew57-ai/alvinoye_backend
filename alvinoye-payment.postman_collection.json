@@ -1,0 +1,179 @@
+{
+  "info": {
+    "name": "Alvinoye - Payment (DPO + Stripe)",
+    "description": "Payment APIs for the Alvinoye backend.\n\nFlow:\n1. Run **Auth > Login (Customer)** first — it auto-saves `access_token`.\n2. Set the `parcel_id` collection variable (a parcel that has a `final_price`).\n3. Run **DPO > Create Checkout** — copy the returned `url` and open it in a browser to pay with the DPO test card.\n4. After payment DPO redirects to **DPO > Callback** automatically (you normally don't call it by hand).\n\nTest card: 4012888888881881  Exp 12/26  CVV 1234",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:5000/api/v1", "type": "string" },
+    { "key": "customer_email", "value": "customer@example.com", "type": "string" },
+    { "key": "customer_password", "value": "123456", "type": "string" },
+    { "key": "access_token", "value": "", "type": "string" },
+    { "key": "parcel_id", "value": "", "type": "string" },
+    { "key": "payment_id", "value": "", "type": "string" },
+    { "key": "dpo_token", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login (Customer)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res && res.data && res.data.accessToken) {",
+                  "  pm.collectionVariables.set('access_token', res.data.accessToken);",
+                  "  console.log('access_token saved');",
+                  "}",
+                  "pm.test('login ok', function () {",
+                  "  pm.expect(pm.response.code).to.eql(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{customer_email}}\",\n  \"password\": \"{{customer_password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "DPO",
+      "item": [
+        {
+          "name": "Create Checkout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res && res.data) {",
+                  "  if (res.data.token) pm.collectionVariables.set('dpo_token', res.data.token);",
+                  "  if (res.data.url) console.log('Open this URL in a browser to pay:', res.data.url);",
+                  "}",
+                  "pm.test('checkout created', function () {",
+                  "  pm.expect(pm.response.code).to.eql(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"parcel_id\": \"{{parcel_id}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/payments/dpo/checkout",
+              "host": ["{{base_url}}"],
+              "path": ["payments", "dpo", "checkout"]
+            },
+            "description": "Creates a DPO transaction for the given parcel and returns { url, token }. Open `url` in a browser to complete payment on DPO's hosted page."
+          }
+        },
+        {
+          "name": "Callback (verify) — reference only",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/payments/dpo/callback?TransactionToken={{dpo_token}}",
+              "host": ["{{base_url}}"],
+              "path": ["payments", "dpo", "callback"],
+              "query": [{ "key": "TransactionToken", "value": "{{dpo_token}}" }]
+            },
+            "description": "Public endpoint DPO redirects the customer's browser to after payment. It verifies the transaction and then 302-redirects to the frontend success/cancel page. Normally triggered by DPO, not called manually — included here for reference/debugging. Returns a redirect (302), not JSON."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Stripe",
+      "item": [
+        {
+          "name": "Create Checkout",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"parcel_id\": \"{{parcel_id}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/payments/checkout",
+              "host": ["{{base_url}}"],
+              "path": ["payments", "checkout"]
+            },
+            "description": "Creates a Stripe checkout session and returns the checkout URL."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payment",
+      "item": [
+        {
+          "name": "Payment History (Customer)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/payments/history",
+              "host": ["{{base_url}}"],
+              "path": ["payments", "history"]
+            },
+            "description": "Returns all payments for the logged-in customer (both DPO and Stripe)."
+          }
+        },
+        {
+          "name": "Refund (Admin) — Stripe only",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"payment_id\": \"{{payment_id}}\",\n  \"reason\": \"requested_by_customer\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/payments/refund",
+              "host": ["{{base_url}}"],
+              "path": ["payments", "refund"]
+            },
+            "description": "Refunds a successful payment. Requires an ADMIN token. (Currently implemented for Stripe payments.)"
+          }
+        }
+      ]
+    }
+  ]
+}

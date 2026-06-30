@@ -1,0 +1,869 @@
+{
+  "info": {
+    "name": "Alvinoye Backend - Full API",
+    "description": "Complete API collection for the Alvinoye parcel-delivery backend.\n\n## Getting started\n1. Set the `root_url` variable (default http://localhost:5000). `base_url` is `{{root_url}}/api/v1`.\n2. Run a login under **Auth** (Login Customer / Admin / Driver). The token is auto-saved to `access_token` and used by every protected request (collection-level Bearer auth).\n3. Fill id variables (`parcel_id`, `user_id`, `payment_id`, `chat_id`, `notification_id`, `review_id`, `faq_id`) as you go.\n\n## Notes\n- Protected routes use collection-level Bearer `{{access_token}}`. Public routes override to No Auth.\n- Multipart routes (parcel create/update, profile update, driver info, chat send) send a `data` text field with a JSON string plus file fields.\n- Payment test card (DPO): 4012888888881881  Exp 12/26  CVV 1234.\n- 'Track Driver' endpoints are included but the module is NOT mounted in routes/index.ts yet — they will 404 until registered.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }]
+  },
+  "variable": [
+    { "key": "root_url", "value": "http://localhost:5000", "type": "string" },
+    { "key": "base_url", "value": "http://localhost:5000/api/v1", "type": "string" },
+    { "key": "customer_email", "value": "customer@example.com", "type": "string" },
+    { "key": "customer_password", "value": "123456", "type": "string" },
+    { "key": "admin_email", "value": "admin@example.com", "type": "string" },
+    { "key": "admin_password", "value": "123456", "type": "string" },
+    { "key": "driver_email", "value": "driver@example.com", "type": "string" },
+    { "key": "driver_password", "value": "123456", "type": "string" },
+    { "key": "access_token", "value": "", "type": "string" },
+    { "key": "user_id", "value": "", "type": "string" },
+    { "key": "parcel_id", "value": "", "type": "string" },
+    { "key": "payment_id", "value": "", "type": "string" },
+    { "key": "dpo_token", "value": "", "type": "string" },
+    { "key": "chat_id", "value": "", "type": "string" },
+    { "key": "notification_id", "value": "", "type": "string" },
+    { "key": "review_id", "value": "", "type": "string" },
+    { "key": "price_request_id", "value": "", "type": "string" },
+    { "key": "faq_id", "value": "", "type": "string" },
+    { "key": "recipient_id", "value": "", "type": "string" },
+    { "key": "driver_id", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"full_name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\",\n  \"role\": \"CUSTOMER\"\n}" },
+            "url": { "raw": "{{base_url}}/auth/register", "host": ["{{base_url}}"], "path": ["auth", "register"] },
+            "description": "Public. role: SUPER_ADMIN | ADMIN | CUSTOMER | DRIVER. password min 6."
+          }
+        },
+        {
+          "name": "Login (Customer)",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": [
+              "const r = pm.response.json();",
+              "if (r && r.data && r.data.accessToken) { pm.collectionVariables.set('access_token', r.data.accessToken); }",
+              "if (r && r.data && r.data.user && r.data.user._id) { pm.collectionVariables.set('user_id', r.data.user._id); }",
+              "pm.test('login ok', () => pm.expect(pm.response.code).to.eql(200));"
+            ] } }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{customer_email}}\",\n  \"password\": \"{{customer_password}}\"\n}" },
+            "url": { "raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"] },
+            "description": "Saves access_token + user_id."
+          }
+        },
+        {
+          "name": "Login (Admin)",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": [
+              "const r = pm.response.json();",
+              "if (r && r.data && r.data.accessToken) { pm.collectionVariables.set('access_token', r.data.accessToken); }",
+              "pm.test('login ok', () => pm.expect(pm.response.code).to.eql(200));"
+            ] } }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{admin_email}}\",\n  \"password\": \"{{admin_password}}\"\n}" },
+            "url": { "raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "Login (Driver)",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": [
+              "const r = pm.response.json();",
+              "if (r && r.data && r.data.accessToken) { pm.collectionVariables.set('access_token', r.data.accessToken); }",
+              "pm.test('login ok', () => pm.expect(pm.response.code).to.eql(200));"
+            ] } }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{driver_email}}\",\n  \"password\": \"{{driver_password}}\"\n}" },
+            "url": { "raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [],
+            "url": { "raw": "{{base_url}}/auth/logout", "host": ["{{base_url}}"], "path": ["auth", "logout"] }
+          }
+        },
+        {
+          "name": "Verify OTP",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"otp\": \"123456\",\n  \"purpose\": \"REGISTER\"\n}" },
+            "url": { "raw": "{{base_url}}/auth/verify-otp", "host": ["{{base_url}}"], "path": ["auth", "verify-otp"] },
+            "description": "Auth required. otp = 6 digits. purpose: REGISTER | RESET_PASSWORD."
+          }
+        },
+        {
+          "name": "Resend OTP",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"john@example.com\",\n  \"purpose\": \"REGISTER\"\n}" },
+            "url": { "raw": "{{base_url}}/auth/resend-otp", "host": ["{{base_url}}"], "path": ["auth", "resend-otp"] }
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"old_password\": \"password123\",\n  \"new_password\": \"newpassword456\"\n}" },
+            "url": { "raw": "{{base_url}}/auth/change-password", "host": ["{{base_url}}"], "path": ["auth", "change-password"] }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [],
+            "url": { "raw": "{{base_url}}/auth/refresh-token", "host": ["{{base_url}}"], "path": ["auth", "refresh-token"] },
+            "description": "Uses refresh_token cookie set during login."
+          }
+        },
+        {
+          "name": "Forget Password",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"john@example.com\"\n}" },
+            "url": { "raw": "{{base_url}}/auth/forget-password", "host": ["{{base_url}}"], "path": ["auth", "forget-password"] }
+          }
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"new_password\": \"newpassword456\"\n}" },
+            "url": { "raw": "{{base_url}}/auth/reset-password", "host": ["{{base_url}}"], "path": ["auth", "reset-password"] },
+            "description": "Auth required (after OTP verification)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "User",
+      "item": [
+        {
+          "name": "Create Admin (Super Admin)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"full_name\": \"Admin User\",\n  \"email\": \"admin@example.com\",\n  \"password\": \"password123\"\n}" },
+            "url": { "raw": "{{base_url}}/user/create-admin", "host": ["{{base_url}}"], "path": ["user", "create-admin"] }
+          }
+        },
+        {
+          "name": "Change User Status (Admin) — approve driver/user",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"ACTIVE\"\n}" },
+            "url": { "raw": "{{base_url}}/user/change-status/{{user_id}}", "host": ["{{base_url}}"], "path": ["user", "change-status", "{{user_id}}"] },
+            "description": "status: PENDING | ACTIVE | BLOCKED | REJECTED | DELETED. ACTIVE = approve."
+          }
+        },
+        {
+          "name": "Get All Users",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/user/get-all", "host": ["{{base_url}}"], "path": ["user", "get-all"] } }
+        },
+        {
+          "name": "Get Me",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/user/get-me", "host": ["{{base_url}}"], "path": ["user", "get-me"] } }
+        },
+        {
+          "name": "Update Me (multipart)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": { "mode": "formdata", "formdata": [
+              { "key": "data", "value": "{\n  \"full_name\": \"John Doe Updated\",\n  \"phone_number\": \"+1234567890\",\n  \"address\": \"123 Main St, City\"\n}", "type": "text" },
+              { "key": "profile_image", "type": "file", "src": [] }
+            ] },
+            "url": { "raw": "{{base_url}}/user/update-me", "host": ["{{base_url}}"], "path": ["user", "update-me"] },
+            "description": "multipart/form-data. JSON in `data` field. Optional file field: profile_image."
+          }
+        },
+        {
+          "name": "Get Single User",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/user/get-single/{{user_id}}", "host": ["{{base_url}}"], "path": ["user", "get-single", "{{user_id}}"] } }
+        },
+        {
+          "name": "Update User by ID",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"full_name\": \"Updated Name\",\n  \"phone_number\": \"+1234567890\",\n  \"address\": \"123 Main St, City\"\n}" },
+            "url": { "raw": "{{base_url}}/user/update/{{user_id}}", "host": ["{{base_url}}"], "path": ["user", "update", "{{user_id}}"] }
+          }
+        },
+        {
+          "name": "Delete User (soft)",
+          "request": { "method": "PATCH", "header": [], "url": { "raw": "{{base_url}}/user/delete/{{user_id}}", "host": ["{{base_url}}"], "path": ["user", "delete", "{{user_id}}"] } }
+        }
+      ]
+    },
+    {
+      "name": "Driver",
+      "item": [
+        {
+          "name": "Register Driver Info (multipart)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": { "mode": "formdata", "formdata": [
+              { "key": "data", "value": "{\n  \"driverInfo\": {\n    \"from\": { \"address\": \"123 Main St\", \"latitude\": \"40.7128\", \"longitude\": \"-74.0060\" },\n    \"to\": { \"address\": \"456 Oak Ave\", \"latitude\": \"34.0522\", \"longitude\": \"-118.2437\" },\n    \"driver_license_number\": \"DL123456789\",\n    \"daily_commute_time\": \"8:00 AM\",\n    \"max_parcel_weight\": \"50\",\n    \"notes\": \"Available for deliveries\"\n  },\n  \"vehicle\": {\n    \"vehicle_type\": \"Sedan\",\n    \"vehicle_number\": \"ABC1234\"\n  }\n}", "type": "text" },
+              { "key": "license_image", "type": "file", "src": [] },
+              { "key": "number_plate_image", "type": "file", "src": [] },
+              { "key": "vehicle_images", "type": "file", "src": [] }
+            ] },
+            "url": { "raw": "{{base_url}}/driver/info", "host": ["{{base_url}}"], "path": ["driver", "info"] },
+            "description": "DRIVER. multipart. JSON in `data`. Files: license_image, number_plate_image, vehicle_images[]."
+          }
+        },
+        {
+          "name": "Update Driver Info (multipart)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": { "mode": "formdata", "formdata": [
+              { "key": "data", "value": "{\n  \"driverInfo\": {\n    \"daily_commute_time\": \"9:00 AM\",\n    \"max_parcel_weight\": \"60\",\n    \"notes\": \"Updated availability\"\n  },\n  \"vehicle\": {\n    \"vehicle_type\": \"SUV\",\n    \"vehicle_number\": \"XYZ5678\",\n    \"existing_vehicle_images\": []\n  }\n}", "type": "text" },
+              { "key": "license_image", "type": "file", "src": [] },
+              { "key": "number_plate_image", "type": "file", "src": [] },
+              { "key": "vehicle_images", "type": "file", "src": [] }
+            ] },
+            "url": { "raw": "{{base_url}}/driver/update-info", "host": ["{{base_url}}"], "path": ["driver", "update-info"] }
+          }
+        },
+        {
+          "name": "Get All Drivers",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/driver/get-all", "host": ["{{base_url}}"], "path": ["driver", "get-all"] } }
+        },
+        {
+          "name": "Get Driver by ID",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/driver/get/{{driver_id}}", "host": ["{{base_url}}"], "path": ["driver", "get", "{{driver_id}}"] } }
+        },
+        {
+          "name": "Get My Driver Info",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/driver/get-driver-info", "host": ["{{base_url}}"], "path": ["driver", "get-driver-info"] } }
+        },
+        {
+          "name": "Get Available Parcels (Driver)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/driver/available-for-driver?currentLat=40.7128&currentLng=-74.0060&radiusMeters=1500&page=1&limit=10",
+              "host": ["{{base_url}}"], "path": ["driver", "available-for-driver"],
+              "query": [
+                { "key": "currentLat", "value": "40.7128" },
+                { "key": "currentLng", "value": "-74.0060" },
+                { "key": "heading", "value": "180", "disabled": true },
+                { "key": "radiusMeters", "value": "1500" },
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Accept Parcel",
+          "request": { "method": "PATCH", "header": [], "url": { "raw": "{{base_url}}/driver/accept-parcel/{{parcel_id}}", "host": ["{{base_url}}"], "path": ["driver", "accept-parcel", "{{parcel_id}}"] } }
+        },
+        {
+          "name": "Verify Parcel OTP",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"parcel_id\": \"{{parcel_id}}\",\n  \"otp\": \"123456\"\n}" },
+            "url": { "raw": "{{base_url}}/driver/parcel/verify-otp", "host": ["{{base_url}}"], "path": ["driver", "parcel", "verify-otp"] }
+          }
+        },
+        {
+          "name": "Select Parcel",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"parcel_id\": \"{{parcel_id}}\",\n  \"routeContext\": {\n    \"fromLat\": 40.7128,\n    \"fromLng\": -74.0060,\n    \"toLat\": 34.0522,\n    \"toLng\": -118.2437,\n    \"routePolyline\": \"encoded_polyline_string\"\n  }\n}" },
+            "url": { "raw": "{{base_url}}/driver/parcel/select", "host": ["{{base_url}}"], "path": ["driver", "parcel", "select"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Customer",
+      "item": [
+        {
+          "name": "Get All Customers",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/customer/get-all", "host": ["{{base_url}}"], "path": ["customer", "get-all"] } }
+        }
+      ]
+    },
+    {
+      "name": "Parcel",
+      "item": [
+        {
+          "name": "Create Parcel (multipart)",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": [
+              "const r = pm.response.json();",
+              "const p = r && r.data ? (r.data._id || (r.data.parcel && r.data.parcel._id)) : null;",
+              "if (p) pm.collectionVariables.set('parcel_id', p);"
+            ] } }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": { "mode": "formdata", "formdata": [
+              { "key": "data", "value": "{\n  \"parcel_name\": \"Electronics Package\",\n  \"size\": \"medium\",\n  \"vehicle_type\": \"sedan\",\n  \"weight\": 2.5,\n  \"pickup_location\": { \"address\": \"123 Main Street\", \"latitude\": 40.7128, \"longitude\": -74.0060 },\n  \"handover_location\": { \"address\": \"456 Oak Avenue\", \"latitude\": 40.7580, \"longitude\": -73.9855 },\n  \"priority\": \"normal\",\n  \"date\": \"2026-07-15\",\n  \"time\": \"14:30\",\n  \"receiver_name\": \"John Doe\",\n  \"receiver_phone\": \"+1234567890\",\n  \"sender_remarks\": \"Handle with care\"\n}", "type": "text" },
+              { "key": "parcel_images", "type": "file", "src": [] }
+            ] },
+            "url": { "raw": "{{base_url}}/parcel/create", "host": ["{{base_url}}"], "path": ["parcel", "create"] },
+            "description": "CUSTOMER. multipart. JSON in `data`. Files: parcel_images[]. Saves parcel_id."
+          }
+        },
+        {
+          "name": "Update Parcel (multipart)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": { "mode": "formdata", "formdata": [
+              { "key": "data", "value": "{\n  \"parcel_name\": \"Updated Package\",\n  \"weight\": 3.5,\n  \"priority\": \"high\",\n  \"existing_parcel_images\": []\n}", "type": "text" },
+              { "key": "parcel_images", "type": "file", "src": [] }
+            ] },
+            "url": { "raw": "{{base_url}}/parcel/update/{{parcel_id}}", "host": ["{{base_url}}"], "path": ["parcel", "update", "{{parcel_id}}"] }
+          }
+        },
+        {
+          "name": "Get All Parcels",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/parcel/get-all", "host": ["{{base_url}}"], "path": ["parcel", "get-all"] } }
+        },
+        {
+          "name": "Get My Parcels",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/parcel/get-my-parcels", "host": ["{{base_url}}"], "path": ["parcel", "get-my-parcels"] } }
+        },
+        {
+          "name": "Get Single Parcel",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/parcel/get/{{parcel_id}}", "host": ["{{base_url}}"], "path": ["parcel", "get", "{{parcel_id}}"] } }
+        },
+        {
+          "name": "Reject Parcel (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"rejection_reason\": \"Parcel violates safety guidelines\"\n}" },
+            "url": { "raw": "{{base_url}}/parcel/reject/{{parcel_id}}", "host": ["{{base_url}}"], "path": ["parcel", "reject", "{{parcel_id}}"] }
+          }
+        },
+        {
+          "name": "Request For Price (Customer)",
+          "request": { "method": "PATCH", "header": [], "url": { "raw": "{{base_url}}/parcel/request-for-price/{{parcel_id}}", "host": ["{{base_url}}"], "path": ["parcel", "request-for-price", "{{parcel_id}}"] } }
+        },
+        {
+          "name": "Propose Price (Admin)",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": [
+              "const r = pm.response.json();",
+              "if (r && r.data && r.data._id) { pm.collectionVariables.set('price_request_id', r.data._id); console.log('price_request_id saved:', r.data._id); }"
+            ] } }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"parcel_id\": \"{{parcel_id}}\",\n  \"proposed_price\": 150.50,\n  \"message\": \"Initial price estimate\"\n}" },
+            "url": { "raw": "{{base_url}}/parcel/propose-price", "host": ["{{base_url}}"], "path": ["parcel", "propose-price"] },
+            "description": "ADMIN. Saves price_request_id (the proposal's _id) used by Accept/Reject Price."
+          }
+        },
+        {
+          "name": "Reject and Counter (Customer)",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": [
+              "const r = pm.response.json();",
+              "if (r && r.data && r.data._id) { pm.collectionVariables.set('price_request_id', r.data._id); console.log('price_request_id saved:', r.data._id); }"
+            ] } }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"parcel_id\": \"{{parcel_id}}\",\n  \"rejection_reason\": \"Price is too high\",\n  \"suggested_price\": 120.00\n}" },
+            "url": { "raw": "{{base_url}}/parcel/reject-and-counter/{{parcel_id}}", "host": ["{{base_url}}"], "path": ["parcel", "reject-and-counter", "{{parcel_id}}"] },
+            "description": "CUSTOMER counter-offer. Saves the new price_request_id."
+          }
+        },
+        {
+          "name": "Admin Final Offer",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": [
+              "const r = pm.response.json();",
+              "if (r && r.data && r.data._id) { pm.collectionVariables.set('price_request_id', r.data._id); console.log('price_request_id saved:', r.data._id); }"
+            ] } }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"parcel_id\": \"{{parcel_id}}\",\n  \"final_price\": 135.75,\n  \"message\": \"Final price offer\"\n}" },
+            "url": { "raw": "{{base_url}}/parcel/final-offer/{{parcel_id}}", "host": ["{{base_url}}"], "path": ["parcel", "final-offer", "{{parcel_id}}"] },
+            "description": "ADMIN. Saves the new price_request_id."
+          }
+        },
+        {
+          "name": "Accept Price",
+          "request": { "method": "PATCH", "header": [], "url": { "raw": "{{base_url}}/parcel/accept-price/{{price_request_id}}", "host": ["{{base_url}}"], "path": ["parcel", "accept-price", "{{price_request_id}}"] }, "description": "PATCH :id = the PRICE REQUEST _id (auto-saved by Propose/Counter/Final Offer), NOT the parcel id. The OTHER party must accept (admin proposed -> customer accepts). Sets final_price." }
+        },
+        {
+          "name": "Reject Price",
+          "request": { "method": "PATCH", "header": [], "url": { "raw": "{{base_url}}/parcel/reject-price/{{price_request_id}}", "host": ["{{base_url}}"], "path": ["parcel", "reject-price", "{{price_request_id}}"] }, "description": "PATCH :id = the PRICE REQUEST _id (auto-saved), NOT the parcel id." }
+        }
+      ]
+    },
+    {
+      "name": "Payment",
+      "item": [
+        {
+          "name": "DPO - Create Checkout",
+          "event": [
+            { "listen": "test", "script": { "type": "text/javascript", "exec": [
+              "const r = pm.response.json();",
+              "if (r && r.data) {",
+              "  if (r.data.token) pm.collectionVariables.set('dpo_token', r.data.token);",
+              "  if (r.data.url) console.log('Open in browser to pay:', r.data.url);",
+              "}"
+            ] } }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"parcel_id\": \"{{parcel_id}}\"\n}" },
+            "url": { "raw": "{{base_url}}/payments/dpo/checkout", "host": ["{{base_url}}"], "path": ["payments", "dpo", "checkout"] },
+            "description": "CUSTOMER. Returns { url, token }. Open url in a browser to pay. Test card 4012888888881881 12/26 1234."
+          }
+        },
+        {
+          "name": "DPO - Callback (verify) — reference",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/payments/dpo/callback?TransactionToken={{dpo_token}}",
+              "host": ["{{base_url}}"], "path": ["payments", "dpo", "callback"],
+              "query": [{ "key": "TransactionToken", "value": "{{dpo_token}}" }]
+            },
+            "description": "Public. DPO redirects the browser here after payment; verifies and 302-redirects to frontend. Returns a redirect, not JSON."
+          }
+        },
+        {
+          "name": "Stripe - Create Checkout",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"parcel_id\": \"{{parcel_id}}\"\n}" },
+            "url": { "raw": "{{base_url}}/payments/checkout", "host": ["{{base_url}}"], "path": ["payments", "checkout"] }
+          }
+        },
+        {
+          "name": "Stripe - Webhook (public)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "stripe-signature", "value": "<set-by-stripe>" }],
+            "body": { "mode": "raw", "raw": "{ }" },
+            "url": { "raw": "{{base_url}}/payments/webhook/stripe", "host": ["{{base_url}}"], "path": ["payments", "webhook", "stripe"] },
+            "description": "Called by Stripe with a signed raw payload. Not meant to be called manually."
+          }
+        },
+        {
+          "name": "Refund (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"payment_id\": \"{{payment_id}}\",\n  \"reason\": \"requested_by_customer\"\n}" },
+            "url": { "raw": "{{base_url}}/payments/refund", "host": ["{{base_url}}"], "path": ["payments", "refund"] },
+            "description": "ADMIN. reason: duplicate | fraudulent | requested_by_customer (optional)."
+          }
+        },
+        {
+          "name": "Payment History",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/payments/history", "host": ["{{base_url}}"], "path": ["payments", "history"] } }
+        }
+      ]
+    },
+    {
+      "name": "Refund",
+      "item": [
+        {
+          "name": "Request Refund (Customer)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"reason\": \"Item was damaged during delivery\"\n}" },
+            "url": { "raw": "{{base_url}}/refund/request/{{parcel_id}}", "host": ["{{base_url}}"], "path": ["refund", "request", "{{parcel_id}}"] },
+            "description": "CUSTOMER. reason min 5 chars."
+          }
+        },
+        {
+          "name": "Admin Refund Decision",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"action\": \"APPROVE\",\n  \"adminNote\": \"Refund approved due to valid damage claim\"\n}" },
+            "url": { "raw": "{{base_url}}/refund/decision/{{payment_id}}", "host": ["{{base_url}}"], "path": ["refund", "decision", "{{payment_id}}"] },
+            "description": "ADMIN/SUPER_ADMIN. action: APPROVE | REJECT. :id is the refund request id."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Review",
+      "item": [
+        {
+          "name": "Create Review (Customer)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"parcel_id\": \"{{parcel_id}}\",\n  \"rating\": 4,\n  \"feedback\": \"Driver was professional and on time\"\n}" },
+            "url": { "raw": "{{base_url}}/review/create", "host": ["{{base_url}}"], "path": ["review", "create"] },
+            "description": "rating 1-5, feedback min 5 chars."
+          }
+        },
+        {
+          "name": "Get Single Review",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/review/get/{{review_id}}", "host": ["{{base_url}}"], "path": ["review", "get", "{{review_id}}"] } }
+        },
+        {
+          "name": "Get Driver Reviews",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/review/get-driver-review", "host": ["{{base_url}}"], "path": ["review", "get-driver-review"] } }
+        },
+        {
+          "name": "Get Customer Reviews",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/review/get-customer-review", "host": ["{{base_url}}"], "path": ["review", "get-customer-review"] } }
+        }
+      ]
+    },
+    {
+      "name": "Chat",
+      "item": [
+        {
+          "name": "Initiate Support Chat",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": { "raw": "{{base_url}}/chat/initiate-support", "host": ["{{base_url}}"], "path": ["chat", "initiate-support"] }
+          }
+        },
+        {
+          "name": "Initiate P2P Chat",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"recipientId\": \"{{recipient_id}}\"\n}" },
+            "url": { "raw": "{{base_url}}/chat/initiate-p2p", "host": ["{{base_url}}"], "path": ["chat", "initiate-p2p"] }
+          }
+        },
+        {
+          "name": "Get My Chats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/chat/my-chats?page=1&limit=10&sort=-createdAt",
+              "host": ["{{base_url}}"], "path": ["chat", "my-chats"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "sort", "value": "-createdAt" },
+                { "key": "searchTerm", "value": "", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Messages",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/chat/messages/{{chat_id}}?page=1&limit=10&sort=-createdAt",
+              "host": ["{{base_url}}"], "path": ["chat", "messages", "{{chat_id}}"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "sort", "value": "-createdAt" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Send Message (multipart)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": { "mode": "formdata", "formdata": [
+              { "key": "chat_id", "value": "{{chat_id}}", "type": "text" },
+              { "key": "content", "value": "Hello", "type": "text" },
+              { "key": "attachments", "type": "file", "src": [] }
+            ] },
+            "url": { "raw": "{{base_url}}/chat/send", "host": ["{{base_url}}"], "path": ["chat", "send"] },
+            "description": "multipart. chat_id required, content optional, attachments file(s) optional."
+          }
+        },
+        {
+          "name": "Mark Chat as Read",
+          "request": { "method": "PATCH", "header": [], "url": { "raw": "{{base_url}}/chat/mark-as-read/{{chat_id}}", "host": ["{{base_url}}"], "path": ["chat", "mark-as-read", "{{chat_id}}"] } }
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "Get All Notifications",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/notifications/get-all?page=1&limit=10&sort=-createdAt",
+              "host": ["{{base_url}}"], "path": ["notifications", "get-all"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "sort", "value": "-createdAt" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Unread Count",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/notifications/unread-count", "host": ["{{base_url}}"], "path": ["notifications", "unread-count"] } }
+        },
+        {
+          "name": "Mark All as Read",
+          "request": { "method": "PATCH", "header": [], "url": { "raw": "{{base_url}}/notifications/mark-all-read", "host": ["{{base_url}}"], "path": ["notifications", "mark-all-read"] } }
+        },
+        {
+          "name": "Delete All Notifications",
+          "request": { "method": "DELETE", "header": [], "url": { "raw": "{{base_url}}/notifications/", "host": ["{{base_url}}"], "path": ["notifications", ""] } }
+        },
+        {
+          "name": "Get Single Notification",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/notifications/{{notification_id}}", "host": ["{{base_url}}"], "path": ["notifications", "{{notification_id}}"] } }
+        },
+        {
+          "name": "Mark Notification as Read",
+          "request": { "method": "PATCH", "header": [], "url": { "raw": "{{base_url}}/notifications/{{notification_id}}/read", "host": ["{{base_url}}"], "path": ["notifications", "{{notification_id}}", "read"] } }
+        },
+        {
+          "name": "Delete Notification",
+          "request": { "method": "DELETE", "header": [], "url": { "raw": "{{base_url}}/notifications/{{notification_id}}", "host": ["{{base_url}}"], "path": ["notifications", "{{notification_id}}"] } }
+        }
+      ]
+    },
+    {
+      "name": "Settings",
+      "item": [
+        {
+          "name": "Create FAQ (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"question\": \"How to use?\",\n  \"answer\": \"Step by step...\"\n}" },
+            "url": { "raw": "{{base_url}}/settings/faq/create", "host": ["{{base_url}}"], "path": ["settings", "faq", "create"] }
+          }
+        },
+        {
+          "name": "Get All FAQs (Public)",
+          "request": { "auth": { "type": "noauth" }, "method": "GET", "header": [], "url": { "raw": "{{base_url}}/settings/faq/get-all", "host": ["{{base_url}}"], "path": ["settings", "faq", "get-all"] } }
+        },
+        {
+          "name": "Get Single FAQ (Admin)",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/settings/faq/get/{{faq_id}}", "host": ["{{base_url}}"], "path": ["settings", "faq", "get", "{{faq_id}}"] } }
+        },
+        {
+          "name": "Update FAQ (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"question\": \"Updated question?\",\n  \"answer\": \"Updated answer...\"\n}" },
+            "url": { "raw": "{{base_url}}/settings/faq/update/{{faq_id}}", "host": ["{{base_url}}"], "path": ["settings", "faq", "update", "{{faq_id}}"] }
+          }
+        },
+        {
+          "name": "Delete FAQ (Admin)",
+          "request": { "method": "DELETE", "header": [], "url": { "raw": "{{base_url}}/settings/faq/delete/{{faq_id}}", "host": ["{{base_url}}"], "path": ["settings", "faq", "delete", "{{faq_id}}"] } }
+        },
+        {
+          "name": "Create Terms (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"title\": \"Terms & Conditions\",\n  \"content\": \"Our terms...\"\n}" },
+            "url": { "raw": "{{base_url}}/settings/terms/create", "host": ["{{base_url}}"], "path": ["settings", "terms", "create"] }
+          }
+        },
+        {
+          "name": "Get Terms (Public)",
+          "request": { "auth": { "type": "noauth" }, "method": "GET", "header": [], "url": { "raw": "{{base_url}}/settings/terms/get", "host": ["{{base_url}}"], "path": ["settings", "terms", "get"] } }
+        },
+        {
+          "name": "Update Terms (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"title\": \"Updated T&C\",\n  \"content\": \"Updated content...\"\n}" },
+            "url": { "raw": "{{base_url}}/settings/terms/update/{{faq_id}}", "host": ["{{base_url}}"], "path": ["settings", "terms", "update", "{{faq_id}}"] }
+          }
+        },
+        {
+          "name": "Create Privacy Policy (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"title\": \"Privacy Policy\",\n  \"content\": \"Our privacy...\"\n}" },
+            "url": { "raw": "{{base_url}}/settings/privacy/create", "host": ["{{base_url}}"], "path": ["settings", "privacy", "create"] }
+          }
+        },
+        {
+          "name": "Get Privacy Policy (Public)",
+          "request": { "auth": { "type": "noauth" }, "method": "GET", "header": [], "url": { "raw": "{{base_url}}/settings/privacy/get", "host": ["{{base_url}}"], "path": ["settings", "privacy", "get"] } }
+        },
+        {
+          "name": "Update Privacy Policy (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"title\": \"Updated Privacy\",\n  \"content\": \"Updated content...\"\n}" },
+            "url": { "raw": "{{base_url}}/settings/privacy/update/{{faq_id}}", "host": ["{{base_url}}"], "path": ["settings", "privacy", "update", "{{faq_id}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "Get Stats (Admin)",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/dashboard/stats", "host": ["{{base_url}}"], "path": ["dashboard", "stats"] } }
+        },
+        {
+          "name": "Parcel Movement (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/dashboard/parcel-movement?year=2026",
+              "host": ["{{base_url}}"], "path": ["dashboard", "parcel-movement"],
+              "query": [{ "key": "year", "value": "2026" }]
+            }
+          }
+        },
+        {
+          "name": "Parcel Owner Growth (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/dashboard/parcel-owner-growth?year=2026",
+              "host": ["{{base_url}}"], "path": ["dashboard", "parcel-owner-growth"],
+              "query": [{ "key": "year", "value": "2026" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "System (root)",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": { "auth": { "type": "noauth" }, "method": "GET", "header": [], "url": { "raw": "{{root_url}}/health", "host": ["{{root_url}}"], "path": ["health"] } }
+        },
+        {
+          "name": "Send Test SMS",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"to\": \"+1234567890\",\n  \"message\": \"Test message\"\n}" },
+            "url": { "raw": "{{root_url}}/test/send-sms", "host": ["{{root_url}}"], "path": ["test", "send-sms"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Track Driver (NOT mounted — enable in routes/index.ts)",
+      "item": [
+        {
+          "name": "Update Location (Driver)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"latitude\": 40.7128,\n  \"longitude\": -74.0060,\n  \"parcel_id\": \"{{parcel_id}}\",\n  \"heading\": 180,\n  \"speed\": 50,\n  \"accuracy\": 5\n}" },
+            "url": { "raw": "{{base_url}}/track-driver/update-location", "host": ["{{base_url}}"], "path": ["track-driver", "update-location"] },
+            "description": "Module not registered in routes/index.ts — will 404 until mounted."
+          }
+        },
+        {
+          "name": "Mark Offline (Driver)",
+          "request": { "method": "POST", "header": [], "url": { "raw": "{{base_url}}/track-driver/offline", "host": ["{{base_url}}"], "path": ["track-driver", "offline"] } }
+        },
+        {
+          "name": "Get Nearby Drivers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/track-driver/nearby?latitude=40.7128&longitude=-74.0060&radius=10",
+              "host": ["{{base_url}}"], "path": ["track-driver", "nearby"],
+              "query": [
+                { "key": "latitude", "value": "40.7128" },
+                { "key": "longitude", "value": "-74.0060" },
+                { "key": "radius", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Parcel Driver Location",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/track-driver/parcel/{{parcel_id}}", "host": ["{{base_url}}"], "path": ["track-driver", "parcel", "{{parcel_id}}"] } }
+        },
+        {
+          "name": "Get Location History",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/track-driver/{{driver_id}}/history", "host": ["{{base_url}}"], "path": ["track-driver", "{{driver_id}}", "history"] } }
+        },
+        {
+          "name": "Get Driver Location",
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{base_url}}/track-driver/{{driver_id}}", "host": ["{{base_url}}"], "path": ["track-driver", "{{driver_id}}"] } }
+        }
+      ]
+    }
+  ]
+}

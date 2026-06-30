@@ -12,6 +12,12 @@ export interface TPayment extends Document {
   status: PAYMENT_STATUS;
   payment_method: string;
 
+  // Which gateway processed this payment. Defaults to 'stripe' so existing
+  // records remain valid.
+  gateway: 'stripe' | 'dpo';
+  // DPO TransRef (human-readable reference returned alongside the token).
+  dpo_trans_ref?: string | null;
+
   refund_id: string | null;
   refunded_at: Date | null;
 
