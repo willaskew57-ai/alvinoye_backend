@@ -44,8 +44,8 @@ const modulesRoute: TModuleRoutes[] = [
     route: ParcelRoutes,
   },
   {
-    path: '/parcel',
-    route: ParcelRoutes,
+    path: '/payments',
+    route: PaymentRoute,
   },
   {
     path: '/refund',

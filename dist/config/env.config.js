@@ -29,6 +29,18 @@ const configs = {
     smtp_service_name: process.env.SERVICE_NAME,
     // Stripe
     stripe_secret_key: process.env.STRIPE_SECRET_KEY || '',
+    // DPO Pay (DirectPay Online)
+    dpo_company_token: process.env.DPO_COMPANY_TOKEN || '',
+    dpo_api_url: process.env.DPO_API_URL || 'https://secure.3gdirectpay.com/API/v6/',
+    dpo_payment_url: process.env.DPO_PAYMENT_URL || 'https://secure.3gdirectpay.com/payv3.php',
+    dpo_currency: process.env.DPO_CURRENCY || 'NGN',
+    dpo_service_type: process.env.DPO_SERVICE_TYPE || '54841',
+    // ISO country code used for DPO fraud screening (NGN -> NG).
+    dpo_country: process.env.DPO_COUNTRY || 'NG',
+    // Public backend URL DPO redirects the customer back to after payment
+    dpo_redirect_url: process.env.DPO_REDIRECT_URL || '',
+    // Frontend URL the customer is finally sent to (success/cancel pages)
+    client_url: process.env.CLIENT_URL || 'http://localhost:3000',
     // Twilio
     twilio_account_sid: process.env.TWILIO_ACCOUNT_SID || '',
     twilio_auth_token: process.env.TWILIO_AUTH_TOKEN || '',

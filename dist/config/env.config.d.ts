@@ -17,6 +17,14 @@ declare const configs: {
     smtp_password: string | undefined;
     smtp_service_name: string | undefined;
     stripe_secret_key: string;
+    dpo_company_token: string;
+    dpo_api_url: string;
+    dpo_payment_url: string;
+    dpo_currency: string;
+    dpo_service_type: string;
+    dpo_country: string;
+    dpo_redirect_url: string;
+    client_url: string;
     twilio_account_sid: string;
     twilio_auth_token: string;
     twilio_phone_number: string;
