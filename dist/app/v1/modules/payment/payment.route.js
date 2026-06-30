@@ -10,6 +10,7 @@ const user_interface_1 = require("../user/user.interface");
 const validate_request_1 = __importDefault(require("../../../../middleware/validate-request"));
 const auth_1 = require("../../../../middleware/auth");
 const payment_validation_1 = require("./payment.validation");
+const dpo_payment_controller_1 = require("./dpo-payment.controller");
 const router = express_1.default.Router();
 /**
  * @route POST /api/payments/checkout
@@ -23,6 +24,18 @@ router.post('/checkout', (0, auth_1.auth)(user_interface_1.USER_ROLE.CUSTOMER), 
  * @access Public (Stripe will call)
  */
 router.post('/webhook/stripe', express_1.default.raw({ type: 'application/json' }), payment_controller_1.stripeWebhook);
+/**
+ * @route POST /api/v1/payments/dpo/checkout
+ * @desc Create a DPO transaction and return the hosted payment page URL
+ * @access CUSTOMER
+ */
+router.post('/dpo/checkout', (0, auth_1.auth)(user_interface_1.USER_ROLE.CUSTOMER), (0, validate_request_1.default)(payment_validation_1.createCheckoutSchema), dpo_payment_controller_1.createDpoCheckout);
+/**
+ * @route GET /api/v1/payments/dpo/callback
+ * @desc DPO redirects the customer here after payment; verifies and redirects
+ * @access Public (DPO will redirect the browser)
+ */
+router.get('/dpo/callback', dpo_payment_controller_1.dpoCallback);
 /**
  * @route POST /api/payments/refund
  * @desc Refund a payment

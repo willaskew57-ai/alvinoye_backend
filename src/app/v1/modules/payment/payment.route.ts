@@ -13,6 +13,10 @@ import {
   createCheckoutSchema,
   refundPaymentSchema,
 } from './payment.validation';
+import {
+  createDpoCheckout,
+  dpoCallback,
+} from './dpo-payment.controller';
 
 const router = express.Router();
 
@@ -38,6 +42,25 @@ router.post(
   express.raw({ type: 'application/json' }),
   stripeWebhook
 );
+
+/**
+ * @route POST /api/v1/payments/dpo/checkout
+ * @desc Create a DPO transaction and return the hosted payment page URL
+ * @access CUSTOMER
+ */
+router.post(
+  '/dpo/checkout',
+  auth(USER_ROLE.CUSTOMER),
+  validateRequest(createCheckoutSchema),
+  createDpoCheckout
+);
+
+/**
+ * @route GET /api/v1/payments/dpo/callback
+ * @desc DPO redirects the customer here after payment; verifies and redirects
+ * @access Public (DPO will redirect the browser)
+ */
+router.get('/dpo/callback', dpoCallback);
 
 /**
  * @route POST /api/payments/refund

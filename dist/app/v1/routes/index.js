@@ -13,6 +13,7 @@ const parcel_route_1 = require("../modules/parcel/parcel.route");
 const settings_routes_1 = require("../modules/setting/settings.routes");
 const chat_routes_1 = require("../modules/chat/chat.routes");
 const review_routes_1 = require("../modules/review/review.routes");
+const payment_route_1 = require("../modules/payment/payment.route");
 const customer_route_1 = require("../modules/cusotmer/customer.route");
 const dashboard_route_1 = require("../modules/dashboard/dashboard.route");
 const refund_route_1 = require("../modules/refund/refund.route");
@@ -40,8 +41,8 @@ const modulesRoute = [
         route: parcel_route_1.ParcelRoutes,
     },
     {
-        path: '/parcel',
-        route: parcel_route_1.ParcelRoutes,
+        path: '/payments',
+        route: payment_route_1.PaymentRoute,
     },
     {
         path: '/refund',

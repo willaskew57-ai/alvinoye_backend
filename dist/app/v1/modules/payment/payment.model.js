@@ -15,6 +15,8 @@ const paymentSchema = new mongoose_1.Schema({
         default: payment_constants_1.PAYMENT_STATUS.PENDING,
     },
     payment_method: { type: String, default: 'card' },
+    gateway: { type: String, enum: ['stripe', 'dpo'], default: 'stripe' },
+    dpo_trans_ref: { type: String, default: null },
     refund_id: { type: String, default: null },
     refunded_at: { type: Date, default: null },
 }, {

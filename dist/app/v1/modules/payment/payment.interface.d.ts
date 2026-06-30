@@ -8,6 +8,8 @@ export interface TPayment extends Document {
     currency: string;
     status: PAYMENT_STATUS;
     payment_method: string;
+    gateway: 'stripe' | 'dpo';
+    dpo_trans_ref?: string | null;
     refund_id: string | null;
     refunded_at: Date | null;
     created_at: Date;
