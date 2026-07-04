@@ -18,6 +18,7 @@ const customer_route_1 = require("../modules/cusotmer/customer.route");
 const dashboard_route_1 = require("../modules/dashboard/dashboard.route");
 const refund_route_1 = require("../modules/refund/refund.route");
 const notification_routes_1 = require("../modules/notification/notification.routes");
+const wallet_route_1 = require("../modules/wallet/wallet.route");
 const router = express_1.default.Router();
 const modulesRoute = [
     {
@@ -67,6 +68,10 @@ const modulesRoute = [
     {
         path: '/notifications',
         route: notification_routes_1.NotificationRoutes,
+    },
+    {
+        path: '/wallet',
+        route: wallet_route_1.WalletRoutes,
     },
 ];
 modulesRoute.forEach((route) => router.use(route.path, route.route));

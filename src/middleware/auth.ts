@@ -59,7 +59,7 @@ export const auth = (...requiredRoles: TUserRole[]) => {
     }
 
     if (requiredRoles.length > 0 && !requiredRoles.includes(role)) {
-      throw new AppError(httpStatus.UNAUTHORIZED, 'You are not Authorized !!!');
+      throw new AppError(httpStatus.FORBIDDEN, 'You are not Authorized !!!');
     }
 
     req.user = decoded;

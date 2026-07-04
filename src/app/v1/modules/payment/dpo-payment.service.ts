@@ -154,18 +154,32 @@ ${customerXml}  </Transaction>
  * redirect/back URL). Confirms the payment server-to-server with DPO and
  * updates the local Payment record. Idempotent.
  */
-export const verifyDpoPaymentService = async (
-  transToken: string
-): Promise<IDpoVerifyResult> => {
-  if (!transToken)
-    throw new AppError(httpStatus.BAD_REQUEST, 'Transaction token is required');
+export const verifyDpoPaymentService = async (params: {
+  transToken?: string;
+  companyRef?: string;
+}): Promise<IDpoVerifyResult> => {
+  // Resolve the payment either by the DPO token or by CompanyRef (parcel id),
+  // since DPO's redirect may carry either one back to us.
+  let payment = null;
 
-  const payment = await Payment.findOne({
-    transaction_id: transToken,
-    gateway: 'dpo',
-  });
+  if (params.transToken) {
+    payment = await Payment.findOne({
+      transaction_id: params.transToken,
+      gateway: 'dpo',
+    });
+  }
+
+  if (!payment && params.companyRef) {
+    payment = await Payment.findOne({
+      parcel_id: params.companyRef,
+      gateway: 'dpo',
+    }).sort({ created_at: -1 });
+  }
+
   if (!payment)
     throw new AppError(httpStatus.NOT_FOUND, 'Payment record not found');
+
+  const transToken = payment.transaction_id;
 
   // Already finalized — return current state without re-processing.
   if (payment.status === PAYMENT_STATUS.SUCCESS) {
@@ -233,6 +247,13 @@ export const verifyDpoPaymentService = async (
 
     lockedPayment.status = PAYMENT_STATUS.SUCCESS;
     await lockedPayment.save({ session: dbSession });
+
+    // Mark the parcel as paid so it becomes visible to drivers.
+    await Parcel.updateOne(
+      { _id: lockedPayment.parcel_id },
+      { $set: { is_paid: true, paid_at: new Date() } },
+      { session: dbSession }
+    );
 
     await dbSession.commitTransaction();
   } catch (error) {

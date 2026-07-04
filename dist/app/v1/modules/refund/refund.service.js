@@ -13,6 +13,7 @@ const refund_model_1 = require("./refund.model");
 const app_error_1 = __importDefault(require("../../../../errors/app-error"));
 const notification_service_1 = require("../notification/notification.service");
 const notification_constant_1 = require("../notification/notification.constant");
+const query_builder_1 = __importDefault(require("../../../../builders/query-builder"));
 const createRefundRequest = async (userId, parcelId, reason) => {
     // 1. Check if parcel exists and belongs to the user
     const parcel = await parcel_model_1.Parcel.findOne({ _id: parcelId, user_id: userId });
@@ -118,8 +119,21 @@ const processRefundDecision = async (requestId, payload) => {
         await session.endSession();
     }
 };
+const getAllRefundsFromDB = async (query) => {
+    const refundQuery = new query_builder_1.default(refund_model_1.RefundRequest.find()
+        .populate('user_id', 'full_name email phone_number profile_picture')
+        .populate('parcel_id', 'parcel_id parcel_name final_price status'), query)
+        .filter()
+        .sort()
+        .paginate()
+        .fields();
+    const data = await refundQuery.modelQuery;
+    const meta = await refundQuery.countTotal();
+    return { meta, data };
+};
 exports.RefundServices = {
     createRefundRequest,
+    getAllRefundsFromDB,
     processRefundDecision,
 };
 //# sourceMappingURL=refund.service.js.map

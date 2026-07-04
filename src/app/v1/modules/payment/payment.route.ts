@@ -16,6 +16,7 @@ import {
 import {
   createDpoCheckout,
   dpoCallback,
+  verifyDpoPayment,
 } from './dpo-payment.controller';
 
 const router = express.Router();
@@ -61,6 +62,13 @@ router.post(
  * @access Public (DPO will redirect the browser)
  */
 router.get('/dpo/callback', dpoCallback);
+
+/**
+ * @route POST /api/v1/payments/dpo/verify
+ * @desc Mobile app confirms a DPO payment and gets a JSON status
+ * @access CUSTOMER
+ */
+router.post('/dpo/verify', auth(USER_ROLE.CUSTOMER), verifyDpoPayment);
 
 /**
  * @route POST /api/payments/refund

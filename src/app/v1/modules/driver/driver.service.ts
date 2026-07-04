@@ -15,6 +15,7 @@ import { deleteFileFromS3 } from '../../../../aws/deleteFromS3';
 import configs from '../../../../config/env.config';
 import axios from 'axios';
 import { NotificationServices } from '../notification/notification.service';
+import { WalletServices } from '../wallet/wallet.service';
 import { pushEmailJob } from '../../../queues/email.queue';
 import { sendParcelOtpEmailJob } from '../../../jobs/email.job';
 import { pushSmsJob } from '../../../queues/sms.queue';
@@ -422,6 +423,7 @@ const getAvailableParcelsFromDB = async (
       vehicle_type: vehicle.vehicle_type,
       price_status: PRICE_STATUS.ACCEPTED,
       accepted_by: null,
+      is_paid: true,
       'pickup_location.coordinates': {
         $near: {
           $geometry: {
@@ -450,6 +452,7 @@ const getAvailableParcelsFromDB = async (
       vehicle_type: vehicle.vehicle_type,
       price_status: PRICE_STATUS.ACCEPTED,
       accepted_by: null,
+      is_paid: true,
       'pickup_location.latitude': { $gte: minLat, $lte: maxLat },
       'pickup_location.longitude': { $gte: minLng, $lte: maxLng },
     };
@@ -746,6 +749,13 @@ const acceptParcelFromDB = async (
       );
     }
 
+    if (!parcel.is_paid) {
+      throw new AppError(
+        httpStatus.BAD_REQUEST,
+        'Parcel has not been paid for yet'
+      );
+    }
+
     parcel.status = PARCEL_STATUS.ONGOING;
     parcel.accepted_by = new Types.ObjectId(driverIdFromToken);
     parcel.accepted_at = new Date();
@@ -861,7 +871,41 @@ const verifyParcelOtpFromDB = async (payload: {
     parcel.completed_at = new Date();
     await parcel.save({ session });
 
+    // Credit the driver's earning (final_price minus company commission) into
+    // their wallet's PENDING balance, atomically with completion.
+    let earning: { net: number; commissionAmount: number } | null = null;
+    if (parcel.accepted_by && parcel.final_price) {
+      earning = await WalletServices.creditEarning(
+        {
+          driverUserId: parcel.accepted_by,
+          parcelId: parcel._id,
+          grossAmount: parcel.final_price,
+        },
+        session
+      );
+    }
+
     await session.commitTransaction();
+
+    // Notify the driver that earnings were added (after commit).
+    if (earning && parcel.accepted_by) {
+      try {
+        await NotificationServices.createNotificationIntoDB({
+          user_id: parcel.accepted_by,
+          type: NOTIFICATION_TYPE.WALLET_CREDITED,
+          title: 'Earnings Added',
+          message: `You earned ${earning.net} for delivering "${parcel.parcel_name}". It will be available for withdrawal after the weekly distribution.`,
+          parcel_id: parcel._id,
+          data: {
+            parcel_name: parcel.parcel_name,
+            net: earning.net,
+            commission: earning.commissionAmount,
+          },
+        });
+      } catch (error) {
+        console.error('Failed to create wallet notification:', error);
+      }
+    }
 
     // Send notification after parcel is completed
     try {

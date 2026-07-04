@@ -37,6 +37,12 @@ router.post('/dpo/checkout', (0, auth_1.auth)(user_interface_1.USER_ROLE.CUSTOME
  */
 router.get('/dpo/callback', dpo_payment_controller_1.dpoCallback);
 /**
+ * @route POST /api/v1/payments/dpo/verify
+ * @desc Mobile app confirms a DPO payment and gets a JSON status
+ * @access CUSTOMER
+ */
+router.post('/dpo/verify', (0, auth_1.auth)(user_interface_1.USER_ROLE.CUSTOMER), dpo_payment_controller_1.verifyDpoPayment);
+/**
  * @route POST /api/payments/refund
  * @desc Refund a payment
  * @access ADMIN

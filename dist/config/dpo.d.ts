@@ -37,6 +37,37 @@ export interface DpoApiResponse {
  * Throws an AppError on a misconfigured gateway or a network/transport failure.
  */
 export declare const postToDpo: (xml: string) => Promise<DpoApiResponse>;
+export interface IDpoPayoutParams {
+    amount: number;
+    currency: string;
+    bank_name: string;
+    account_number: string;
+    account_holder_name: string;
+    /** Our own reference (e.g. the Withdrawal id) so we can reconcile. */
+    reference: string;
+}
+export interface IDpoPayoutResult {
+    success: boolean;
+    /** DPO-side reference for the disbursement, when available. */
+    payoutRef?: string | undefined;
+    resultCode?: string | undefined;
+    resultExplanation?: string | undefined;
+}
+/**
+ * Disburse (pay out) money from the merchant account to a driver's bank
+ * account via DPO.
+ *
+ * NOTE: DPO's disbursement/payout product is separate from the standard
+ * collection API and is not enabled on every merchant account. The exact
+ * request verb and field names differ per account, so both the endpoint
+ * (`DPO_PAYOUT_URL`) and the verb (`DPO_PAYOUT_REQUEST`) are env-driven and
+ * this is the single place to adjust once the DPO payout spec is confirmed.
+ *
+ * If payout is not configured, this throws an AppError the caller catches so
+ * the withdrawal stays in PROCESSING for manual/admin handling instead of
+ * silently failing.
+ */
+export declare const createDpoPayout: (params: IDpoPayoutParams) => Promise<IDpoPayoutResult>;
 declare const _default: {
     postToDpo: (xml: string) => Promise<DpoApiResponse>;
     xmlEscape: (value: unknown) => string;
@@ -49,6 +80,7 @@ declare const _default: {
         readonly TIME_LIMIT_EXCEEDED: "903";
         readonly CANCELLED: "904";
     };
+    createDpoPayout: (params: IDpoPayoutParams) => Promise<IDpoPayoutResult>;
 };
 export default _default;
 //# sourceMappingURL=dpo.d.ts.map

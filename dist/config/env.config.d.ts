@@ -3,7 +3,10 @@ declare const configs: {
     port: string | number;
     database_url: string | undefined;
     bcrypt_salt_rounds: number;
-    jwt_access_token: string;
+    super_admin_name: string | undefined;
+    super_admin_email: string | undefined;
+    super_admin_password: string | undefined;
+    jwt_access_token: string | undefined;
     jwt_refresh_token: string | undefined;
     jwt_access_expiresIn: string | number;
     jwt_refresh_expiresIn: string | number;
@@ -25,6 +28,10 @@ declare const configs: {
     dpo_country: string;
     dpo_redirect_url: string;
     client_url: string;
+    dpo_payout_url: string;
+    dpo_payout_request: string;
+    wallet_default_commission_percent: number;
+    wallet_distribution_cron: string;
     twilio_account_sid: string;
     twilio_auth_token: string;
     twilio_phone_number: string;

@@ -11,5 +11,8 @@ export declare const SettingsController: {
     createPrivacy: (req: Request, res: Response, next: import("express").NextFunction) => void;
     getSinglePrivacy: (req: Request, res: Response, next: import("express").NextFunction) => void;
     updatePrivacy: (req: Request, res: Response, next: import("express").NextFunction) => void;
+    createAbout: (req: Request, res: Response, next: import("express").NextFunction) => void;
+    getSingleAbout: (req: Request, res: Response, next: import("express").NextFunction) => void;
+    updateAbout: (req: Request, res: Response, next: import("express").NextFunction) => void;
 };
 //# sourceMappingURL=settings.controller.d.ts.map

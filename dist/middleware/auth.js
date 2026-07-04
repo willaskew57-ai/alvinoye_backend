@@ -41,7 +41,7 @@ const auth = (...requiredRoles) => {
             throw new app_error_1.default(http_status_1.default.UNAUTHORIZED, 'Password was changed. Please login again.');
         }
         if (requiredRoles.length > 0 && !requiredRoles.includes(role)) {
-            throw new app_error_1.default(http_status_1.default.UNAUTHORIZED, 'You are not Authorized !!!');
+            throw new app_error_1.default(http_status_1.default.FORBIDDEN, 'You are not Authorized !!!');
         }
         req.user = decoded;
         next();
