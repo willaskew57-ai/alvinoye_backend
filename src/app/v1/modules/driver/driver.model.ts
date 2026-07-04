@@ -10,6 +10,15 @@ const LocationSchema = new Schema(
   { _id: false }
 );
 
+const BankDetailsSchema = new Schema(
+  {
+    bank_name: { type: String },
+    account_number: { type: String },
+    account_holder_name: { type: String },
+  },
+  { _id: false }
+);
+
 const DriverInfoSchema = new Schema<TDriver>(
   {
     user_id: {
@@ -25,6 +34,7 @@ const DriverInfoSchema = new Schema<TDriver>(
     daily_commute_time: { type: String, required: true },
     max_parcel_weight: { type: String, required: true },
     notes: { type: String },
+    bank_details: { type: BankDetailsSchema, default: null },
   },
   {
     timestamps: {

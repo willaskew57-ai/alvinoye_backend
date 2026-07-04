@@ -133,6 +133,8 @@ const handleStripeWebhookService = async (event) => {
         const parcel = await parcel_model_1.Parcel.findById(parcelId).session(dbSession);
         if (parcel) {
             parcel.stripe_checkout_session_id = session.id; // session confirmed
+            parcel.is_paid = true;
+            parcel.paid_at = new Date();
             await parcel.save({ session: dbSession });
         }
         await dbSession.commitTransaction();

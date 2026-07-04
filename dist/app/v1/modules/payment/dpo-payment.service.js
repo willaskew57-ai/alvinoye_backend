@@ -142,15 +142,25 @@ exports.createDpoCheckoutService = createDpoCheckoutService;
  * redirect/back URL). Confirms the payment server-to-server with DPO and
  * updates the local Payment record. Idempotent.
  */
-const verifyDpoPaymentService = async (transToken) => {
-    if (!transToken)
-        throw new app_error_1.default(http_status_1.default.BAD_REQUEST, 'Transaction token is required');
-    const payment = await payment_model_1.Payment.findOne({
-        transaction_id: transToken,
-        gateway: 'dpo',
-    });
+const verifyDpoPaymentService = async (params) => {
+    // Resolve the payment either by the DPO token or by CompanyRef (parcel id),
+    // since DPO's redirect may carry either one back to us.
+    let payment = null;
+    if (params.transToken) {
+        payment = await payment_model_1.Payment.findOne({
+            transaction_id: params.transToken,
+            gateway: 'dpo',
+        });
+    }
+    if (!payment && params.companyRef) {
+        payment = await payment_model_1.Payment.findOne({
+            parcel_id: params.companyRef,
+            gateway: 'dpo',
+        }).sort({ created_at: -1 });
+    }
     if (!payment)
         throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'Payment record not found');
+    const transToken = payment.transaction_id;
     // Already finalized — return current state without re-processing.
     if (payment.status === payment_constants_1.PAYMENT_STATUS.SUCCESS) {
         return { status: payment_constants_1.PAYMENT_STATUS.SUCCESS, paid: true };
@@ -207,6 +217,8 @@ const verifyDpoPaymentService = async (transToken) => {
         }
         lockedPayment.status = payment_constants_1.PAYMENT_STATUS.SUCCESS;
         await lockedPayment.save({ session: dbSession });
+        // Mark the parcel as paid so it becomes visible to drivers.
+        await parcel_model_1.Parcel.updateOne({ _id: lockedPayment.parcel_id }, { $set: { is_paid: true, paid_at: new Date() } }, { session: dbSession });
         await dbSession.commitTransaction();
     }
     catch (error) {

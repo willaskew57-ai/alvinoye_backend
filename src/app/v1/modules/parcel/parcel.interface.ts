@@ -75,6 +75,8 @@ export interface TParcel extends Document {
   accepted_at: Date | null;
   completed_at: Date | null;
   stripe_checkout_session_id?: string | null;
+  is_paid: boolean;
+  paid_at: Date | null;
 }
 
 export interface TParcelPriceRequest extends Document {

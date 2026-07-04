@@ -116,6 +116,35 @@ const updatePrivacy = (0, catch_async_1.default)(async (req, res) => {
         data: result,
     });
 });
+// ** ------------ About Us Controller --------------
+const createAbout = (0, catch_async_1.default)(async (req, res) => {
+    const result = await settings_service_1.SettingsService.createAboutInDB(req.body);
+    (0, send_response_1.default)(res, {
+        statusCode: http_status_1.default.CREATED,
+        success: true,
+        message: 'About Us created successfully!',
+        data: result,
+    });
+});
+const getSingleAbout = (0, catch_async_1.default)(async (_req, res) => {
+    const result = await settings_service_1.SettingsService.getSingleAboutInDB();
+    (0, send_response_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: 'About Us retrieved successfully!',
+        data: result,
+    });
+});
+const updateAbout = (0, catch_async_1.default)(async (req, res) => {
+    const { id } = req.params;
+    const result = await settings_service_1.SettingsService.updateAboutInDB(id, req.body);
+    (0, send_response_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: 'About Us updated successfully!',
+        data: result,
+    });
+});
 exports.SettingsController = {
     // FAQ
     createFaq,
@@ -131,5 +160,9 @@ exports.SettingsController = {
     createPrivacy,
     getSinglePrivacy,
     updatePrivacy,
+    // About Us
+    createAbout,
+    getSingleAbout,
+    updateAbout,
 };
 //# sourceMappingURL=settings.controller.js.map

@@ -6,6 +6,12 @@ export type TLocation = {
   longitude: number;
 };
 
+export type TBankDetails = {
+  bank_name: string;
+  account_number: string;
+  account_holder_name: string;
+};
+
 export type TDriver = {
   user_id: Types.ObjectId;
   from: TLocation;
@@ -16,4 +22,6 @@ export type TDriver = {
   daily_commute_time: string;
   max_parcel_weight: string;
   notes?: string;
+  // Payout destination used for wallet withdrawals.
+  bank_details?: TBankDetails;
 };

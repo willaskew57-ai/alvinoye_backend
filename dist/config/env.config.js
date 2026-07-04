@@ -12,8 +12,12 @@ const configs = {
     port: process.env.PORT || 5001,
     database_url: process.env.DATABASE_URI || process.env.DATABASE_URI,
     bcrypt_salt_rounds: parseInt(process.env.BCRYPT_SALT_ROUNDS || '12') || 12,
+    // Super admin seed (created on startup if it does not exist)
+    super_admin_name: process.env.SUPER_ADMIN_NAME,
+    super_admin_email: process.env.SUPER_ADMIN_EMAIL,
+    super_admin_password: process.env.SUPER_ADMIN_PASSWORD,
     // JWT configuration - using your provided JWT_SECRET
-    jwt_access_token: process.env.JWT_SECRET || 'your_super_secret_key',
+    jwt_access_token: process.env.JWT_SECRET,
     jwt_refresh_token: process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET,
     jwt_access_expiresIn: process.env.JWT_ACCESS_EXPIRES_IN || 60 * 60 * 24 * 356,
     jwt_refresh_expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || 60 * 60 * 24 * 365,
@@ -41,6 +45,18 @@ const configs = {
     dpo_redirect_url: process.env.DPO_REDIRECT_URL || '',
     // Frontend URL the customer is finally sent to (success/cancel pages)
     client_url: process.env.CLIENT_URL || 'http://localhost:3000',
+    // DPO Payout / Disbursement (paying drivers out to their bank account).
+    // Only used when the merchant account has the disbursement product enabled.
+    dpo_payout_url: process.env.DPO_PAYOUT_URL || '',
+    // The API3G "Request" verb used for disbursements (varies per DPO account).
+    dpo_payout_request: process.env.DPO_PAYOUT_REQUEST || 'createBankTransfer',
+    // Wallet / driver earnings
+    // Default commission percentage the company keeps from each delivery.
+    // Admin can override this at runtime via the CommissionSetting document.
+    wallet_default_commission_percent: parseFloat(process.env.WALLET_DEFAULT_COMMISSION_PERCENT || '10') || 10,
+    // Cron expression for the weekly payout distribution (pending -> available).
+    // Default: every Sunday at 00:00.
+    wallet_distribution_cron: process.env.WALLET_DISTRIBUTION_CRON || '0 0 * * 0',
     // Twilio
     twilio_account_sid: process.env.TWILIO_ACCOUNT_SID || '',
     twilio_auth_token: process.env.TWILIO_AUTH_TOKEN || '',

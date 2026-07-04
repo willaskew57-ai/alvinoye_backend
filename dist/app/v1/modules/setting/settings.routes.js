@@ -25,5 +25,9 @@ router.patch('/terms/update/:id', (0, auth_1.auth)(user_interface_1.USER_ROLE.AD
 router.post('/privacy/create', (0, auth_1.auth)(user_interface_1.USER_ROLE.ADMIN, user_interface_1.USER_ROLE.SUPER_ADMIN), (0, validate_request_1.default)(settings_validation_1.contentCreateValidation), settings_controller_1.SettingsController.createPrivacy);
 router.get('/privacy/get', settings_controller_1.SettingsController.getSinglePrivacy);
 router.patch('/privacy/update/:id', (0, auth_1.auth)(user_interface_1.USER_ROLE.ADMIN, user_interface_1.USER_ROLE.SUPER_ADMIN), (0, validate_request_1.default)(settings_validation_1.contentUpdateValidation), settings_controller_1.SettingsController.updatePrivacy);
+//** ---------------- About Us Routes ---------
+router.post('/about/create', (0, auth_1.auth)(user_interface_1.USER_ROLE.ADMIN, user_interface_1.USER_ROLE.SUPER_ADMIN), (0, validate_request_1.default)(settings_validation_1.contentCreateValidation), settings_controller_1.SettingsController.createAbout);
+router.get('/about/get', settings_controller_1.SettingsController.getSingleAbout);
+router.patch('/about/update/:id', (0, auth_1.auth)(user_interface_1.USER_ROLE.ADMIN, user_interface_1.USER_ROLE.SUPER_ADMIN), (0, validate_request_1.default)(settings_validation_1.contentUpdateValidation), settings_controller_1.SettingsController.updateAbout);
 exports.SettingsRoutes = router;
 //# sourceMappingURL=settings.routes.js.map

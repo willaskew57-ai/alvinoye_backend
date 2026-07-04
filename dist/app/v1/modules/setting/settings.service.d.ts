@@ -1,4 +1,4 @@
-import type { TFaq, TPrivacyPolicy, TTermsCondition } from './settings.interface';
+import type { TFaq, TPrivacyPolicy, TTermsCondition, TAboutUs } from './settings.interface';
 export declare const SettingsService: {
     createFaqInDB: (payload: TFaq) => Promise<import("mongoose").Document<unknown, {}, TFaq, {}, import("mongoose").DefaultSchemaOptions> & TFaq & {
         _id: import("mongoose").Types.ObjectId;
@@ -71,6 +71,27 @@ export declare const SettingsService: {
         id: string;
     }>;
     updatePrivacyInDB: (id: string, payload: Partial<TPrivacyPolicy>) => Promise<import("mongoose").Document<unknown, {}, TPrivacyPolicy, {}, import("mongoose").DefaultSchemaOptions> & TPrivacyPolicy & {
+        _id: import("mongoose").Types.ObjectId;
+    } & {
+        __v: number;
+    } & {
+        id: string;
+    }>;
+    createAboutInDB: (payload: TAboutUs) => Promise<import("mongoose").Document<unknown, {}, TAboutUs, {}, import("mongoose").DefaultSchemaOptions> & TAboutUs & {
+        _id: import("mongoose").Types.ObjectId;
+    } & {
+        __v: number;
+    } & {
+        id: string;
+    }>;
+    getSingleAboutInDB: () => Promise<import("mongoose").Document<unknown, {}, TAboutUs, {}, import("mongoose").DefaultSchemaOptions> & TAboutUs & {
+        _id: import("mongoose").Types.ObjectId;
+    } & {
+        __v: number;
+    } & {
+        id: string;
+    }>;
+    updateAboutInDB: (id: string, payload: Partial<TAboutUs>) => Promise<import("mongoose").Document<unknown, {}, TAboutUs, {}, import("mongoose").DefaultSchemaOptions> & TAboutUs & {
         _id: import("mongoose").Types.ObjectId;
     } & {
         __v: number;

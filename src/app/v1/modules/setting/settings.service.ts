@@ -1,10 +1,11 @@
 import httpStatus from 'http-status';
 import AppError from '../../../../errors/app-error';
-import { Faq, PrivacyPolicy, TermsCondition } from './settings.model';
+import { AboutUs, Faq, PrivacyPolicy, TermsCondition } from './settings.model';
 import type {
   TFaq,
   TPrivacyPolicy,
   TTermsCondition,
+  TAboutUs,
 } from './settings.interface';
 
 //** ----------------- Faq Services --------------
@@ -105,6 +106,32 @@ const updatePrivacyInDB = async (
   return result;
 };
 
+//** ----------------- About Us Services --------------
+
+const createAboutInDB = async (payload: TAboutUs) => {
+  const result = await AboutUs.create(payload);
+  return result;
+};
+
+const getSingleAboutInDB = async () => {
+  const result = await AboutUs.findOne().sort({ created_at: -1 });
+  if (!result) {
+    throw new AppError(httpStatus.NOT_FOUND, 'About Us not found');
+  }
+  return result;
+};
+
+const updateAboutInDB = async (id: string, payload: Partial<TAboutUs>) => {
+  const result = await AboutUs.findByIdAndUpdate(id, payload, {
+    new: true,
+    runValidators: true,
+  });
+  if (!result) {
+    throw new AppError(httpStatus.NOT_FOUND, 'About Us not found');
+  }
+  return result;
+};
+
 //** ----------------- Exporting All Services --------------
 
 export const SettingsService = {
@@ -120,8 +147,13 @@ export const SettingsService = {
   getSingleTermsInDB,
   updateTermsInDB,
 
-  // Privacy 
+  // Privacy
   createPrivacyInDB,
   getSinglePrivacyInDB,
   updatePrivacyInDB,
+
+  // About Us
+  createAboutInDB,
+  getSingleAboutInDB,
+  updateAboutInDB,
 };

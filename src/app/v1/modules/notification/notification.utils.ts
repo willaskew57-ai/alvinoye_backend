@@ -23,6 +23,10 @@ export const getNotificationTitle = (type: TNotificationType): string => {
     [NOTIFICATION_TYPE.REFUND_REQUESTED]: 'Refund Requested',
     [NOTIFICATION_TYPE.REFUND_APPROVED]: 'Refund Approved',
     [NOTIFICATION_TYPE.REFUND_REJECTED]: 'Refund Rejected',
+    [NOTIFICATION_TYPE.WALLET_CREDITED]: 'Earnings Added',
+    [NOTIFICATION_TYPE.WALLET_DISTRIBUTED]: 'Earnings Available',
+    [NOTIFICATION_TYPE.WITHDRAWAL_PAID]: 'Withdrawal Paid',
+    [NOTIFICATION_TYPE.WITHDRAWAL_FAILED]: 'Withdrawal Failed',
     [NOTIFICATION_TYPE.NEW_MESSAGE]: 'New Message',
     [NOTIFICATION_TYPE.SYSTEM]: 'System Notification',
   };

@@ -13,6 +13,8 @@ const validate_request_1 = __importDefault(require("../../../../middleware/valid
 const router = express_1.default.Router();
 // User requests refund for a specific parcel
 router.post('/request/:parcelId', (0, auth_1.auth)(user_interface_1.USER_ROLE.CUSTOMER), (0, validate_request_1.default)(refund_validation_1.requestRefundSchema), refund_controller_1.RefundControllers.requestRefund);
+// Admin lists all refund requests (optionally filtered by ?status=)
+router.get('/', (0, auth_1.auth)(user_interface_1.USER_ROLE.ADMIN, user_interface_1.USER_ROLE.SUPER_ADMIN), refund_controller_1.RefundControllers.getAllRefunds);
 // Admin decides on the refund
 router.patch('/decision/:id', (0, auth_1.auth)(user_interface_1.USER_ROLE.ADMIN, user_interface_1.USER_ROLE.SUPER_ADMIN), (0, validate_request_1.default)(refund_validation_1.adminRefundDecisionSchema), refund_controller_1.RefundControllers.adminRefundDecision);
 exports.RefundRoutes = router;

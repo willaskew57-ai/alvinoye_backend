@@ -20,5 +20,8 @@ export declare const createDpoCheckoutService: (user: TUserPayload, parcelId: st
  * redirect/back URL). Confirms the payment server-to-server with DPO and
  * updates the local Payment record. Idempotent.
  */
-export declare const verifyDpoPaymentService: (transToken: string) => Promise<IDpoVerifyResult>;
+export declare const verifyDpoPaymentService: (params: {
+    transToken?: string;
+    companyRef?: string;
+}) => Promise<IDpoVerifyResult>;
 //# sourceMappingURL=dpo-payment.service.d.ts.map

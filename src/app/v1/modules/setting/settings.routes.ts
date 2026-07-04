@@ -69,4 +69,19 @@ router.patch(
   SettingsController.updatePrivacy
 );
 
+//** ---------------- About Us Routes ---------
+router.post(
+  '/about/create',
+  auth(USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN),
+  validateRequest(contentCreateValidation),
+  SettingsController.createAbout
+);
+router.get('/about/get', SettingsController.getSingleAbout);
+router.patch(
+  '/about/update/:id',
+  auth(USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN),
+  validateRequest(contentUpdateValidation),
+  SettingsController.updateAbout
+);
+
 export const SettingsRoutes = router;

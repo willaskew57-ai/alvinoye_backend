@@ -7,6 +7,11 @@ const LocationSchema = new mongoose_1.Schema({
     latitude: { type: Number, required: true },
     longitude: { type: Number, required: true },
 }, { _id: false });
+const BankDetailsSchema = new mongoose_1.Schema({
+    bank_name: { type: String },
+    account_number: { type: String },
+    account_holder_name: { type: String },
+}, { _id: false });
 const DriverInfoSchema = new mongoose_1.Schema({
     user_id: {
         type: mongoose_1.Schema.Types.ObjectId,
@@ -21,6 +26,7 @@ const DriverInfoSchema = new mongoose_1.Schema({
     daily_commute_time: { type: String, required: true },
     max_parcel_weight: { type: String, required: true },
     notes: { type: String },
+    bank_details: { type: BankDetailsSchema, default: null },
 }, {
     timestamps: {
         createdAt: 'created_at',

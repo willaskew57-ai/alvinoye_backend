@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.postToDpo = exports.xmlEscape = exports.DPO_RESULT = void 0;
+exports.createDpoPayout = exports.postToDpo = exports.xmlEscape = exports.DPO_RESULT = void 0;
 const axios_1 = __importDefault(require("axios"));
 const fast_xml_parser_1 = require("fast-xml-parser");
 const http_status_1 = __importDefault(require("http-status"));
@@ -73,5 +73,59 @@ const postToDpo = async (xml) => {
     return body;
 };
 exports.postToDpo = postToDpo;
-exports.default = { postToDpo: exports.postToDpo, xmlEscape: exports.xmlEscape, DPO_RESULT: exports.DPO_RESULT };
+/**
+ * Disburse (pay out) money from the merchant account to a driver's bank
+ * account via DPO.
+ *
+ * NOTE: DPO's disbursement/payout product is separate from the standard
+ * collection API and is not enabled on every merchant account. The exact
+ * request verb and field names differ per account, so both the endpoint
+ * (`DPO_PAYOUT_URL`) and the verb (`DPO_PAYOUT_REQUEST`) are env-driven and
+ * this is the single place to adjust once the DPO payout spec is confirmed.
+ *
+ * If payout is not configured, this throws an AppError the caller catches so
+ * the withdrawal stays in PROCESSING for manual/admin handling instead of
+ * silently failing.
+ */
+const createDpoPayout = async (params) => {
+    if (!env_config_1.default.dpo_payout_url) {
+        throw new app_error_1.default(http_status_1.default.NOT_IMPLEMENTED, 'DPO payout is not configured');
+    }
+    const xml = `<?xml version="1.0" encoding="utf-8"?>
+<API3G>
+  <CompanyToken>${(0, exports.xmlEscape)(env_config_1.default.dpo_company_token)}</CompanyToken>
+  <Request>${(0, exports.xmlEscape)(env_config_1.default.dpo_payout_request)}</Request>
+  <Transaction>
+    <PaymentAmount>${(0, exports.xmlEscape)(params.amount.toFixed(2))}</PaymentAmount>
+    <PaymentCurrency>${(0, exports.xmlEscape)(params.currency)}</PaymentCurrency>
+    <CompanyRef>${(0, exports.xmlEscape)(params.reference)}</CompanyRef>
+    <BankName>${(0, exports.xmlEscape)(params.bank_name)}</BankName>
+    <BankAccountNumber>${(0, exports.xmlEscape)(params.account_number)}</BankAccountNumber>
+    <BankAccountName>${(0, exports.xmlEscape)(params.account_holder_name)}</BankAccountName>
+  </Transaction>
+</API3G>`;
+    const response = await axios_1.default
+        .post(env_config_1.default.dpo_payout_url, xml, {
+        headers: { 'Content-Type': 'application/xml' },
+        timeout: 30000,
+    })
+        .then((r) => r.data)
+        .catch((error) => {
+        const message = error instanceof Error ? error.message : 'Unknown transport error';
+        console.error('[DPO] Payout request failed:', message);
+        throw new app_error_1.default(http_status_1.default.BAD_GATEWAY, 'Unable to reach the payout gateway');
+    });
+    const parsed = parser.parse(response);
+    const body = (parsed?.API3G ?? parsed);
+    const resultCode = body?.Result;
+    const success = resultCode === exports.DPO_RESULT.PAID;
+    return {
+        success,
+        payoutRef: body?.TransRef ?? undefined,
+        resultCode,
+        resultExplanation: body?.ResultExplanation,
+    };
+};
+exports.createDpoPayout = createDpoPayout;
+exports.default = { postToDpo: exports.postToDpo, xmlEscape: exports.xmlEscape, DPO_RESULT: exports.DPO_RESULT, createDpoPayout: exports.createDpoPayout };
 //# sourceMappingURL=dpo.js.map
