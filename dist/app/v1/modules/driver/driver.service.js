@@ -51,6 +51,7 @@ const deleteFromS3_1 = require("../../../../aws/deleteFromS3");
 const env_config_1 = __importDefault(require("../../../../config/env.config"));
 const axios_1 = __importDefault(require("axios"));
 const notification_service_1 = require("../notification/notification.service");
+const wallet_service_1 = require("../wallet/wallet.service");
 const email_queue_1 = require("../../../queues/email.queue");
 const email_job_1 = require("../../../jobs/email.job");
 const sms_queue_1 = require("../../../queues/sms.queue");
@@ -328,6 +329,7 @@ const getAvailableParcelsFromDB = async (userId, query) => {
             vehicle_type: vehicle.vehicle_type,
             price_status: parcel_interface_1.PRICE_STATUS.ACCEPTED,
             accepted_by: null,
+            is_paid: true,
             'pickup_location.coordinates': {
                 $near: {
                     $geometry: {
@@ -353,6 +355,7 @@ const getAvailableParcelsFromDB = async (userId, query) => {
             vehicle_type: vehicle.vehicle_type,
             price_status: parcel_interface_1.PRICE_STATUS.ACCEPTED,
             accepted_by: null,
+            is_paid: true,
             'pickup_location.latitude': { $gte: minLat, $lte: maxLat },
             'pickup_location.longitude': { $gte: minLng, $lte: maxLng },
         };
@@ -564,6 +567,9 @@ const acceptParcelFromDB = async (parcelId, driverIdFromToken) => {
         if (parcel.status !== parcel_interface_1.PARCEL_STATUS.PENDING) {
             throw new app_error_1.default(http_status_1.default.BAD_REQUEST, 'Parcel is not available for acceptance');
         }
+        if (!parcel.is_paid) {
+            throw new app_error_1.default(http_status_1.default.BAD_REQUEST, 'Parcel has not been paid for yet');
+        }
         parcel.status = parcel_interface_1.PARCEL_STATUS.ONGOING;
         parcel.accepted_by = new mongoose_1.Types.ObjectId(driverIdFromToken);
         parcel.accepted_at = new Date();
@@ -647,7 +653,37 @@ const verifyParcelOtpFromDB = async (payload) => {
         parcel.status = parcel_interface_1.PARCEL_STATUS.COMPLETED;
         parcel.completed_at = new Date();
         await parcel.save({ session });
+        // Credit the driver's earning (final_price minus company commission) into
+        // their wallet's PENDING balance, atomically with completion.
+        let earning = null;
+        if (parcel.accepted_by && parcel.final_price) {
+            earning = await wallet_service_1.WalletServices.creditEarning({
+                driverUserId: parcel.accepted_by,
+                parcelId: parcel._id,
+                grossAmount: parcel.final_price,
+            }, session);
+        }
         await session.commitTransaction();
+        // Notify the driver that earnings were added (after commit).
+        if (earning && parcel.accepted_by) {
+            try {
+                await notification_service_1.NotificationServices.createNotificationIntoDB({
+                    user_id: parcel.accepted_by,
+                    type: notification_constant_1.NOTIFICATION_TYPE.WALLET_CREDITED,
+                    title: 'Earnings Added',
+                    message: `You earned ${earning.net} for delivering "${parcel.parcel_name}". It will be available for withdrawal after the weekly distribution.`,
+                    parcel_id: parcel._id,
+                    data: {
+                        parcel_name: parcel.parcel_name,
+                        net: earning.net,
+                        commission: earning.commissionAmount,
+                    },
+                });
+            }
+            catch (error) {
+                console.error('Failed to create wallet notification:', error);
+            }
+        }
         // Send notification after parcel is completed
         try {
             const driverUser = await user_model_1.default.findById(parcel.accepted_by);

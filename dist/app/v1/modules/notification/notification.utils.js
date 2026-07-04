@@ -20,6 +20,10 @@ const getNotificationTitle = (type) => {
         [notification_constant_1.NOTIFICATION_TYPE.REFUND_REQUESTED]: 'Refund Requested',
         [notification_constant_1.NOTIFICATION_TYPE.REFUND_APPROVED]: 'Refund Approved',
         [notification_constant_1.NOTIFICATION_TYPE.REFUND_REJECTED]: 'Refund Rejected',
+        [notification_constant_1.NOTIFICATION_TYPE.WALLET_CREDITED]: 'Earnings Added',
+        [notification_constant_1.NOTIFICATION_TYPE.WALLET_DISTRIBUTED]: 'Earnings Available',
+        [notification_constant_1.NOTIFICATION_TYPE.WITHDRAWAL_PAID]: 'Withdrawal Paid',
+        [notification_constant_1.NOTIFICATION_TYPE.WITHDRAWAL_FAILED]: 'Withdrawal Failed',
         [notification_constant_1.NOTIFICATION_TYPE.NEW_MESSAGE]: 'New Message',
         [notification_constant_1.NOTIFICATION_TYPE.SYSTEM]: 'System Notification',
     };

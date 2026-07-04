@@ -139,6 +139,42 @@ const updatePrivacy = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+// ** ------------ About Us Controller --------------
+
+const createAbout = catchAsync(async (req: Request, res: Response) => {
+  const result = await SettingsService.createAboutInDB(req.body);
+
+  sendResponse(res, {
+    statusCode: httpStatus.CREATED,
+    success: true,
+    message: 'About Us created successfully!',
+    data: result,
+  });
+});
+
+const getSingleAbout = catchAsync(async (_req: Request, res: Response) => {
+  const result = await SettingsService.getSingleAboutInDB();
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'About Us retrieved successfully!',
+    data: result,
+  });
+});
+
+const updateAbout = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const result = await SettingsService.updateAboutInDB(id as string, req.body);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'About Us updated successfully!',
+    data: result,
+  });
+});
+
 export const SettingsController = {
   // FAQ
   createFaq,
@@ -156,4 +192,9 @@ export const SettingsController = {
   createPrivacy,
   getSinglePrivacy,
   updatePrivacy,
+
+  // About Us
+  createAbout,
+  getSingleAbout,
+  updateAbout,
 };

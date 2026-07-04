@@ -9,6 +9,7 @@ import AppError from '../../../../errors/app-error';
 import configs from '../../../../config/env.config';
 import { NotificationServices } from '../notification/notification.service';
 import { NOTIFICATION_TYPE } from '../notification/notification.constant';
+import QueryBuilder from '../../../../builders/query-builder';
 
 const createRefundRequest = async (
   userId: string,
@@ -159,7 +160,25 @@ const processRefundDecision = async (
   }
 };
 
+const getAllRefundsFromDB = async (query: Record<string, unknown>) => {
+  const refundQuery = new QueryBuilder(
+    RefundRequest.find()
+      .populate('user_id', 'full_name email phone_number profile_picture')
+      .populate('parcel_id', 'parcel_id parcel_name final_price status'),
+    query
+  )
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
+
+  const data = await refundQuery.modelQuery;
+  const meta = await refundQuery.countTotal();
+  return { meta, data };
+};
+
 export const RefundServices = {
   createRefundRequest,
+  getAllRefundsFromDB,
   processRefundDecision,
 };

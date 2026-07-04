@@ -84,6 +84,28 @@ const updatePrivacyInDB = async (id, payload) => {
     }
     return result;
 };
+//** ----------------- About Us Services --------------
+const createAboutInDB = async (payload) => {
+    const result = await settings_model_1.AboutUs.create(payload);
+    return result;
+};
+const getSingleAboutInDB = async () => {
+    const result = await settings_model_1.AboutUs.findOne().sort({ created_at: -1 });
+    if (!result) {
+        throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'About Us not found');
+    }
+    return result;
+};
+const updateAboutInDB = async (id, payload) => {
+    const result = await settings_model_1.AboutUs.findByIdAndUpdate(id, payload, {
+        new: true,
+        runValidators: true,
+    });
+    if (!result) {
+        throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'About Us not found');
+    }
+    return result;
+};
 //** ----------------- Exporting All Services --------------
 exports.SettingsService = {
     // Faq
@@ -96,9 +118,13 @@ exports.SettingsService = {
     createTermsInDB,
     getSingleTermsInDB,
     updateTermsInDB,
-    // Privacy 
+    // Privacy
     createPrivacyInDB,
     getSinglePrivacyInDB,
     updatePrivacyInDB,
+    // About Us
+    createAboutInDB,
+    getSingleAboutInDB,
+    updateAboutInDB,
 };
 //# sourceMappingURL=settings.service.js.map

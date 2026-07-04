@@ -35,6 +35,19 @@ export declare const DriverValidation: {
                 daily_commute_time: z.ZodString;
                 max_parcel_weight: z.ZodString;
                 notes: z.ZodOptional<z.ZodString>;
+                bank_details: z.ZodOptional<z.ZodObject<{
+                    bank_name: z.ZodString;
+                    account_number: z.ZodString;
+                    account_holder_name: z.ZodString;
+                }, "strip", z.ZodTypeAny, {
+                    bank_name: string;
+                    account_number: string;
+                    account_holder_name: string;
+                }, {
+                    bank_name: string;
+                    account_number: string;
+                    account_holder_name: string;
+                }>>;
             }, "strip", z.ZodTypeAny, {
                 to: {
                     address: string;
@@ -52,6 +65,11 @@ export declare const DriverValidation: {
                 user_id?: string | undefined;
                 license_image?: string | undefined;
                 notes?: string | undefined;
+                bank_details?: {
+                    bank_name: string;
+                    account_number: string;
+                    account_holder_name: string;
+                } | undefined;
             }, {
                 to: {
                     address: string;
@@ -69,6 +87,11 @@ export declare const DriverValidation: {
                 user_id?: string | undefined;
                 license_image?: string | undefined;
                 notes?: string | undefined;
+                bank_details?: {
+                    bank_name: string;
+                    account_number: string;
+                    account_holder_name: string;
+                } | undefined;
             }>;
             vehicle: z.ZodObject<Omit<{
                 user_id: z.ZodOptional<z.ZodString>;
@@ -111,6 +134,11 @@ export declare const DriverValidation: {
                 user_id?: string | undefined;
                 license_image?: string | undefined;
                 notes?: string | undefined;
+                bank_details?: {
+                    bank_name: string;
+                    account_number: string;
+                    account_holder_name: string;
+                } | undefined;
             };
         }, {
             vehicle: {
@@ -136,6 +164,11 @@ export declare const DriverValidation: {
                 user_id?: string | undefined;
                 license_image?: string | undefined;
                 notes?: string | undefined;
+                bank_details?: {
+                    bank_name: string;
+                    account_number: string;
+                    account_holder_name: string;
+                } | undefined;
             };
         }>;
     }, "strip", z.ZodTypeAny, {
@@ -163,6 +196,11 @@ export declare const DriverValidation: {
                 user_id?: string | undefined;
                 license_image?: string | undefined;
                 notes?: string | undefined;
+                bank_details?: {
+                    bank_name: string;
+                    account_number: string;
+                    account_holder_name: string;
+                } | undefined;
             };
         };
     }, {
@@ -190,6 +228,11 @@ export declare const DriverValidation: {
                 user_id?: string | undefined;
                 license_image?: string | undefined;
                 notes?: string | undefined;
+                bank_details?: {
+                    bank_name: string;
+                    account_number: string;
+                    account_holder_name: string;
+                } | undefined;
             };
         };
     }>;
@@ -241,6 +284,19 @@ export declare const DriverValidation: {
                 max_parcel_weight: z.ZodOptional<z.ZodString>;
                 pickup_time: z.ZodOptional<z.ZodString>;
                 notes: z.ZodOptional<z.ZodString>;
+                bank_details: z.ZodOptional<z.ZodObject<{
+                    bank_name: z.ZodOptional<z.ZodString>;
+                    account_number: z.ZodOptional<z.ZodString>;
+                    account_holder_name: z.ZodOptional<z.ZodString>;
+                }, "strip", z.ZodTypeAny, {
+                    bank_name?: string | undefined;
+                    account_number?: string | undefined;
+                    account_holder_name?: string | undefined;
+                }, {
+                    bank_name?: string | undefined;
+                    account_number?: string | undefined;
+                    account_holder_name?: string | undefined;
+                }>>;
             }, "strip", z.ZodTypeAny, {
                 to?: {
                     address: string;
@@ -257,6 +313,11 @@ export declare const DriverValidation: {
                 daily_commute_time?: string | undefined;
                 max_parcel_weight?: string | undefined;
                 notes?: string | undefined;
+                bank_details?: {
+                    bank_name?: string | undefined;
+                    account_number?: string | undefined;
+                    account_holder_name?: string | undefined;
+                } | undefined;
                 stops?: {
                     address: string;
                     latitude: string;
@@ -279,6 +340,11 @@ export declare const DriverValidation: {
                 daily_commute_time?: string | undefined;
                 max_parcel_weight?: string | undefined;
                 notes?: string | undefined;
+                bank_details?: {
+                    bank_name?: string | undefined;
+                    account_number?: string | undefined;
+                    account_holder_name?: string | undefined;
+                } | undefined;
                 stops?: {
                     address: string;
                     latitude: string;
@@ -329,6 +395,11 @@ export declare const DriverValidation: {
                 daily_commute_time?: string | undefined;
                 max_parcel_weight?: string | undefined;
                 notes?: string | undefined;
+                bank_details?: {
+                    bank_name?: string | undefined;
+                    account_number?: string | undefined;
+                    account_holder_name?: string | undefined;
+                } | undefined;
                 stops?: {
                     address: string;
                     latitude: string;
@@ -360,6 +431,11 @@ export declare const DriverValidation: {
                 daily_commute_time?: string | undefined;
                 max_parcel_weight?: string | undefined;
                 notes?: string | undefined;
+                bank_details?: {
+                    bank_name?: string | undefined;
+                    account_number?: string | undefined;
+                    account_holder_name?: string | undefined;
+                } | undefined;
                 stops?: {
                     address: string;
                     latitude: string;
@@ -393,6 +469,11 @@ export declare const DriverValidation: {
                 daily_commute_time?: string | undefined;
                 max_parcel_weight?: string | undefined;
                 notes?: string | undefined;
+                bank_details?: {
+                    bank_name?: string | undefined;
+                    account_number?: string | undefined;
+                    account_holder_name?: string | undefined;
+                } | undefined;
                 stops?: {
                     address: string;
                     latitude: string;
@@ -426,6 +507,11 @@ export declare const DriverValidation: {
                 daily_commute_time?: string | undefined;
                 max_parcel_weight?: string | undefined;
                 notes?: string | undefined;
+                bank_details?: {
+                    bank_name?: string | undefined;
+                    account_number?: string | undefined;
+                    account_holder_name?: string | undefined;
+                } | undefined;
                 stops?: {
                     address: string;
                     latitude: string;

@@ -10,4 +10,8 @@ export type TPrivacyPolicy = {
     title: string;
     content: string;
 };
+export type TAboutUs = {
+    title: string;
+    content: string;
+};
 //# sourceMappingURL=settings.interface.d.ts.map

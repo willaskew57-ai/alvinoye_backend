@@ -4,6 +4,11 @@ export type TLocation = {
     latitude: number;
     longitude: number;
 };
+export type TBankDetails = {
+    bank_name: string;
+    account_number: string;
+    account_holder_name: string;
+};
 export type TDriver = {
     user_id: Types.ObjectId;
     from: TLocation;
@@ -13,5 +18,6 @@ export type TDriver = {
     daily_commute_time: string;
     max_parcel_weight: string;
     notes?: string;
+    bank_details?: TBankDetails;
 };
 //# sourceMappingURL=driver.interface.d.ts.map

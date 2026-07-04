@@ -8,6 +8,13 @@ const locationSchema = v3_1.z.object({
     latitude: v3_1.z.string({ required_error: 'Latitude is required' }),
     longitude: v3_1.z.string({ required_error: 'Longitude is required' }),
 });
+const bankDetailsSchema = v3_1.z.object({
+    bank_name: v3_1.z.string({ required_error: 'Bank name is required' }),
+    account_number: v3_1.z.string({ required_error: 'Account number is required' }),
+    account_holder_name: v3_1.z.string({
+        required_error: 'Account holder name is required',
+    }),
+});
 const driverInfoValidationSchema = v3_1.z.object({
     user_id: v3_1.z.string({ required_error: 'User ID is required' }).optional(),
     from: locationSchema,
@@ -19,6 +26,7 @@ const driverInfoValidationSchema = v3_1.z.object({
     daily_commute_time: v3_1.z.string({ required_error: 'Commute time is required' }),
     max_parcel_weight: v3_1.z.string({ required_error: 'Max weight is required' }),
     notes: v3_1.z.string().optional(),
+    bank_details: bankDetailsSchema.optional(),
 });
 const createDriverWithVehicleValidationSchema = v3_1.z.object({
     body: v3_1.z.object({
@@ -41,6 +49,7 @@ const updateDriverWithVehicleValidationSchema = v3_1.z.object({
             max_parcel_weight: v3_1.z.string().optional(),
             pickup_time: v3_1.z.string().optional(),
             notes: v3_1.z.string().optional(),
+            bank_details: bankDetailsSchema.partial().optional(),
         })
             .optional(),
         vehicle: v3_1.z

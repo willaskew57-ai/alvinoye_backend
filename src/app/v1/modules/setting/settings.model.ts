@@ -3,6 +3,7 @@ import type {
   TFaq,
   TTermsCondition,
   TPrivacyPolicy,
+  TAboutUs,
 } from './settings.interface';
 
 const faqSchema = new Schema<TFaq>(
@@ -44,6 +45,19 @@ const privacyPolicySchema = new Schema<TPrivacyPolicy>(
   }
 );
 
+const aboutUsSchema = new Schema<TAboutUs>(
+  {
+    title: { type: String, default: 'About Us' },
+    content: { type: String, required: true },
+  },
+  {
+    timestamps: {
+      createdAt: 'created_at',
+      updatedAt: 'updated_at',
+    },
+  }
+);
+
 export const Faq = model<TFaq>('Faq', faqSchema);
 export const TermsCondition = model<TTermsCondition>(
   'TermsCondition',
@@ -53,3 +67,4 @@ export const PrivacyPolicy = model<TPrivacyPolicy>(
   'PrivacyPolicy',
   privacyPolicySchema
 );
+export const AboutUs = model<TAboutUs>('AboutUs', aboutUsSchema);

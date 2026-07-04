@@ -15,6 +15,13 @@ router.post(
   RefundControllers.requestRefund
 );
 
+// Admin lists all refund requests (optionally filtered by ?status=)
+router.get(
+  '/',
+  auth(USER_ROLE.ADMIN, USER_ROLE.SUPER_ADMIN),
+  RefundControllers.getAllRefunds
+);
+
 // Admin decides on the refund
 router.patch(
   '/decision/:id',

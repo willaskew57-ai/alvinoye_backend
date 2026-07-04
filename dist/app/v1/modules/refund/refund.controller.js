@@ -20,6 +20,16 @@ const requestRefund = (0, catch_async_1.default)(async (req, res) => {
         data: result,
     });
 });
+const getAllRefunds = (0, catch_async_1.default)(async (req, res) => {
+    const result = await refund_service_1.RefundServices.getAllRefundsFromDB(req.query);
+    (0, send_response_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: 'Refund requests retrieved successfully',
+        meta: result.meta,
+        data: result.data,
+    });
+});
 const adminRefundDecision = (0, catch_async_1.default)(async (req, res) => {
     const { id } = req.params; // Request ID
     const result = await refund_service_1.RefundServices.processRefundDecision(id, req.body);
@@ -32,6 +42,7 @@ const adminRefundDecision = (0, catch_async_1.default)(async (req, res) => {
 });
 exports.RefundControllers = {
     requestRefund,
+    getAllRefunds,
     adminRefundDecision,
 };
 //# sourceMappingURL=refund.controller.js.map

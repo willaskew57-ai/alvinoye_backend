@@ -73,7 +73,11 @@ const getAllParcelsFromDB = async (
   }
 
   const parcelQuery = new QueryBuilder(
-    Parcel.find().populate('user_id accepted_by'),
+    Parcel.find().populate([
+      { path: 'user_id' },
+      { path: 'accepted_by' },
+      { path: 'price_requests', options: { sort: { created_at: 1 } } },
+    ]),
     queryObj
   )
     .search(parcelSearchableFields)

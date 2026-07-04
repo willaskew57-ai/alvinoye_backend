@@ -18,6 +18,20 @@ const requestRefund = catchAsync(async (req, res) => {
   });
 });
 
+const getAllRefunds = catchAsync(async (req, res) => {
+  const result = await RefundServices.getAllRefundsFromDB(
+    req.query as Record<string, unknown>
+  );
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Refund requests retrieved successfully',
+    meta: result.meta,
+    data: result.data,
+  });
+});
+
 const adminRefundDecision = catchAsync(async (req, res) => {
   const { id } = req.params; // Request ID
   const result = await RefundServices.processRefundDecision(id as string, req.body);
@@ -32,5 +46,6 @@ const adminRefundDecision = catchAsync(async (req, res) => {
 
 export const RefundControllers = {
   requestRefund,
+  getAllRefunds,
   adminRefundDecision,
 };

@@ -85,6 +85,8 @@ const parcelSchema = new Schema<TParcel>(
     completed_at: { type: Date, default: null },
 
     stripe_checkout_session_id: { type: String, default: null },
+    is_paid: { type: Boolean, default: false },
+    paid_at: { type: Date, default: null },
   },
   {
     timestamps: true,
