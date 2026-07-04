@@ -57,7 +57,11 @@ const getAllParcelsFromDB = async (query, user) => {
     if (user.role === user_interface_1.USER_ROLE.CUSTOMER) {
         queryObj.user_id = user.user_id;
     }
-    const parcelQuery = new query_builder_1.default(parcel_model_1.Parcel.find().populate('user_id accepted_by'), queryObj)
+    const parcelQuery = new query_builder_1.default(parcel_model_1.Parcel.find().populate([
+        { path: 'user_id' },
+        { path: 'accepted_by' },
+        { path: 'price_requests', options: { sort: { created_at: 1 } } },
+    ]), queryObj)
         .search(parcelSearchableFields)
         .filter()
         .sort()

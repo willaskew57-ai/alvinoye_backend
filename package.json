@@ -1,5 +1,8 @@
 {
   "name": "parcel-delivery-backend",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "build": "tsc",
     "start": "node ./dist/server.js",
