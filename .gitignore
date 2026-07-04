@@ -18,5 +18,10 @@ node_modules
 
 .env.development.local
 uploads
-.gitignore
 config.bat
+
+# Secrets — never commit
+.env
+.env.*
+!.env.example
+info.md
