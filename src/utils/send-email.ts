@@ -15,6 +15,18 @@ interface IEmailOptions {
 export const sendEmail = async (
   options: IEmailOptions
 ): Promise<SentMessageInfo> => {
+  // Diagnostic: makes it obvious in the logs (e.g. Railway) whether the SMTP
+  // credentials are actually loaded. Never prints the password itself.
+  if (!configs.smtp_mail || !configs.smtp_password) {
+    console.error(
+      `[send-email] SMTP config missing -> smtp_mail: ${
+        configs.smtp_mail ? 'set' : 'MISSING'
+      }, smtp_password: ${
+        configs.smtp_password ? 'set' : 'MISSING'
+      }. Emails will fail until these env vars are set.`
+    );
+  }
+
   const transporter = nodemailer.createTransport({
     host: configs.smtp_host || 'smtp.gmail.com',
     port: configs.smtp_port ? parseInt(configs.smtp_port as string) : 587,
