@@ -110,6 +110,20 @@ const verifyParcelOtp = (0, catch_async_1.default)(async (req, res) => {
         data: result,
     });
 });
+const resendParcelOtp = (0, catch_async_1.default)(async (req, res) => {
+    const driverId = req.user.user_id;
+    const parcel_id = req.params.id;
+    const result = await driver_service_1.DriverServices.resendParcelOtpFromDB({
+        parcel_id,
+        driverIdFromToken: driverId,
+    });
+    (0, send_response_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: 'Parcel OTP resent successfully',
+        data: result,
+    });
+});
 const selectParcel = (0, catch_async_1.default)(async (req, res) => {
     const driverId = req.user.user_id;
     const { parcel_id, routeContext } = req.body;
@@ -132,6 +146,7 @@ exports.DriverController = {
     getSingleDriver,
     acceptParcel,
     verifyParcelOtp,
+    resendParcelOtp,
     getAvailableParcelsForDriver,
     getDriverById,
     selectParcel,

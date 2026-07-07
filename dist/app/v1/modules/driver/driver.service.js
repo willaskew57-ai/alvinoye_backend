@@ -565,6 +565,19 @@ const acceptParcelFromDB = async (parcelId, driverIdFromToken) => {
             throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'Parcel not found');
         }
         if (parcel.status !== parcel_interface_1.PARCEL_STATUS.PENDING) {
+            // Give the driver a clear, specific reason instead of a generic error.
+            if (parcel.status === parcel_interface_1.PARCEL_STATUS.ONGOING) {
+                if (parcel.accepted_by?.toString() === driverIdFromToken) {
+                    throw new app_error_1.default(http_status_1.default.BAD_REQUEST, 'You have already accepted this parcel');
+                }
+                throw new app_error_1.default(http_status_1.default.BAD_REQUEST, 'This parcel has already been accepted by another driver');
+            }
+            if (parcel.status === parcel_interface_1.PARCEL_STATUS.COMPLETED) {
+                throw new app_error_1.default(http_status_1.default.BAD_REQUEST, 'This parcel has already been delivered');
+            }
+            if (parcel.status === parcel_interface_1.PARCEL_STATUS.REJECTED) {
+                throw new app_error_1.default(http_status_1.default.BAD_REQUEST, 'This parcel has been rejected and is no longer available');
+            }
             throw new app_error_1.default(http_status_1.default.BAD_REQUEST, 'Parcel is not available for acceptance');
         }
         if (!parcel.is_paid) {
@@ -716,6 +729,52 @@ const verifyParcelOtpFromDB = async (payload) => {
         await session.endSession();
     }
 };
+const resendParcelOtpFromDB = async (payload) => {
+    const { parcel_id, driverIdFromToken } = payload;
+    const parcel = await parcel_model_1.Parcel.findById(parcel_id);
+    if (!parcel) {
+        throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'Parcel not found');
+    }
+    // OTP only makes sense while the parcel is out for delivery (accepted).
+    if (parcel.status !== parcel_interface_1.PARCEL_STATUS.ONGOING) {
+        throw new app_error_1.default(http_status_1.default.BAD_REQUEST, 'OTP can only be resent for an ongoing (accepted) parcel');
+    }
+    // Only the driver who accepted this parcel may resend its OTP.
+    if (parcel.accepted_by?.toString() !== driverIdFromToken) {
+        throw new app_error_1.default(http_status_1.default.FORBIDDEN, 'You are not the driver assigned to this parcel');
+    }
+    const parcelOwner = await user_model_1.default.findById(parcel.user_id);
+    if (!parcelOwner) {
+        throw new app_error_1.default(http_status_1.default.NOT_FOUND, 'Parcel owner not found');
+    }
+    // Generate a fresh OTP. generateAndSaveOtp deletes any previous unused OTP
+    // for this parcel first, so only the latest code stays valid.
+    const otp = await otp_services_1.OtpServices.generateAndSaveOtp({
+        parcel_id: parcel._id,
+        purpose: 'PARCEL',
+    });
+    console.log('[resend-otp]', otp);
+    // Queue email to parcel owner (customer who created the parcel)
+    await (0, email_queue_1.pushEmailJob)(() => (0, email_job_1.sendParcelOtpEmailJob)(parcelOwner.email, {
+        email: parcelOwner.email,
+        name: parcelOwner.full_name,
+        verificationCode: otp,
+    }), parcelOwner.email);
+    // Queue SMS to receiver with the new parcel OTP
+    if (parcel.receiver_phone) {
+        const smsMessage = `Your parcel "${parcel.parcel_name}" verification OTP is: ${otp}. Please share this OTP with the driver for delivery confirmation.`;
+        try {
+            await (0, sms_queue_1.pushSmsJob)(() => (0, sms_job_1.sendSmsJob)({ to: parcel.receiver_phone, body: smsMessage }), parcel.receiver_phone);
+        }
+        catch (error) {
+            console.error('Failed to queue resend SMS to receiver:', error);
+        }
+    }
+    return {
+        message: 'Parcel OTP resent successfully',
+        parcel_id: parcel._id,
+    };
+};
 const selectParcelFromDB = async (payload) => {
     const { parcel_id, driverId, routeContext } = payload;
     const parcel = await parcel_model_1.Parcel.findById(parcel_id);
@@ -826,6 +885,7 @@ exports.DriverServices = {
     getSingleDriverFromDB,
     acceptParcelFromDB,
     verifyParcelOtpFromDB,
+    resendParcelOtpFromDB,
     getAvailableParcelsFromDB,
     selectParcelFromDB,
 };
