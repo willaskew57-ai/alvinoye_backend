@@ -969,6 +969,79 @@ const verifyParcelOtpFromDB = async (payload: {
   }
 };
 
+const resendParcelOtpFromDB = async (payload: {
+  parcel_id: string;
+  driverIdFromToken: string;
+}) => {
+  const { parcel_id, driverIdFromToken } = payload;
+
+  const parcel = await Parcel.findById(parcel_id);
+
+  if (!parcel) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Parcel not found');
+  }
+
+  // OTP only makes sense while the parcel is out for delivery (accepted).
+  if (parcel.status !== PARCEL_STATUS.ONGOING) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      'OTP can only be resent for an ongoing (accepted) parcel'
+    );
+  }
+
+  // Only the driver who accepted this parcel may resend its OTP.
+  if (parcel.accepted_by?.toString() !== driverIdFromToken) {
+    throw new AppError(
+      httpStatus.FORBIDDEN,
+      'You are not the driver assigned to this parcel'
+    );
+  }
+
+  const parcelOwner = await User.findById(parcel.user_id);
+
+  if (!parcelOwner) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Parcel owner not found');
+  }
+
+  // Generate a fresh OTP. generateAndSaveOtp deletes any previous unused OTP
+  // for this parcel first, so only the latest code stays valid.
+  const otp = await OtpServices.generateAndSaveOtp({
+    parcel_id: parcel._id,
+    purpose: 'PARCEL',
+  });
+
+  console.log('[resend-otp]', otp);
+
+  // Queue email to parcel owner (customer who created the parcel)
+  await pushEmailJob(
+    () =>
+      sendParcelOtpEmailJob(parcelOwner.email, {
+        email: parcelOwner.email,
+        name: parcelOwner.full_name,
+        verificationCode: otp,
+      }),
+    parcelOwner.email
+  );
+
+  // Queue SMS to receiver with the new parcel OTP
+  if (parcel.receiver_phone) {
+    const smsMessage = `Your parcel "${parcel.parcel_name}" verification OTP is: ${otp}. Please share this OTP with the driver for delivery confirmation.`;
+    try {
+      await pushSmsJob(
+        () => sendSmsJob({ to: parcel.receiver_phone, body: smsMessage }),
+        parcel.receiver_phone
+      );
+    } catch (error) {
+      console.error('Failed to queue resend SMS to receiver:', error);
+    }
+  }
+
+  return {
+    message: 'Parcel OTP resent successfully',
+    parcel_id: parcel._id,
+  };
+};
+
 const selectParcelFromDB = async (payload: {
   parcel_id: string;
   driverId: string;
@@ -1115,6 +1188,7 @@ export const DriverServices = {
   getSingleDriverFromDB,
   acceptParcelFromDB,
   verifyParcelOtpFromDB,
+  resendParcelOtpFromDB,
   getAvailableParcelsFromDB,
   selectParcelFromDB,
 };

@@ -126,6 +126,12 @@ router.post(
 );
 
 router.post(
+  '/parcel/resend-otp/:id',
+  auth(USER_ROLE.DRIVER),
+  DriverController.resendParcelOtp
+);
+
+router.post(
   '/parcel/select',
   auth(USER_ROLE.DRIVER),
   validateRequest(DriverValidation.selectParcelValidationSchema),
