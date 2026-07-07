@@ -76,15 +76,15 @@ export const parcelOtpEmailTemp = (data: IParcelOtpData): string => {
         <div class="logo">
           <img src="${logoUrl}" alt="Logo" class="logo-img" />
         </div>
-        <h1>Password Reset Request</h1>
+        <h1>Parcel Pickup Verification Code</h1>
         <p>Hello, <strong>${data.name}</strong>,</p>
         <p>
-          We have received a request to reset your password. Please use the code below to proceed with resetting your password:
+          A driver has accepted your parcel and is on the way for pickup. Please share the verification code below with the driver to confirm the delivery:
         </p>
         <div class="code">${data.verificationCode}</div>
-        
+
         <p>
-          If you did not request a password reset, please disregard this email or contact support.
+          Only share this code with the assigned driver at the time of pickup/delivery. If you did not request this, please contact support.
         </p>
         <p>Thank you,<br>The Parcel Delivery Team</p>
       </div>
