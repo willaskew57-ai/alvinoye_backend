@@ -102,10 +102,13 @@ const sendParcelOtpEmail = async (data: IParcelOtpEmailData): Promise<void> => {
       }),
     });
   } catch (error) {
-    console.error('Parcel OTP Email Error:', error);
+    // Surface the REAL underlying cause (auth failure, timeout, blocked port,
+    // etc.) instead of hiding it behind a generic message.
+    const reason = error instanceof Error ? error.message : String(error);
+    console.error('Parcel OTP Email Error:', reason, error);
     throw new AppError(
       httpStatus.INTERNAL_SERVER_ERROR,
-      'Failed to send parcel OTP email'
+      `Failed to send parcel OTP email: ${reason}`
     );
   }
 };
