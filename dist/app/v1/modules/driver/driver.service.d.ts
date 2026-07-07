@@ -66,6 +66,13 @@ export declare const DriverServices: {
         parcel_id: Types.ObjectId;
         status: "COMPLETED";
     }>;
+    resendParcelOtpFromDB: (payload: {
+        parcel_id: string;
+        driverIdFromToken: string;
+    }) => Promise<{
+        message: string;
+        parcel_id: Types.ObjectId;
+    }>;
     getAvailableParcelsFromDB: (userId: string, query: Record<string, unknown>) => Promise<{
         meta: {
             total: number;
