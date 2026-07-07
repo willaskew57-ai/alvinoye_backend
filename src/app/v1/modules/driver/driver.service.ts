@@ -743,6 +743,34 @@ const acceptParcelFromDB = async (
     }
 
     if (parcel.status !== PARCEL_STATUS.PENDING) {
+      // Give the driver a clear, specific reason instead of a generic error.
+      if (parcel.status === PARCEL_STATUS.ONGOING) {
+        if (parcel.accepted_by?.toString() === driverIdFromToken) {
+          throw new AppError(
+            httpStatus.BAD_REQUEST,
+            'You have already accepted this parcel'
+          );
+        }
+        throw new AppError(
+          httpStatus.BAD_REQUEST,
+          'This parcel has already been accepted by another driver'
+        );
+      }
+
+      if (parcel.status === PARCEL_STATUS.COMPLETED) {
+        throw new AppError(
+          httpStatus.BAD_REQUEST,
+          'This parcel has already been delivered'
+        );
+      }
+
+      if (parcel.status === PARCEL_STATUS.REJECTED) {
+        throw new AppError(
+          httpStatus.BAD_REQUEST,
+          'This parcel has been rejected and is no longer available'
+        );
+      }
+
       throw new AppError(
         httpStatus.BAD_REQUEST,
         'Parcel is not available for acceptance'
