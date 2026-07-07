@@ -23,4 +23,4 @@ uploads
 .env
 .env.*
 !.env.example
-info.md
+info.md.gitignore
