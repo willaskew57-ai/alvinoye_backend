@@ -54,6 +54,7 @@ router.get('/get-driver-info', (0, auth_1.auth)(user_interface_1.USER_ROLE.DRIVE
 router.get('/available-for-driver', (0, auth_1.auth)(user_interface_1.USER_ROLE.DRIVER), (0, validate_request_1.default)(driver_validation_1.DriverValidation.getAvailableParcelsValidationSchema), driver_controller_1.DriverController.getAvailableParcelsForDriver);
 router.patch('/accept-parcel/:id', (0, auth_1.auth)(user_interface_1.USER_ROLE.DRIVER), driver_controller_1.DriverController.acceptParcel);
 router.post('/parcel/verify-otp', (0, auth_1.auth)(user_interface_1.USER_ROLE.DRIVER), (0, validate_request_1.default)(driver_validation_1.DriverValidation.verifyParcelOtpValidationSchema), driver_controller_1.DriverController.verifyParcelOtp);
+router.post('/parcel/resend-otp/:id', (0, auth_1.auth)(user_interface_1.USER_ROLE.DRIVER), driver_controller_1.DriverController.resendParcelOtp);
 router.post('/parcel/select', (0, auth_1.auth)(user_interface_1.USER_ROLE.DRIVER), (0, validate_request_1.default)(driver_validation_1.DriverValidation.selectParcelValidationSchema), driver_controller_1.DriverController.selectParcel);
 exports.DriverRoutes = router;
 //# sourceMappingURL=driver.route.js.map

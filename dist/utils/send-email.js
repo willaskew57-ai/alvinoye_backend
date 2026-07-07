@@ -11,6 +11,11 @@ const env_config_1 = __importDefault(require("../config/env.config"));
  * @param options - Object containing recipient email, subject, and HTML content.
  */
 const sendEmail = async (options) => {
+    // Diagnostic: makes it obvious in the logs (e.g. Railway) whether the SMTP
+    // credentials are actually loaded. Never prints the password itself.
+    if (!env_config_1.default.smtp_mail || !env_config_1.default.smtp_password) {
+        console.error(`[send-email] SMTP config missing -> smtp_mail: ${env_config_1.default.smtp_mail ? 'set' : 'MISSING'}, smtp_password: ${env_config_1.default.smtp_password ? 'set' : 'MISSING'}. Emails will fail until these env vars are set.`);
+    }
     const transporter = nodemailer_1.default.createTransport({
         host: env_config_1.default.smtp_host || 'smtp.gmail.com',
         port: env_config_1.default.smtp_port ? parseInt(env_config_1.default.smtp_port) : 587,

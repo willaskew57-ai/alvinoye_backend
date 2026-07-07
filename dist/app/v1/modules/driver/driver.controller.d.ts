@@ -6,6 +6,7 @@ export declare const DriverController: {
     getSingleDriver: (req: Request, res: Response, next: import("express").NextFunction) => void;
     acceptParcel: (req: Request, res: Response, next: import("express").NextFunction) => void;
     verifyParcelOtp: (req: Request, res: Response, next: import("express").NextFunction) => void;
+    resendParcelOtp: (req: Request, res: Response, next: import("express").NextFunction) => void;
     getAvailableParcelsForDriver: (req: Request, res: Response, next: import("express").NextFunction) => void;
     getDriverById: (req: Request, res: Response, next: import("express").NextFunction) => void;
     selectParcel: (req: Request, res: Response, next: import("express").NextFunction) => void;
