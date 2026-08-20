@@ -20,7 +20,5 @@ node_modules
 uploads
 
 # Secrets — never commit
-.env
-.env.*
 !.env.example
 info.md.gitignore
